@@ -1,0 +1,1289 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="ネットワークスペシャリスト試験の学習計画づくり、4択・記述・事例演習、進捗管理"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="ネスペコーチ"><meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#16212A" media="(prefers-color-scheme: dark)"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ネスペ合格コーチ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: 1カラムのチャット。上にリンクLED付きヘッダ、下に返答ドック。LANケーブルの青をアクセントに */
+:root {
+  --bg: #F2F5F7;
+  --surface: #FFFFFF;
+  --coach: #E5EDF4;
+  --ink: #15212B;
+  --muted: #55636F;
+  --line: #D3DCE3;
+  --edge: #7D8E9B;
+  --track: #D3DCE3;
+  --accent: #1F6FB2;
+  --accent-hi: #185C95;
+  --accent-ink: #FFFFFF;
+  --led: #2E9E4C;
+  --ok: #1D7536;
+  --amber: #B97A0C;
+  --bad: #B3362F;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E151B; --surface: #16212A; --coach: #1A2A37; --ink: #E2E9EF; --muted: #97A8B6;
+    --line: #2A3A47; --edge: #6E8597; --track: #22313D; --accent: #5BA7E9; --accent-hi: #8CC3F2; --accent-ink: #08131C;
+    --led: #47C46B; --ok: #5ED07F; --amber: #E7B23F; --bad: #EE7A73;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E151B; --surface: #16212A; --coach: #1A2A37; --ink: #E2E9EF; --muted: #97A8B6;
+  --line: #2A3A47; --edge: #6E8597; --track: #22313D; --accent: #5BA7E9; --accent-hi: #8CC3F2; --accent-ink: #08131C;
+  --led: #47C46B; --ok: #5ED07F; --amber: #E7B23F; --bad: #EE7A73;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { height: 100%; }
+/* 画面全体は動かさず、会話欄（main）だけをスクロールさせる。アプリ内の表示でも自動スクロールが効くようにするため */
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.75;
+  height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 720px; margin: 0 auto; }
+a { color: var(--accent); }
+
+header { flex: none; position: relative; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+header .col { display: flex; align-items: center; gap: 12px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .02em; white-space: nowrap; min-width: 0; }
+.port { width: 30px; height: 24px; border: 2px solid var(--ink); border-radius: 3px; position: relative; flex: none; }
+.port::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: -2px; height: 6px; background: var(--surface); border: 2px solid var(--ink); border-bottom: 0; }
+.port i { position: absolute; top: 3px; width: 5px; height: 4px; border-radius: 1px; }
+.port i:first-child { left: 3px; background: var(--led); animation: blink 1.6s infinite steps(2); }
+.port i:last-child { right: 3px; background: var(--amber); }
+@keyframes blink { 50% { opacity: .25; } }
+.status { margin-left: auto; font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; min-width: 0; }
+.status > span { border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; white-space: nowrap; }
+
+main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-block: 20px 12px; }
+#log { display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 10px; align-items: flex-start; max-width: 100%; scroll-margin-top: 72px; }
+.msg.me { justify-content: flex-end; }
+.av { flex: none; width: 34px; height: 34px; border-radius: 8px; background: var(--ink); color: var(--bg); font-family: var(--f-mono); font-size: 11px; display: grid; place-items: center; letter-spacing: .04em; }
+.bub { min-width: 0; max-width: min(600px, 88%); padding: 10px 14px; border-radius: 4px 14px 14px 14px; background: var(--coach); overflow-wrap: anywhere; }
+.me .bub { background: var(--accent); color: var(--accent-ink); border-radius: 14px 4px 14px 14px; }
+.bub p { margin: 0; }
+.bub > * + * { margin-top: 8px; }
+.bub ul { margin-bottom: 0; padding-left: 1.2em; }
+.bub strong { font-weight: 700; }
+.qtext { white-space: pre-wrap; }
+.tag { display: inline-block; font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; border: 1px solid currentColor; border-radius: 4px; padding: 0 6px; color: var(--muted); }
+.ok { color: var(--ok); font-weight: 700; }
+.ng { color: var(--bad); font-weight: 700; }
+.na { color: var(--muted); font-weight: 700; }
+.small { font-size: 13px; color: var(--muted); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.card.warn { border-color: var(--amber); }
+.phase { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; padding-block: 10px; }
+.phase + .phase { border-top: 1px dashed var(--line); }
+.phase:first-child { padding-top: 2px; }
+.phase .n { font-family: var(--f-mono); font-size: 12px; color: var(--accent); padding-top: 3px; }
+.phase h4 { margin: 0; font-size: 15px; text-wrap: balance; }
+.phase .d { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.phase ul { grid-column: 2; margin-top: 4px; }
+.phase .pill { font-size: 11px; font-weight: 500; margin-left: 8px; padding: 1px 7px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); vertical-align: 2px; white-space: nowrap; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); font-size: 13px; }
+.kv dd { margin: 0; min-width: 0; }
+.bar { display: grid; grid-template-columns: 10.5em 1fr 6.5em; align-items: center; gap: 8px; font-size: 13px; }
+.bar + .bar { margin-top: 6px; }
+.bar .t { height: 10px; background: var(--track); border: 1px solid var(--edge); border-radius: 5px; overflow: hidden; }
+.bar .t b { display: block; height: 100%; background: var(--accent); }
+.bar .t b.low { background: var(--bad); }
+.bar .v { font-family: var(--f-mono); font-size: 12px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.answer { border-left: 3px solid var(--led); padding-left: 10px; }
+.fig .cap { font-size: 13px; font-weight: 700; margin: 0 0 4px; }
+.tw { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+table.t { border-collapse: collapse; font-size: 13px; width: 100%; font-variant-numeric: tabular-nums; }
+table.t th, table.t td { border-bottom: 1px solid var(--line); padding: 4px 10px; text-align: left; white-space: nowrap; }
+table.t th { color: var(--muted); font-weight: 500; }
+table.t tr:last-child td { border-bottom: 0; }
+pre.log { margin: 0; font-family: var(--f-mono); font-size: 11.5px; line-height: 1.6; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow-x: auto; white-space: pre; overflow-wrap: normal; }
+
+.dock { flex: none; position: relative; z-index: 4; background: var(--bg); border-top: 1px solid var(--line); }
+@supports (background: color-mix(in srgb, red 50%, transparent)) {
+  .dock { background: color-mix(in srgb, var(--bg) 92%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+}
+.dock .col { padding-block: 10px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px; align-items: center; outline: none; max-height: 52vh; max-height: 52dvh; overflow-y: auto; }
+.dock .col.grid2 { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+.dock .col.grid2 > .lead, .dock .col.grid2 > .full { grid-column: 1 / -1; }
+.dock .hint { width: 100%; font-size: 12px; color: var(--muted); margin: -2px 0 0; }
+.dock .hint.err { color: var(--bad); font-weight: 700; }
+.dock .lead { width: 100%; font-size: 13px; color: var(--muted); margin: 0; }
+.dock .lead.q { color: var(--ink); font-size: 14px; max-height: 4.8em; overflow-y: auto; border-left: 3px solid var(--accent); padding-left: 8px; }
+button { font: inherit; cursor: pointer; }
+.opt { border: 1px solid var(--accent); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 14px; text-align: left; line-height: 1.5; max-width: 100%; min-height: 44px; }
+.opt.primary { background: var(--accent); color: var(--accent-ink); }
+.opt.wide { width: 100%; display: grid; grid-template-columns: 1.8em 1fr; gap: 4px; }
+.opt .k { font-weight: 700; color: var(--accent); }
+.opt.on { background: var(--accent); color: var(--accent-ink); }
+.opt.on .k { color: inherit; }
+.opt.quiet { border-color: var(--edge); color: var(--muted); }
+.opt.danger { border-color: var(--bad); color: var(--bad); }
+@media (hover: hover) {
+  .opt:hover { background: var(--coach); }
+  .opt.primary:hover, .opt.on:hover { background: var(--accent-hi); }
+}
+.row { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; align-items: center; }
+.row.end { justify-content: flex-end; margin-top: 6px; }
+.row .grow { flex: 1; }
+.row input { flex: 1; min-width: 0; }
+.row input[type="number"] { flex: 0 1 7em; }
+.row .count { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.row .count.over { color: var(--bad); font-weight: 700; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+textarea, input[type="date"], input[type="number"] { font: inherit; font-size: 16px; width: 100%; border: 1px solid var(--edge); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 10px 12px; }
+textarea { min-height: 76px; resize: vertical; }
+textarea[aria-invalid="true"], input[aria-invalid="true"] { border-color: var(--bad); }
+.typing { display: inline-flex; gap: 4px; padding: 6px 2px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: dot 1s infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 50% { opacity: .2; } }
+body.kb .status, body.kb .dock .hint { display: none; }
+body.kb .dock .col { max-height: 60vh; }
+@media (prefers-reduced-motion: reduce) { .port i:first-child, .typing i { animation: none; } }
+@media (max-width: 480px) {
+  .bub { max-width: 100%; } .av { display: none; }
+  .bar { grid-template-columns: 1fr 6.5em; } .bar .t { grid-column: 1 / -1; grid-row: 2; }
+  .brand { font-size: 15px; gap: 8px; }
+  .status { font-size: 11px; gap: 4px; } .status > span { padding: 1px 6px; } .status .ph-name { display: none; }
+}
+@media (max-width: 380px) { .status .acc { display: none; } }
+</style>
+
+<header class="gut"><div class="col">
+  <div class="brand"><span class="port" aria-hidden="true"><i></i><i></i></span>ネスペ合格コーチ</div>
+  <div class="status" id="status" aria-label="学習状況"></div>
+</div></header>
+
+<main class="gut"><div class="col"><div id="log" role="log" aria-label="コーチとの会話"></div></div></main>
+
+<div class="dock gut"><div class="col" id="dock" tabindex="-1" role="group" aria-label="返答"></div></div>
+<script>
+/* ===== 試験情報（IPA公式サイトの掲載内容を 2026-11-11 時点で確認して記載） ===== */
+const EXAM = {
+  asof: "2026年11月11日",
+  fmt: [
+    ["科目A-1（旧午前I）", "50分・四肢択一30問（免除制度あり）"],
+    ["科目A-2（旧午前II）", "40分・四肢択一25問"],
+    ["科目B-1（旧午後I）", "90分・記述式。3問から2問を選んで解答"],
+    ["科目B-2（旧午後II）", "120分・記述式。2問から1問を選んで解答"],
+    ["合格基準", "各科目とも100点満点で60点以上"]
+  ],
+  cur: {
+    name: "令和8年度 前期（CBT方式）",
+    apply: "2026/10/6（火）〜 10/24（土）", applyStart: "2026-10-06", applyEnd: "2026-10-24",
+    a: "2026/10/17（土）〜 10/27（火）", aStart: "2026-10-17", aEnd: "2026-10-27",
+    b: "2026/11/11（水）〜 11/23（月・祝）", bStart: "2026-11-11", bEnd: "2026-11-23",
+    note: "受験日時は期間内で各自が予約します。予約内容はIPAのマイページで確認してください。"
+  },
+  late: {
+    kubun: "プロジェクトマネージャ、データベーススペシャリスト、エンベデッドシステムスペシャリスト、システム監査技術者の4区分",
+    ap: "後期の応用情報技術者試験（申込 2027/1/27〜2/16）に合格すると、2年間は科目A-1（旧午前I）が免除になります。新制度での免除の扱いは公表待ちです。"
+  },
+  next: "現行の試験制度は2026年度で終了し、2027年度から新しい試験制度に移行する予定です。ネットワーク分野の扱い、申込開始日、試験日はまだ発表されていません。",
+  links: [
+    ["ネットワークスペシャリスト試験（IPA）", "https://www.ipa.go.jp/shiken/kubun/nw.html"],
+    ["令和8年度前期試験について（IPA）", "https://www.ipa.go.jp/shiken/2026/r08zen_exam.html"],
+    ["令和8年度 申込受付期間・試験実施期間（IPA）", "https://www.ipa.go.jp/shiken/2026/ap_koudo_sc_kikan.html"],
+    ["スケジュール、手数料など（IPA）", "https://www.ipa.go.jp/shiken/mousikomi/schedule.html"]
+  ]
+};
+
+/* ===== 問題データ（オリジナル問題。IPA過去問の転載ではありません） ===== */
+const DOMAINS = {
+  l2:    "L2・VLAN・STP",
+  ip:    "IP・IPv6・サブネット",
+  route: "ルーティング",
+  tcp:   "TCP・UDP",
+  app:   "DNS・DHCP・メール・SIP",
+  sec:   "セキュリティ・VPN",
+  wlan:  "無線LAN",
+  red:   "冗長化・QoS・運用",
+  cloud: "WAN・仮想化・クラウド"
+};
+
+// 4択: c[0] が正解（表示時にシャッフル）。誤答も正解と同じくらいの長さにそろえる
+const QUIZ = [
+  {id:"l2-1", d:"l2", q:"STPでルートブリッジとして選出されるのはどれか。", c:["ブリッジIDが最も小さいスイッチ","MACアドレスが最も大きいスイッチ","ポート数が最も多いスイッチ","ルートパスコストが最も大きいスイッチ"], e:"ブリッジID＝ブリッジプライオリティ＋MACアドレス。値が最小のスイッチがルートブリッジになります。設計ではプライオリティを明示的に下げて、意図したスイッチをルートにします。"},
+  {id:"l2-2", d:"l2", q:"IEEE 802.1QタグのVLAN IDフィールドのビット長はどれか。", c:["12ビット","8ビット","10ビット","16ビット"], e:"VLAN IDは12ビット。0と4095は予約されているため、利用できるのは1〜4094です。"},
+  {id:"l2-3", d:"l2", q:"RSTPでエッジポートに設定するのが適切なポートはどれか。", c:["PCやサーバなど端末だけを接続するポート","上位スイッチとの間でBPDUを交換するポート","ルートブリッジに最も近いルートポート","リンクアグリゲーションを構成するポート"], e:"エッジポートは端末接続用で、リンクアップ後すぐにフォワーディング状態になります。スイッチを接続するとループの原因になるため、BPDUガードと併用するのが定石です。"},
+  {id:"l2-4", d:"l2", q:"MACアドレステーブルに宛先が登録されていないユニキャストフレームを受信したスイッチの動作はどれか。", c:["受信ポート以外の同一VLANの全ポートへ転送する","宛先が学習されるまでフレームをバッファに保持する","フレームを破棄し、送信元へICMPエラーを返す","デフォルトゲートウェイのポートにだけ転送する"], e:"未知のユニキャストはフラッディングします。宛先端末が応答すると、そのMACアドレスが学習されます。"},
+  {id:"l2-5", d:"l2", q:"LACPによるリンクアグリゲーションで、一般的にフレームの順序逆転が起きにくい理由はどれか。", c:["同一フローをハッシュ値で同じ物理リンクに振り分けるから","全フレームを全リンクに複製し、受信側で重複を除くから","フレームごとに物理リンクを順番に切り替え、均等に送るから","受信側スイッチが順序番号を見て必ず並べ替えるから"], e:"送信元・宛先アドレスなどのハッシュで物理リンクを選ぶため、同一フローは同じリンクを通ります。反面、フローが少ないと負荷が偏ります。"},
+  {id:"l2-6", d:"l2", q:"L2スイッチのIGMPスヌーピングの目的として適切なものはどれか。", c:["IGMPを監視し、マルチキャストを受信希望者がいるポートにだけ転送する","マルチキャストをブロードキャストに変換し、同一VLANの全ポートへ転送する","ルータ間でマルチキャストの配信経路を交換し、配信ツリーを作る","DHCPの応答を監視し、不正なサーバからの応答を遮断する"], e:"スヌーピングがないと、L2スイッチはマルチキャストを同一VLANの全ポートへフラッディングします。映像配信の設計で頻出です。ルータ間の経路制御はPIMの役割です。"},
+
+  {id:"ip-1", d:"ip", q:"192.168.10.0/26 のサブネットで、ホストに割り当てられるアドレス数はどれか。", c:["62","64","30","126"], e:"ホスト部は32−26＝6ビット。2^6＝64からネットワークアドレスとブロードキャストアドレスを引いて62です。"},
+  {id:"ip-2", d:"ip", q:"プライベートIPv4アドレスはどれか。", c:["172.20.5.5","172.32.1.1","172.15.0.1","192.169.0.1"], e:"プライベートアドレスは 10.0.0.0/8、172.16.0.0/12（172.16〜172.31）、192.168.0.0/16 です。"},
+  {id:"ip-3", d:"ip", q:"IPv6でIPv4のARPに相当する機能を担うものはどれか。", c:["ICMPv6の近隣探索（NS/NA）","DHCPv6のアドレス割当て","マルチキャストリスナ探索（MLD）","ICMPv6のルータ通知（RA）"], e:"近隣探索プロトコル（NDP）のNeighbor Solicitation／Neighbor AdvertisementでMACアドレスを解決します。ブロードキャストではなく要請ノードマルチキャストを使う点も頻出です。"},
+  {id:"ip-4", d:"ip", q:"IPv6のリンクローカルアドレスのプレフィックスはどれか。", c:["fe80::/10","fc00::/7","2000::/3","ff00::/8"], e:"fe80::/10がリンクローカル、fc00::/7がユニークローカル、2000::/3がグローバルユニキャスト、ff00::/8がマルチキャストです。"},
+  {id:"ip-5", d:"ip", q:"10.1.0.0/24〜10.1.3.0/24 の4経路を過不足なく集約した経路はどれか。", c:["10.1.0.0/22","10.1.0.0/23","10.1.0.0/21","10.1.0.0/16"], e:"第3オクテット0〜3は下位2ビットだけが変化します。24−2＝22で /22 です。"},
+  {id:"ip-6", d:"ip", q:"IPv4のPath MTU Discoveryの仕組みとして適切なものはどれか。", c:["DFビットを立てて送り、ICMPのエラー通知を受けてサイズを下げる","TTLを1ずつ増やして送り、経路上の各ルータのMTUを順に調べる","SYNで通知されたMSSだけを使い、経路上の最小MTUを決める","受信側が断片の大きさを測り、送信側へ最適なMTUを通知する"], e:"ICMP Type3 Code4が途中でフィルタされると、大きなパケットだけ届かない障害（PMTUブラックホール）になります。午後の障害分析で頻出です。"},
+  {id:"ip-7", d:"ip", q:"IPv6のSLAACで、端末がグローバルユニキャストアドレスを生成するのに使う情報はどれか。", c:["ルータが送るRAに含まれるプレフィックス情報","DHCPv6サーバから払い出されるアドレス","近隣探索のNSに含まれる相手のMACアドレス","DNSサーバから取得したAAAAレコード"], e:"RAのプレフィックスに、端末が自分で作るインタフェースIDを組み合わせます。DNSサーバの情報はRAのRDNSSオプションか、ステートレスDHCPv6で配ります。"},
+
+  {id:"rt-1", d:"route", q:"OSPFが経路選択に用いるメトリックはどれか。", c:["帯域幅などから決めるインタフェースごとのコスト","経由するルータの数（ホップ数）で、最大15まで数える","隣接ASから受け取ったAS_PATH属性の長さ","帯域・遅延・負荷・信頼性を組み合わせた複合値"], e:"OSPFはリンクステート型で、経路上のコストの合計が最小の経路を選びます。多くの実装では基準帯域÷インタフェース帯域を既定値にしています。ホップ数を使うのはRIPです。"},
+  {id:"rt-2", d:"route", q:"ルーティングテーブルに 10.0.0.0/8、10.1.0.0/16、10.1.1.0/24、0.0.0.0/0 の4経路があるとき、宛先10.1.1.5のパケットに使われる経路はどれか。", c:["10.1.1.0/24","10.1.0.0/16","10.0.0.0/8","0.0.0.0/0"], e:"ロンゲストマッチ。宛先に一致する経路のうち、プレフィックス長が最も長いものが選ばれます。"},
+  {id:"rt-3", d:"route", q:"BGPの説明として適切なものはどれか。", c:["AS間の経路交換に使うパスベクタ型のプロトコルで、TCP 179番を使う","AS内部で使うリンクステート型のプロトコルで、IPプロトコル番号89を使う","ホップ数を最大15とする距離ベクタ型のプロトコルで、UDP 520番を使う","レイヤ2でループを防止するプロトコルで、BPDUを交換する"], e:"BGPはTCPで接続を張り、AS_PATHなどのパス属性で経路を選択・ループ検出します。プロトコル番号89で動くのはOSPFです。"},
+  {id:"rt-4", d:"route", q:"OSPFのエリア設計で正しいものはどれか。", c:["エリア0以外のエリアはエリア0に接続しなければならない","各エリアは、エリア0を介さず互いに直接接続しなければならない","エリア0には、1台のルータしか所属させることができない","エリア境界ルータは、1つのエリアにだけ所属しなければならない"], e:"エリア0はバックボーンエリア。他エリアは必ずエリア0と接続します（物理的に無理なら仮想リンク）。ABRは複数エリアに所属します。"},
+  {id:"rt-5", d:"route", q:"OSPFでDR（指定ルータ）を選出する目的はどれか。", c:["マルチアクセス網での隣接関係とLSAの交換を減らすため","AS外部から学習した経路をOSPF内へ再配布するため","等コストの複数経路で負荷を分散させるため","隣接ルータ間でやり取りする経路情報を認証するため"], e:"全ルータが互いに隣接関係を結ぶと数が増えすぎるため、DR/BDRとだけ完全隣接になります。優先度が最大、同値ならルータIDが最大のルータが選ばれます。DRはプリエンプトしないので、後から優先度の高いルータが参加しても交代しません。"},
+  {id:"rt-6", d:"route", q:"BGPで受信した経路のAS_PATHに自ASの番号が含まれていたときの動作はどれか。", c:["ループと判断して経路を採用しない","最も優先度の高い経路として採用する","AS_PATHから自ASを削除して採用する","経路を全ピアへそのまま広告する"], e:"AS_PATHはループ検出に使われます。経路選択では、他の条件が同じならAS_PATHが短い経路が優先されます。"},
+  {id:"rt-7", d:"route", q:"BGPのLOCAL_PREF属性の説明として適切なものはどれか。", c:["AS内で共有され、値が大きい経路ほど優先される。自ASの出口の選択に使う","AS間で伝搬され、値が小さい経路ほど優先される。隣接ASからの入口の選択に使う","自ASの番号を繰り返し付加して経路を長く見せ、受信側の経路選択を誘導する","経路の生成元がIGP・EGP・不明のどれかを示し、経路選択の判断材料になる"], e:"出口（アウトバウンド）の制御はLOCAL_PREF、入口（インバウンド）の制御はMEDやAS_PATHプリペンドが定番です。2本のISP回線の使い分けで頻出です。"},
+
+  {id:"tcp-1", d:"tcp", q:"TCPの3ウェイハンドシェイクの順序として正しいものはどれか。", c:["SYN → SYN/ACK → ACK","SYN → ACK → SYN/ACK","SYN/ACK → SYN → ACK","ACK → SYN → SYN/ACK"], e:"クライアントのSYN、サーバのSYN/ACK、クライアントのACKで接続が確立します。"},
+  {id:"tcp-2", d:"tcp", q:"ウィンドウサイズ64Kバイト、RTT10ミリ秒のTCP通信で、理論上の最大スループットに最も近いものはどれか（ウィンドウスケールなし）。", c:["約52Mビット/秒","約5Mビット/秒","約520Mビット/秒","約6.4Mビット/秒"], e:"1RTTで送れるのは最大ウィンドウ分。65,535バイト×8÷0.01秒≒52Mビット/秒です。回線が1Gビット/秒でもこれが上限になります。"},
+  {id:"tcp-3", d:"tcp", q:"TCPのTIME_WAIT状態の説明として適切なものはどれか。", c:["先に切断した側が、最後のACK送信後に一定時間接続情報を保持する状態","サーバがポートを開いて、接続要求の到着を待ち受けている状態","SYNを送信したあと、相手からSYN/ACKが届くのを待っている状態","受信ウィンドウが0になり、送信側が送信を一時停止している状態"], e:"遅れて届くセグメントが次の接続に混ざらないようにするための状態です。大量に溜まるとポート枯渇の原因になります。"},
+  {id:"tcp-4", d:"tcp", q:"トランスポート層にUDPを用いるプロトコルはどれか。", c:["SNMP","SSH","SMTP","HTTP/1.1"], e:"SNMPはUDP 161（トラップは162）。SSH・SMTP・HTTP/1.1はTCPです。HTTP/3はQUIC（UDP）上で動きます。"},
+  {id:"tcp-5", d:"tcp", q:"TCPのスロースタートの説明として適切なものはどれか。", c:["輻輳ウィンドウを小さく始め、ACKごとに1MSSずつ増やしていく","受信ウィンドウを0から始め、ACKごとに1バイトずつ増やしていく","パケットロスを検出したら、タイムアウトまで送信を完全に停止する","接続直後は再送タイマを止め、最初のRTTを測るまで送信を待つ"], e:"その結果、輻輳ウィンドウはRTTごとにほぼ倍増し、増え方は指数関数的になります。しきい値（ssthresh）に達すると輻輳回避フェーズに移り、増加はRTTごとに1MSS程度の線形になります。"},
+  {id:"tcp-6", d:"tcp", q:"TCPのMSSの説明として適切なものはどれか。", c:["1セグメントのデータ部の最大長で、SYNのオプションで通知する","IPヘッダとTCPヘッダを含む、パケット全体の最大長である","経路上の機器は書き換えられず、端末同士だけで決める値である","受信側が一度に受け取れるデータ量で、ウィンドウの上限となる"], e:"イーサネットではMTU1500−IPヘッダ20−TCPヘッダ20＝1460バイトが一般的です。PPPoEやトンネル区間ではMSSを小さく書き換える（MSSクランプ）ことがあります。"},
+
+  {id:"app-1", d:"app", q:"ドメインのメール受信サーバを指定するDNSのリソースレコードはどれか。", c:["MX","CNAME","PTR","NS"], e:"MXレコードで受信サーバと優先度を指定します。値が小さいほど優先されます。"},
+  {id:"app-2", d:"app", q:"DHCPでIPアドレスが割り当てられるまでのメッセージの順序はどれか。", c:["DISCOVER → OFFER → REQUEST → ACK","REQUEST → OFFER → DISCOVER → ACK","DISCOVER → REQUEST → OFFER → ACK","OFFER → DISCOVER → ACK → REQUEST"], e:"DISCOVERはブロードキャストのためルータを越えません。別セグメントにDHCPサーバを置くならDHCPリレーが必要です。"},
+  {id:"app-3", d:"app", q:"DHCPリレーエージェントがDHCPサーバへ転送する際に設定し、サーバがアドレスプールを選ぶ手がかりにするフィールドはどれか。", c:["giaddr","ciaddr","yiaddr","chaddr"], e:"giaddrにはリレーエージェントの受信インタフェースのアドレスが入ります。サーバはこれで端末のセグメントを判断します。"},
+  {id:"app-4", d:"app", q:"送信元ドメインのDNSに登録した送信サーバのIPアドレスと照合して、なりすましメールを検知する技術はどれか。", c:["SPF","DKIM","S/MIME","STARTTLS"], e:"SPFはTXTレコードに許可する送信元IPを記述します。DKIMは電子署名で改ざんとなりすましを検知し、DMARCは両者の結果に基づく処理方針を示します。"},
+  {id:"app-5", d:"app", q:"DNSキャッシュポイズニングの対策として適切なものはどれか。", c:["問合せの送信元ポート番号をランダム化する","ゾーン転送をすべてのホストに許可する","キャッシュのTTLを極端に長くして問合せを減らす","フルリゾルバをインターネット側にも公開する"], e:"ポート番号とIDの組合せを推測されにくくします。根本対策としてはDNSSECによる応答の検証があります。"},
+  {id:"app-6", d:"app", q:"HTTP/2の特徴として適切なものはどれか。", c:["1つのTCPコネクション上で複数のストリームを多重化する","UDP上のQUICで通信し、TCPのHoLブロッキングを解消する","ヘッダをテキスト形式のまま、圧縮せずに送る","1リクエストごとにTCPコネクションを張り直す"], e:"HTTP/2はバイナリフレームで多重化しますが、TCPレベルのHoLブロッキングは残ります。これをQUICで解消したのがHTTP/3です。"},
+  {id:"app-7", d:"app", q:"DMARCの説明として適切なものはどれか。", c:["SPF・DKIMの結果とヘッダFromの一致を基に、処理方針をDNSで公開する","送信を許可するサーバのIPアドレスをDNSのTXTレコードに列挙し、受信側が照合する","送信サーバがヘッダと本文に電子署名を付け、検証用の公開鍵をDNSで公開する","SMTPの通信開始後に暗号化へ切り替え、経路上での盗聴を防ぐ"], e:"方針はnone／quarantine／rejectの3段階で、集計レポートの送付先も指定できます。IPアドレスを列挙して照合するのはSPF、電子署名を付けるのはDKIM、通信開始後に暗号化へ切り替えるのはSTARTTLSです。"},
+  {id:"app-8", d:"app", q:"SIPで、発信側が相手に通話セッションの確立を要求するメソッドはどれか。", c:["INVITE","REGISTER","BYE","OPTIONS"], e:"REGISTERは端末の所在をSIPサーバに登録、BYEは通話の終了です。音声そのものはRTPで運ばれ、そのポート番号はSDPで通知されるため、NAT越えが論点になります。"},
+
+  {id:"sec-1", d:"sec", q:"IPsecのESPをトンネルモードで用いたときの説明として適切なものはどれか。", c:["元のIPヘッダを含むパケット全体を暗号化し、新しいIPヘッダを付ける","元のIPヘッダはそのまま残し、TCP/UDP以降のデータ部だけを暗号化する","暗号化は行わず、IPヘッダを含めて改ざんの検知だけを行う","新しいIPヘッダを付けるが、元のパケットは暗号化しない"], e:"拠点間VPNでよく使われる形態です。データ部だけを暗号化するのはトランスポートモード、暗号化せず改ざん検知だけを行うのはAHです。"},
+  {id:"sec-2", d:"sec", q:"IPsecのNATトラバーサルで、ESPパケットをカプセル化するのに用いるものはどれか。", c:["UDP 4500番","TCP 443番","UDP 500番","TCP 1723番"], e:"ESPはポート番号を持たないためNAPTで変換できません。そこでUDP 4500でカプセル化します。UDP 500はIKEの通常ポートです。"},
+  {id:"sec-3", d:"sec", q:"IEEE 802.1X認証で、オーセンティケータの役割を担う機器はどれか。", c:["認証スイッチや無線LANアクセスポイント","利用者のPCやスマートフォンなどの端末","RADIUSサーバなどの認証サーバ","端末にアドレスを配るDHCPサーバ"], e:"端末＝サプリカント、スイッチやAP＝オーセンティケータ、RADIUSサーバ＝認証サーバの3者構成です。"},
+  {id:"sec-4", d:"sec", q:"ステートフルインスペクション型ファイアウォールの説明として適切なものはどれか。", c:["通信の状態を記録し、許可した通信の戻りを動的に通す","パケットごとに独立して、ヘッダを静的なルールと照合する","アプリケーションごとに代理で接続し直し、内容を検査する","通過する通信の内容をすべて暗号化して、盗聴を防ぐ"], e:"セッション管理テーブルを持つため、冗長構成ではセッション情報の同期がないと切替時に通信が切れます。午後の冗長化問題の定番論点です。"},
+  {id:"sec-5", d:"sec", q:"TLS 1.3の特徴として適切なものはどれか。", c:["フルハンドシェイクの鍵交換は(EC)DHEで、1-RTTで完了する","鍵交換に静的RSAを必須とし、サーバ証明書の鍵で共通鍵を暗号化する","ハンドシェイクはすべて平文で行い、その後のデータだけを暗号化する","互換性のため、共通鍵暗号にRC4やCBCモードを引き続き使える"], e:"TLS 1.3では静的RSA鍵交換が廃止され、フルハンドシェイクは前方秘匿性のある方式になりました。ServerHello以降のハンドシェイクは暗号化されます。なお、PSKだけで再開する場合は前方秘匿性がありません。"},
+  {id:"sec-6", d:"sec", q:"DMZに公開Webサーバを置く主な目的はどれか。", c:["外部公開サーバが侵害されても内部LANへの被害拡大を防ぐ","Webサーバを内部LANに近づけ、社内からの通信を高速化する","内部LANの端末をインターネットから直接操作できるようにする","公開サーバにプライベートアドレスを使い、アドレスを節約する"], e:"インターネット・DMZ・内部LANをファイアウォールで分け、DMZから内部LANへの通信を原則禁止にします。"},
+  {id:"sec-7", d:"sec", q:"L2スイッチのDHCPスヌーピングの説明として適切なものはどれか。", c:["信頼するポート以外からのDHCPサーバ応答を遮断し、正規の割当て情報を記録する","DHCPのブロードキャストを、別セグメントのサーバへユニキャストで中継する","DHCPサーバ同士でリース情報を同期し、サーバを冗長化する","端末のMACアドレスを認証サーバに問い合わせ、所属VLANを割り当てる"], e:"記録した割当て情報は、ARPの詐称を防ぐダイナミックARPインスペクションなどにも使われます。ブロードキャストを別セグメントへ中継するのはDHCPリレー、認証サーバに問い合わせてVLANを割り当てるのはMAC認証とダイナミックVLANです。"},
+  {id:"sec-8", d:"sec", q:"拠点間のIPsec VPN上でOSPFを動かすために、GRE over IPsecを用いる理由として適切なものはどれか。", c:["IPsecだけではOSPFのマルチキャストを運べないので、GREで包んで送るため","IPsecのトンネルではMTUが大きくなるので、GREで小さく分割するため","GREが暗号化を担い、IPsecが経路制御を担うよう役割分担するため","NAPT配下でもIPsecが通るよう、GREでポート番号を付けるため"], e:"ポリシーベースのIPsecはユニキャストしか運べません。GREトンネルの中でOSPFを動かし、そのGREをIPsecで暗号化します。"},
+
+  {id:"wl-1", d:"wlan", q:"2.4GHz帯の無線LANで、互いに電波が重ならないチャネルの組合せとして一般的なものはどれか。", c:["1、6、11","1、2、3","1、4、7、10","3、8"], e:"チャネル間隔は5MHzで、DSSSの信号は約22MHz幅のため、5チャネル以上離す必要があります。なお日本では13chまで使えるので、OFDM（20MHz幅）では1・5・9・13の4チャネル配置も使われます。"},
+  {id:"wl-2", d:"wlan", q:"無線LANの隠れ端末問題の対策として用いられる仕組みはどれか。", c:["RTS/CTS","CSMA/CD","スロースタート","ローミング"], e:"互いの電波が届かない端末同士が同時送信して衝突する問題です。APがCTSで送信権を周知し、他の端末は送信を控えます。"},
+  {id:"wl-3", d:"wlan", q:"無線LANがCSMA/CAを用いる理由として適切なものはどれか。", c:["無線では送信中に衝突を検知することが難しいから","無線は有線より帯域が広く、衝突してもすぐ再送できるから","無線は全二重なので、送信と受信を同時に行えるから","無線は暗号化が不要なので、送信前の確認だけで足りるから"], e:"送信前にランダムな待ち時間を置いて衝突を回避し、受信側のACKで成功を確認します。"},
+  {id:"wl-4", d:"wlan", q:"WPA3-Personalで採用された、オフライン辞書攻撃に強い認証方式はどれか。", c:["SAE","PSK（4ウェイハンドシェイクのみ）","WEP","EAP-TLS"], e:"SAE（Simultaneous Authentication of Equals）により、キャプチャしたハンドシェイクから総当たりでパスフレーズを割り出す攻撃に強くなりました。"},
+
+  {id:"rd-1", d:"red", q:"VRRPの説明として適切なものはどれか。", c:["複数のルータで仮想IPアドレスを共有し、障害時に引き継ぐ","複数の物理リンクを束ね、1本の論理リンクとして帯域を増やす","AS間で経路情報を交換し、最適な出口ルータを選ぶ","スイッチ間の冗長経路をブロックして、L2ループを防止する"], e:"端末のデフォルトゲートウェイに仮想IPを設定します。仮想MACアドレスは 00-00-5E-00-01-{VRID} です。"},
+  {id:"rd-2", d:"red", q:"稼働率0.9の装置を2台並列に接続したシステム（どちらか1台が動けばよい）の稼働率はどれか。", c:["0.99","0.81","0.9","0.95"], e:"1−（1−0.9）×（1−0.9）＝0.99。直列なら0.9×0.9＝0.81です。"},
+  {id:"rd-3", d:"red", q:"音声パケットを優先制御するために、一般的にDSCPに設定する値（PHB）はどれか。", c:["EF","BE","AF11","CS1"], e:"EF（Expedited Forwarding、DSCP46）は低遅延・低ジッタが必要な音声向けです。BEはベストエフォートです。"},
+  {id:"rd-4", d:"red", q:"SNMPトラップの説明として適切なものはどれか。", c:["エージェントがイベント発生時にマネージャへ自発的に通知する","マネージャがエージェントの値を定期的に問い合わせて読み取る","マネージャがエージェントの設定値を書き換え、動作を変更する","エージェント同士が直接通信し、障害情報を交換し合う"], e:"トラップはUDP 162宛て。ポーリング（GetRequest）は161宛てです。"},
+  {id:"rd-5", d:"red", q:"VRRPのトラッキング機能の目的として適切なものはどれか。", c:["WAN側などの障害を検知して自らの優先度を下げ、マスタを切り替える","LAN側で仮想MACアドレスを定期的に変更し、なりすましを防ぐ","マスタが学習した経路情報をバックアップルータに配布する","切替時に端末のARPキャッシュを削除し、再学習させる"], e:"VRRPはLAN側の広告で生死を判断するため、WAN側だけが切れてもマスタが切り替わりません。トラッキングで監視対象を広げます。"},
+  {id:"rd-6", d:"red", q:"IEEE 802.3at（PoE+）で、給電側機器（PSE）が1ポートあたりに供給できる最大電力はどれか。", c:["30W","15.4W","60W","90W"], e:"受電側（PD）で使えるのはケーブルでの損失を引いた25.5Wです。15.4Wは802.3af、60W／90Wは802.3btです。スイッチ全体の給電容量（電力バジェット）の設計もよく問われます。"},
+  {id:"rd-7", d:"red", q:"VRRPでバックアップがマスタに切り替わったとき、新マスタがGratuitous ARPを送る目的として適切なものはどれか。", c:["スイッチのMACアドレステーブルを更新させ、通信を新マスタへ向けるため","端末のIPアドレスの重複を検出し、管理者にSNMPで通知するため","新マスタの仮想IPアドレスを、DHCPサーバに登録し直すため","旧マスタに切替を通知し、自らの優先度を下げさせるため"], e:"仮想MACアドレスは変わらないので、端末のARPキャッシュは書き換え不要です。変わるのは「どのポートの先にその仮想MACがあるか」で、これをスイッチに学習させます。"},
+
+  {id:"cl-1", d:"cloud", q:"VXLANの説明として適切なものはどれか。", c:["L2フレームをUDPでカプセル化し、24ビットのVNIでセグメントを識別する","IPパケットにMPLSラベルを付け、ラベルだけを見て網内を高速に転送する","12ビットのVLAN IDを32ビットに拡張したタグを、イーサネットフレームに付ける","無線LANのチャネルを仮想化し、複数のSSIDを1つの電波で送る"], e:"VNIは24ビットなので約1,600万のセグメントを識別できます。VLANの4094個という上限を越えるため、データセンタやクラウドのオーバレイで使われます。"},
+  {id:"cl-2", d:"cloud", q:"SDNの考え方として適切なものはどれか。", c:["コントロールプレーンを分離し、コントローラで集中制御する","全てのスイッチが自律的に経路を計算し、コントローラを不要にする","物理配線をソフトウェアで置き換え、ケーブルを不要にする","ルータのOSを汎用サーバの仮想マシン上で動かすことを指す"], e:"ルータのOSを汎用サーバの仮想マシンで動かすのはNFVです。区別して覚えましょう。"},
+  {id:"cl-3", d:"cloud", q:"L7ロードバランサで、同じ利用者の通信を同じサーバへ振り分け続ける機能はどれか。", c:["セッション維持（パーシステンス）","ヘルスチェック（死活監視）","SSLオフロード（暗号処理の代行）","ラウンドロビン（順番に振り分け）"], e:"Cookieや送信元IPを使って振り分け先を固定します。サーバ側でセッション情報を共有していないアプリで必要になります。"},
+  {id:"cl-4", d:"cloud", q:"ロードバランサのヘルスチェックをICMPエコーだけで行う場合の問題点はどれか。", c:["OSは動作しているがWebアプリが停止している状態を検知できない","ICMPの応答待ちでサーバの負荷が大きく増え、性能が落ちる","ICMPを使うと、サーバとの間で暗号化通信が使えなくなる","振り分けアルゴリズムがラウンドロビンに固定される"], e:"HTTPで特定のURLにアクセスし応答コードを確認するL7ヘルスチェックなら、アプリの停止も検知できます。"},
+  {id:"cl-5", d:"cloud", q:"MPLSを用いたIP-VPNで、複数の顧客が同じプライベートアドレスを使っても通信が混ざらない理由として適切なものはどれか。", c:["PEルータが顧客ごとにVRFを持ち、経路をRDで区別するから","CEルータが顧客ごとにIPsecで全通信を暗号化するから","Pルータが顧客ごとにVLANを割り当て、L2で分離するから","顧客ごとに物理回線とルータを分け、網内で共有しないから"], e:"VRFは仮想ルーティングテーブルです。経路はMP-BGPでRD付きで交換され、RTでどのVRFに取り込むかが決まります。転送時はVPNラベルで顧客を識別します。"}
+];
+
+/*
+ 記述: k はキーワード群（各群のいずれかの語が含まれれば一致）。alt は別解のキーワード群
+ 解答例 a は lim 字以内で、自分の k をすべて満たすこと（起動時に検証）
+ 表記ゆれ（全角半角・大文字小文字・カタカナの長音・チャンネル）は norm() で吸収
+*/
+const WRITE = [
+  {id:"w-1", d:"red", lim:40, s:"本社のルータR1（マスタ）とR2（バックアップ）でVRRPを構成している。R1のLAN側は正常なまま、R1のWAN回線だけが切断された。", q:"このとき端末の通信が復旧しない理由を述べよ。", a:"R1のLAN側が正常でVRRP広告を送り続け、R2へ切り替わらないから。",
+    k:[["切り替わらな","切替わらな","切り換わらな","切り替わらず","切替わらず","マスタのまま","マスタを維持","維持","R2がマスタにならな","バックアップのまま","優先度が下がらな","フェールオーバしな","切り替えが発生しな","切替が発生しな"],["LAN側が正常","LAN側は正常","LAN側の","LAN側インタ","広告を送","広告を出","VRRP広告","アドバタイズ"]],
+    note:"対策はトラッキング機能。WAN側インタフェースを監視し、障害時に優先度を下げてR2をマスタにします。"},
+  {id:"w-2", d:"l2", lim:40, s:"冗長化のためにフロアスイッチ2台の間に2本目のケーブルを接続したところ、ネットワーク全体が通信不能になった。どちらのスイッチもSTPは無効だった。", q:"通信不能になった原因を述べよ。", a:"L2ループが生じ、ブロードキャストが循環してストームになったから。",
+    k:[["ループ"],["ストーム","循環","増殖","回り続け","ぐるぐる"]], note:"MACアドレステーブルの学習が不安定になる（MACフラッピング）点も合わせて説明できると強いです。"},
+  {id:"w-3", d:"app", lim:40, s:"社内のDNSキャッシュサーバが、インターネット上の任意の送信元からの再帰問合せにも応答する設定になっていた。", q:"この設定のまま運用する危険性を述べよ。", a:"オープンリゾルバとなり、DNSリフレクション攻撃の踏み台に悪用される。",
+    k:[["オープンリゾルバ","外部","第三者","誰でも","任意"],["踏み台","悪用","加担"],["リフレクション","反射","アンプ","増幅","DDOS","DOS"]],
+    alt:[[["ポイズニング","汚染","偽の応答","偽応答"]]],
+    note:"キャッシュポイズニングを受けやすくなる点も危険性として成立します（別解として採点）。対策は再帰問合せを許可する送信元を社内アドレスに限定することです。"},
+  {id:"w-4", d:"app", lim:40, s:"支店のPCが本社のDHCPサーバからアドレスを取得できるよう設計したい。支店と本社はルータで接続されている。", q:"支店のルータにDHCPリレーの設定が必要な理由を述べよ。", a:"DHCPDISCOVERはブロードキャストのため、ルータを越えないから。",
+    k:[["ブロードキャスト"],["ルータを越え","ルータを超え","ルータで遮","中継されな","中継しな","転送されな","転送しな","通過しな","届かな","越えられな","超えられな","越えな","超えな"]], note:"リレーエージェントはgiaddrに自分のアドレスを入れてユニキャストで転送します。"},
+  {id:"w-5", d:"tcp", lim:50, s:"東京とシンガポールの拠点間（RTT約70ミリ秒）を1Gビット/秒の専用線で結んだが、1本のTCPコネクションでのファイル転送は約7Mビット/秒しか出ない。回線の利用率は低い。", q:"スループットが上がらない原因を述べよ。", a:"RTTが大きく、1RTTで送れるデータ量がウィンドウサイズで制限されるから。",
+    k:[["RTT","往復","遅延","帯域遅延積"],["ウィンドウ","バッファ"]], note:"64Kバイト×8÷0.07秒≒7.5Mビット/秒。帯域遅延積（1Gビット/秒×70ミリ秒＝約8.75Mバイト）以上のウィンドウが必要で、ウィンドウスケールオプションや並列コネクションが対策です。"},
+  {id:"w-6", d:"sec", lim:40, s:"在宅勤務者がNAPTを行う家庭用ルータの配下から、IPsec（ESP）で本社VPN装置に接続しようとしたが通信できなかった。", q:"ESPのままではNAPTを通過できない理由を述べよ。", a:"ESPにはポート番号がなく、NAPTで通信を区別して変換できないから。",
+    k:[["ポート番号がな","ポートがな","ポート番号が無","ポートが無","ポート番号を持たな","ポートを持たな","ポート番号を持たず","ポートを持たず","ポート番号を含ま","ポートを含ま","ポート番号が存在","UDPヘッダがな","TCP/UDPヘッダがな"],["区別","識別","対応付け","変換できな","変換でき"]], note:"NATトラバーサルでESPをUDP 4500にカプセル化して解決します。"},
+  {id:"w-7", d:"route", lim:40, s:"ルータR1から本社LANへの経路が2本あり、OSPFのコストはどちらも20である。", q:"このときR1がとる経路選択の動作を述べよ。", a:"等コストの2経路をともに経路表に載せ、負荷分散（ECMP）する。",
+    k:[["等コスト","同じコスト","同一コスト","コストが等し","コストが同じ","ECMP","イコールコスト","両方","2経路とも","ともに"],["負荷分散","分散","ロードバランス","ロードシェア","振り分"]], note:"フロー単位で振り分ける実装が多く、順序逆転を避けられます。"},
+  {id:"w-8", d:"wlan", lim:40, s:"オフィスで通信速度が遅いという苦情を受け、同じ2.4GHz帯のチャネル1でAPを3台追加したが、かえって遅くなった。", q:"遅くなった理由を述べよ。", a:"同一チャネルのAP同士が干渉し、送信待ちや衝突が増えたから。",
+    k:[["同一チャネル","同じチャネル","同チャネル","チャネルが同じ","チャネルが重","チャネル1"],["干渉","待ち","待つ","待た","衝突","コリジョン","送信できな","CSMA","空き","エアタイム","共有"]], note:"同じチャネルのAPは通信時間（エアタイム）を分け合うため、台数を増やしても速くなりません。チャネルを1・6・11に分け、5GHz帯の活用やセル設計（出力調整）も検討します。"},
+  {id:"w-9", d:"sec", lim:40, s:"ステートフルインスペクション型FWを2台でアクティブ/スタンバイ構成にした。切替試験で、既存のTCP通信がすべて切断された。", q:"既存の通信が切断された理由を述べよ。", a:"セッション情報が同期されず、スタンバイ機が既存通信を破棄したから。",
+    k:[["セッション","ステート"],["同期","引き継","引継"],["破棄","廃棄","ドロップ","落と","遮断","拒否","許可されな","通さな","通過させな","不正"]], note:"対策はFW間のセッション同期（ステート同期）機能を使うことです。"},
+  {id:"w-10", d:"cloud", lim:40, s:"ロードバランサ配下のWebサーバ1台でWebアプリケーションのプロセスが停止したが、利用者の一部はエラー画面を受け取り続けた。ヘルスチェックはICMPで行っていた。", q:"障害サーバが振り分け対象から外れなかった理由を述べよ。", a:"ICMPにはOSが応答するため、アプリの停止を検知できないから。",
+    k:[["ICMP","PING"],["OSが","OSは","OSレベル","サーバ自体","ホスト","L3","ネットワーク層","サーバが応答","サーバは応答"],["検知できな","検出できな","検知しな","検出しな","確認できな","判別できな","分からな","わからな","判断できな","気づけな"]], note:"HTTPで特定URLを監視し、応答コードや文字列で判定するL7ヘルスチェックに変更します。"},
+  {id:"w-11", d:"route", lim:50, s:"拠点ルータ間をL2スイッチ経由で接続し、OSPFで経路制御している。対向ルータのインタフェースが故障したとき、経路の切替に約40秒かかった。", q:"切替が遅い理由と、改善のために導入する技術を述べよ。", a:"自側のリンクはダウンせずデッド間隔満了まで障害を検知できないため。BFDを導入する。",
+    k:[["デッド","DEAD","HELLO","ハロ"],["ダウンしな","ダウンせ","アップのまま","リンクダウンを検知","検知できな","気づけな"],["BFD"]], note:"間にL2スイッチがあると、対向側の故障では自分のポートはリンクアップのままです。BFDはミリ秒単位の監視で障害を検知し、OSPFに通知します。"},
+  {id:"w-12", d:"ip", lim:40, s:"IPv4 over IPv6（MAP-E）でインターネットに接続したところ、多数の端末が同時に通信すると一部の通信が失敗するようになった。", q:"通信が失敗する理由を述べよ。", a:"共有IPv4アドレスで使えるポート数が限られ、NAPTのポートが枯渇したから。",
+    k:[["ポート"],["枯渇","不足","上限","足りな","使い切","限られ"]], note:"MAP-Eでは1つのIPv4アドレスを複数の契約者で共有し、それぞれに割り当てられたポート範囲だけを使います。"}
+];
+
+// 事例演習（科目B形式）: 図表付きの事例に複数の設問。pick は c と ans（fixed なら表示順を固定）
+const CASES = [
+  {id:"c-1", d:"red", title:"本社ルータの冗長化（VRRP）", s:"本社では、端末のデフォルトゲートウェイとして、ルータR1とR2でVRRPを構成している。R1とR2は、それぞれWAN側で別のISPと接続している。VRRPの設定は表1のとおりである。",
+    fig:{type:"table", cap:"表1 VRRPの設定", head:["項目","R1","R2"], rows:[["仮想IPアドレス","192.168.1.254","192.168.1.254"],["VRID","10","10"],["優先度","120","100"],["プリエンプト","有効","有効"],["トラッキング","なし","なし"]]},
+    qs:[
+      {type:"pick", q:"通常時にマスタとなるルータはどれか。", c:["R1","R2","IPアドレスが大きい方","端末ごとに異なる"], ans:0, fixed:true, e:"優先度は値が大きいほど優先されるので、120のR1がマスタになります。"},
+      {type:"pick", q:"端末がデフォルトゲートウェイ宛てに送るフレームの、宛先MACアドレスはどれか。", c:["00-00-5E-00-01-0A","R1の物理インタフェースのMACアドレス","R2の物理インタフェースのMACアドレス","FF-FF-FF-FF-FF-FF"], ans:0, e:"VRRPの仮想MACアドレスは 00-00-5E-00-01-{VRID} です。VRIDが10（16進で0A）なので 00-00-5E-00-01-0A になります。マスタが替わっても仮想MACアドレスは変わりません。"},
+      {type:"text", q:"R1のWAN回線だけが切断されたとき、端末の通信が復旧しない理由を、表1中の字句を用いて40字以内で述べよ。", lim:40, a:"トラッキングがなく、R1の優先度が下がらずマスタのままだから。", k:[["トラッキング"],["優先度","マスタのまま","切り替わらな","切替わらな"]], note:"VRRPはLAN側の広告で生死を判断します。WAN側の障害はトラッキングで監視しないと、マスタが切り替わりません。"},
+      {type:"text", q:"この問題を解決するためにR1に追加する設定を、40字以内で述べよ。", lim:40, a:"WAN側インタフェースをトラッキングし、障害時に優先度を100未満に下げる。", k:[["トラッキング","監視"],["WAN"],["優先度","100未満","下げ"]], note:"下げた後の優先度がR2の100より小さくなるよう設定します。プリエンプトが有効なので、R1のWAN回線が復旧すればR1がマスタに戻ります。"}
+    ]},
+  {id:"c-2", d:"route", title:"拠点ルータの経路表", s:"拠点ルータRAは、本社とはIP-VPNで、インターネットとはISP経由で接続している。さらに、本社の一部のセグメントとはIPsec VPNを経由したOSPFで経路を交換している。RAの経路表の一部を表2に示す。",
+    fig:{type:"table", cap:"表2 RAの経路表（抜粋）", head:["宛先","ネクストホップ","経路の種類","コスト"], rows:[["10.0.0.0/8","172.16.0.1（IP-VPN）","静的","—"],["10.20.0.0/16","172.16.0.1（IP-VPN）","OSPF","30"],["10.20.5.0/24","172.16.9.1（IPsec VPN）","OSPF","50"],["0.0.0.0/0","203.0.113.1（ISP）","静的","—"]]},
+    qs:[
+      {type:"pick", q:"宛先が10.20.5.8のパケットの転送先はどれか。", c:["172.16.9.1（IPsec VPN）","172.16.0.1（IP-VPN）","203.0.113.1（ISP）","パケットを破棄する"], ans:0, fixed:true, e:"ロンゲストマッチで、最も長い/24の経路が選ばれます。コストは、プレフィックス長が同じ経路どうしを比べるときに使います。"},
+      {type:"pick", q:"宛先が10.30.1.1のパケットの転送先はどれか。", c:["172.16.9.1（IPsec VPN）","172.16.0.1（IP-VPN）","203.0.113.1（ISP）","パケットを破棄する"], ans:1, fixed:true, e:"10.30.1.1に一致するのは10.0.0.0/8と0.0.0.0/0で、長い方の10.0.0.0/8が選ばれます。"},
+      {type:"text", q:"IPsec VPNが切断されたとき、10.20.5.0/24宛ての通信はどうなるかを、表2中の字句を用いて40字以内で述べよ。", lim:40, a:"経路が消え、10.20.0.0/16に一致してIP-VPN経由になる。", k:[["10.20.0.0/16","IP-VPN","172.16.0.1"],["消え","削除","なくな","無くな"]], note:"OSPFの隣接関係が切れると、IPsec VPN経由の/24の経路が経路表から消えます。次に長い/16の経路が使われるため、通信はIP-VPN側に切り替わります。"}
+    ]},
+  {id:"c-3", d:"app", title:"支店のDHCPリレー", s:"支店のPC（VLAN20、192.168.20.0/24）は、本社のDHCPサーバ（10.1.1.10）からアドレスを取得する。支店L3スイッチのVLAN20のインタフェースは192.168.20.1である。PCがアドレスを取得できないため、本社でパケットをキャプチャした結果を表3に示す。",
+    fig:{type:"log", cap:"表3 本社でのキャプチャ結果（抜粋）", lines:["No 時刻     送信元        宛先          内容","1  09:00:01 192.168.20.1  10.1.1.10     DHCPDISCOVER giaddr=192.168.20.1","2  09:00:01 10.1.1.10     192.168.20.1  DHCPOFFER    yiaddr=192.168.30.15"]},
+    qs:[
+      {type:"pick", q:"表3から分かることとして適切なものはどれか。", c:["リレーは動作しているが、サーバが別のセグメントのアドレスを払い出している","支店L3スイッチでDHCPリレーが動作していない","DHCPサーバに要求が届いていない","PCがDHCPDISCOVERを送信していない"], ans:0, e:"giaddr付きのDISCOVERがサーバに届いているので、リレーは動作しています。しかしOFFERのyiaddrは192.168.30.15で、VLAN20（192.168.20.0/24）のアドレスではありません。"},
+      {type:"pick", q:"DHCPDISCOVERの送信元が、PCではなく192.168.20.1になっている理由はどれか。", c:["リレーエージェントが受け取ったブロードキャストを、ユニキャストに変えて転送したから","PCが自分のアドレスとして192.168.20.1を使ったから","本社ルータがNAPTで送信元を変換したから","DHCPサーバが応答先として指定したから"], ans:0, e:"PCはまだアドレスを持っていないため、DISCOVERを送信元0.0.0.0のブロードキャストで送ります。リレーエージェントが自分のアドレスを送信元とgiaddrに入れ、サーバへユニキャストで転送します。"},
+      {type:"text", q:"DHCPサーバで確認すべき設定を、表3中の字句を用いて40字以内で述べよ。", lim:40, a:"giaddrの192.168.20.0/24に対応するアドレスプールの範囲設定。", k:[["GIADDR","192.168.20"],["プール","スコープ","範囲"]], note:"サーバはgiaddrのネットワークに合うアドレスプールから払い出します。プールの範囲が192.168.30.0/24などに誤って設定されていないかを確認します。"}
+    ]}
+];
+
+/* ===== 日付ユーティリティ（すべてローカル日付の YYYY-MM-DD 文字列で扱う） ===== */
+const DAY = 864e5;
+const parseLocal = s => new Date(s + "T00:00:00");
+function todayStr(d = new Date()) { return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function addDays(s, n) { const d = parseLocal(s); d.setDate(d.getDate() + n); return todayStr(d); }
+function diff(a, b) { return Math.round((parseLocal(b) - parseLocal(a)) / DAY); }
+function isDate(s) { return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s) && todayStr(parseLocal(s)) === s; }
+const maxD = (a, b) => (a > b ? a : b);
+function md(d) { return (d.getFullYear() !== new Date().getFullYear() ? d.getFullYear() + "/" : "") + (d.getMonth()+1) + "/" + d.getDate(); }
+const mds = s => md(parseLocal(s));
+const slash = s => s.replace(/-/g, "/");
+function hm(min) { const h = Math.floor(min / 60), m = min % 60; return (h ? h + "時間" : "") + (m ? m + "分" : "") || "0分"; }
+
+/* ===== 状態 ===== */
+const KEY = "nespe-coach-v1";
+const DKEY = KEY + "-draft";
+const SCHEMA = 3;
+const TARGETS = ["r8b", "next"];
+const HOURS = [5, 10, 15, 20];
+const H_MIN = 1, H_MAX = 60;
+const validHours = h => Number.isInteger(h) && h >= H_MIN && h <= H_MAX;
+const QIDS = new Set(QUIZ.map(q => q.id)), WIDS = new Set(WRITE.map(w => w.id)), CIDS = new Set(CASES.map(c => c.id));
+const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, days: [], done: "", ob: null });
+// 最初の設定の途中経過（再開用）を検査して取り込む
+function cleanA(a) {
+  const o = { weak: Array.isArray(a.weak) ? a.weak.filter(k => DOMAINS[k]) : [], exp: ["none", "some", "pro"].includes(a.exp) ? a.exp : "some", amI: ["exempt", "none", "unknown"].includes(a.amI) ? a.amI : "none" };
+  if (TARGETS.includes(a.target)) o.target = a.target;
+  if (validHours(a.hours)) o.hours = a.hours;
+  if (isDate(a.exam)) o.exam = a.exam;
+  if (isDate(a.aDate)) o.aDate = a.aDate;
+  return o;
+}
+function migrate(d) {
+  const s = blank();
+  if (!d || typeof d !== "object" || Array.isArray(d)) return s;
+  const t = todayStr();
+  const p = d.profile;
+  if (p && typeof p === "object" && TARGETS.includes(p.target) && isDate(p.exam) && validHours(p.hours) && Array.isArray(p.weak)) {
+    s.profile = {
+      target: p.target,
+      amI: ["exempt", "none", "unknown"].includes(p.amI) ? p.amI : "none",
+      exp: ["none", "some", "pro"].includes(p.exp) ? p.exp : "some",
+      hours: p.hours,
+      weak: p.weak.filter(k => DOMAINS[k]),
+      exam: p.exam,
+      start: isDate(p.start) && p.start <= p.exam ? p.start : (t < p.exam ? t : p.exam),
+      aDate: ""
+    };
+  }
+  const obj = o => o && typeof o === "object" && !Array.isArray(o) ? o : {};
+  for (const [k, v] of Object.entries(obj(d.stats))) if (DOMAINS[k] && v && Number.isInteger(v.n) && Number.isInteger(v.c) && v.c >= 0 && v.c <= v.n) s.stats[k] = { c: v.c, n: v.n };
+  for (const [k, v] of Object.entries(obj(d.last))) if (QIDS.has(k) && typeof v === "boolean") s.last[k] = v;
+  for (const [k, v] of Object.entries(obj(d.write))) {
+    if (!WIDS.has(k)) continue;
+    if ([0, 1, 2].includes(v)) s.write[k] = { r: v, t };
+    else if (v && [0, 1, 2].includes(v.r) && isDate(v.t)) s.write[k] = { r: v.r, t: v.t };
+  }
+  for (const [k, v] of Object.entries(obj(d.cases))) if (CIDS.has(k) && v && Number.isFinite(v.p) && v.p >= 0 && v.p <= 100 && isDate(v.t)) s.cases[k] = { p: v.p, t: v.t };
+  if (Array.isArray(d.days)) s.days = d.days.filter(isDate).slice(-120);
+  if (isDate(d.done)) s.done = d.done;
+  if (Number.isFinite(d.at) && d.at > 0) s.at = d.at;
+  if (!s.profile && d.ob && typeof d.ob === "object" && d.ob.A && typeof d.ob.A === "object" && Number.isInteger(d.ob.i) && d.ob.i >= 0 && d.ob.i < 20) {
+    const A = cleanA(d.ob.A);
+    if (A.target) s.ob = { A, i: d.ob.i };
+  }
+  return s;
+}
+let S = blank(), storageOK = true, storageNotice = false;
+try { S = migrate(JSON.parse(localStorage.getItem(KEY) || "null")); } catch (e) { S = blank(); }
+try { localStorage.setItem(KEY + "-probe", "1"); localStorage.removeItem(KEY + "-probe"); } catch (e) { storageOK = false; storageNotice = true; }
+function saveLocal() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { if (storageOK) { storageOK = false; storageNotice = true; } }
+}
+function save() { S.at = Date.now(); saveLocal(); renderStatus(); queueCloud(); }
+
+/* ===== クラウド保存
+   Claudeの保存領域（db）の、閲覧している本人だけが読み書きできる場所（data/users/<本人のID>/）に記録を置く。
+   アプリを閉じても、別の端末で開いても続きから再開できる。使えない環境ではブラウザ内だけに保存する ===== */
+let cloud = null, cloudBusy = false, cloudDirty = false, cloudTimer = 0;
+const withTimeout = (p, ms) => Promise.race([p, new Promise(r => setTimeout(() => r(null), ms))]);
+async function cloudInit() {
+  try {
+    if (!window.claude || typeof window.claude.use !== "function") return;
+    const got = await withTimeout(Promise.all([window.claude.use("db"), window.claude.use("user")]), 8000);
+    if (!got || !got[0] || !got[1]) return;
+    const uid = await withTimeout(got[1].id(), 5000);
+    if (!uid) return;
+    const ref = got[0].doc("data/users/" + uid + "/" + KEY);
+    const snap = await withTimeout(ref.get(), 8000);
+    if (!snap) return;
+    cloud = ref;
+    let remote = null;
+    if (snap.exists) { try { const b = snap.data(); remote = migrate(JSON.parse(b.s)); } catch (e) { remote = null; } }
+    if (remote && remote.at > (S.at || 0)) { S = remote; saveLocal(); }
+    else if ((S.at || 0) > (remote ? remote.at : 0)) pushCloud();
+  } catch (e) { cloud = null; }
+}
+function queueCloud() { if (!cloud) return; clearTimeout(cloudTimer); cloudTimer = setTimeout(pushCloud, 800); }
+async function pushCloud() {
+  if (!cloud) return;
+  if (cloudBusy) { cloudDirty = true; return; }
+  cloudBusy = true;
+  try { await cloud.set({ v: SCHEMA, at: S.at || Date.now(), s: JSON.stringify(S) }); }
+  catch (e) {
+    const code = e && e.code;
+    if (code === "unavailable" || code === "resource_exhausted") { clearTimeout(cloudTimer); cloudTimer = setTimeout(pushCloud, 2000 + Math.random() * 2000); }
+    else { cloud = null; storageNotice = !storageOK; }
+  } finally {
+    cloudBusy = false;
+    if (cloudDirty) { cloudDirty = false; pushCloud(); }
+  }
+}
+// 画面を閉じる・切り替えるときは待たずに保存する
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && cloud) { clearTimeout(cloudTimer); pushCloud(); } });
+function loadDraft(id) { try { const d = JSON.parse(localStorage.getItem(DKEY) || "null"); return d && d.id === id && typeof d.text === "string" ? d.text : ""; } catch (e) { return ""; } }
+function saveDraft(id, text) { try { if (text) localStorage.setItem(DKEY, JSON.stringify({ id, text })); else localStorage.removeItem(DKEY); } catch (e) {} }
+
+// 表記ゆれの吸収: NFKC（全角→半角）、チャンネル→チャネル、カタカナ直後の長音を削除、大文字化、空白除去
+const norm = s => String(s).normalize("NFKC").replace(/チャンネル/g, "チャネル").replace(/([ァ-ヴ])ー/g, "$1").toUpperCase().replace(/\s/g, "");
+const clen = s => [...String(s).replace(/\s/g, "")].length;
+
+/* ===== 開発用のデータ検証（コンソールに出る） ===== */
+function grade(ans, item) {
+  const A = norm(ans);
+  let best = null;
+  for (const g of [item.k].concat(item.alt || [])) {
+    const hits = g.map(grp => grp.some(k => A.includes(norm(k))));
+    const h = hits.filter(Boolean).length;
+    if (!best || h / g.length > best.h / best.g.length) best = { g, hits, h };
+  }
+  return best;
+}
+(function validate() {
+  const ids = new Set();
+  const uniq = id => { console.assert(!ids.has(id), "重複ID", id); ids.add(id); };
+  let longest = 0;
+  for (const q of QUIZ) {
+    uniq(q.id);
+    console.assert(DOMAINS[q.d] && q.c.length === 4 && new Set(q.c).size === 4 && q.q && q.e, "4択データ不正", q.id);
+    const L = q.c.map(c => [...c].length);
+    if (L[0] > Math.max(...L.slice(1))) longest++;
+  }
+  console.assert(longest / QUIZ.length <= .3, "正解が最長の選択肢に偏っている", longest + "/" + QUIZ.length);
+  const textOK = (w, id) => console.assert(Number.isInteger(w.lim) && clen(w.a) <= w.lim && w.k.every(g => g.length) && grade(w.a, w).h === w.k.length && w.note, "記述データ不正", id);
+  for (const w of WRITE) { uniq(w.id); console.assert(DOMAINS[w.d] && w.s && w.q, "記述データ不正", w.id); textOK(w, w.id); }
+  for (const c of CASES) {
+    uniq(c.id);
+    console.assert(DOMAINS[c.d] && c.fig && c.qs.length, "事例データ不正", c.id);
+    c.qs.forEach((q, i) => q.type === "pick" ? console.assert(q.c.length <= 4 && q.ans >= 0 && q.ans < q.c.length && q.e, "事例の選択データ不正", c.id, i) : textOK(q, c.id + "-" + i));
+  }
+  const E = [EXAM.cur];
+  for (const x of E) console.assert([x.applyStart, x.applyEnd, x.aStart, x.aEnd, x.bStart, x.bEnd].every(isDate) && x.applyStart <= x.applyEnd && x.aStart <= x.aEnd && x.aEnd < x.bStart && x.bStart <= x.bEnd, "試験日程の不整合", x.name);
+})();
+
+/* ===== 画面の部品 ===== */
+const $log = document.getElementById("log");
+const $dock = document.getElementById("dock");
+const $main = document.querySelector("main");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const KANA = ["ア","イ","ウ","エ"];
+const AV = "NW";
+const BACK = "__back";
+
+// キーボード操作中だけ、選択肢へ自動でフォーカスを移す
+let kbd = false;
+document.addEventListener("keydown", e => { if (e.key === "Tab" || e.key === "Enter" || e.key === " " || e.key.startsWith("Arrow")) kbd = true; }, true);
+document.addEventListener("pointerdown", () => { kbd = false; }, true);
+
+// キーボード（ソフトウェアキーボード）が開いているときは補助表示を隠す
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const onR = () => document.body.classList.toggle("kb", vv.height < window.innerHeight * .75);
+  vv.addEventListener("resize", onR);
+}
+
+function settle() {
+  requestAnimationFrame(() => {
+    const last = $log.lastElementChild;
+    if (!last) return;
+    // 最後の吹き出しが会話欄に収まれば一番下まで、収まらなければ吹き出しの先頭まで移動する
+    const r = last.getBoundingClientRect(), m = $main.getBoundingClientRect();
+    const behavior = reduce ? "auto" : "smooth";
+    if (r.height > $main.clientHeight - 24) $main.scrollTo({ top: $main.scrollTop + r.top - m.top - 12, behavior });
+    else $main.scrollTo({ top: $main.scrollHeight, behavior });
+  });
+}
+function trimLog() { while ($log.childElementCount > 160) $log.firstElementChild.remove(); }
+
+async function coach(html, wait = 450) {
+  const m = document.createElement("div");
+  m.className = "msg";
+  m.innerHTML = '<div class="av" aria-hidden="true">' + AV + '</div><div class="bub"><span class="typing" aria-hidden="true"><i></i><i></i><i></i></span></div>';
+  $log.appendChild(m); trimLog(); settle();
+  await sleep(wait);
+  m.querySelector(".bub").innerHTML = html;
+  settle();
+}
+function me(text) {
+  const m = document.createElement("div");
+  m.className = "msg me";
+  m.innerHTML = '<div class="bub">' + esc(text).replace(/\n/g, "<br>") + "</div>";
+  $log.appendChild(m); settle();
+}
+function clearDock() {
+  $dock.innerHTML = ""; $dock.className = "col";
+  $dock.removeAttribute("aria-labelledby"); $dock.setAttribute("aria-label", "返答");
+}
+function setLead(text, cls) {
+  const l = document.createElement("p");
+  l.className = "lead" + (cls ? " " + cls : ""); l.id = "dockLead"; l.textContent = text;
+  $dock.appendChild(l);
+  $dock.removeAttribute("aria-label"); $dock.setAttribute("aria-labelledby", "dockLead");
+}
+function hint(text, err) { const h = document.createElement("p"); h.className = "hint" + (err ? " err" : ""); h.textContent = text; return h; }
+function focusDock(el) {
+  if (kbd && el) el.focus({ preventScroll: true });
+  else $dock.focus({ preventScroll: true });
+}
+
+/*
+ options: [{label, value, primary, quiet, danger, full}]
+ opts.wide: 4択（ア〜エ表示、数字キー1〜4でも選べる）
+ opts.extra: 下の行に右寄せで並べる小ボタン（誤タップ防止のため選択肢と離す）
+ opts.lead: ドック上部の短い見出し / opts.grid: 2列 / opts.back: 「← 前の質問」
+*/
+function ask(options, opts = {}) {
+  return new Promise(res => {
+    clearDock();
+    if (opts.grid) $dock.classList.add("grid2");
+    let doneFlag = false;
+    const finish = (label, value) => { if (doneFlag) return; doneFlag = true; document.removeEventListener("keydown", onKey); clearDock(); if (label !== null) me(label); res(value); $dock.focus({ preventScroll: true }); };
+    if (opts.lead) setLead(opts.lead);
+    options.forEach((o, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (o.primary ? " primary" : "") + (o.quiet ? " quiet" : "") + (o.danger ? " danger" : "") + (opts.wide ? " wide" : "") + (o.full ? " full" : "");
+      b.innerHTML = opts.wide ? '<span class="k">' + KANA[i] + '</span><span>' + esc(o.label) + "</span>" : esc(o.label);
+      b.onclick = () => finish(opts.wide ? KANA[i] + "　" + o.label : o.label, o.value);
+      $dock.appendChild(b);
+    });
+    const extra = (opts.extra || []).slice();
+    if (opts.back) extra.unshift({ label: "← 前の質問", value: BACK });
+    if (extra.length) {
+      const row = document.createElement("div");
+      row.className = "row end" + (opts.grid ? " full" : "");
+      extra.forEach(o => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "opt quiet"; b.textContent = o.label;
+        b.onclick = () => finish(o.label, o.value);
+        row.appendChild(b);
+      });
+      $dock.appendChild(row);
+    }
+    if (opts.hint) $dock.appendChild(hint(opts.hint));
+    function onKey(e) {
+      if (!opts.wide || e.ctrlKey || e.metaKey || e.altKey || e.repeat || e.isComposing) return;
+      if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+      const i = ["1","2","3","4"].indexOf(e.key);
+      if (i >= 0 && options[i]) { e.preventDefault(); finish(KANA[i] + "　" + options[i].label, options[i].value); }
+    }
+    document.addEventListener("keydown", onKey);
+    // 4択は誤答防止のため選択肢にフォーカスしない
+    focusDock(opts.wide ? null : ($dock.querySelector(".opt.primary") || $dock.querySelector("button")));
+    settle();
+  });
+}
+function askMulti(options, defaults, opts = {}) {
+  return new Promise(res => {
+    clearDock();
+    if (opts.lead) setLead(opts.lead);
+    const picked = new Set(defaults);
+    options.forEach(o => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (picked.has(o.value) ? " on" : ""); b.textContent = o.label; b.setAttribute("aria-pressed", picked.has(o.value));
+      b.onclick = () => { picked.has(o.value) ? picked.delete(o.value) : picked.add(o.value); b.classList.toggle("on"); b.setAttribute("aria-pressed", picked.has(o.value)); relabel(); };
+      $dock.appendChild(b);
+    });
+    const row = document.createElement("div"); row.className = "row end";
+    if (opts.back) {
+      const bk = document.createElement("button"); bk.type = "button"; bk.className = "opt quiet"; bk.textContent = "← 前の質問";
+      bk.onclick = () => { clearDock(); me("← 前の質問"); res(BACK); };
+      row.appendChild(bk);
+    }
+    const d = document.createElement("button");
+    d.type = "button"; d.className = "opt primary";
+    const relabel = () => { d.textContent = picked.size ? "これで決定（" + picked.size + "）" : "特になし・次へ"; };
+    relabel();
+    d.onclick = () => {
+      clearDock();
+      const labels = options.filter(o => picked.has(o.value)).map(o => o.label);
+      me(labels.length ? labels.join("、") : "特になし");
+      res([...picked]);
+    };
+    row.appendChild(d);
+    $dock.appendChild(row);
+    focusDock($dock.querySelector("button"));
+    settle();
+  });
+}
+/* 記述の入力。戻り値: {text} | {skip:true} | {quit:true} | {extra:true} */
+function askText(id, lead, lim, extraLabel) {
+  return new Promise(res => {
+    clearDock();
+    setLead(lead, "q");
+    const wrap = document.createElement("div");
+    wrap.className = "row";
+    wrap.innerHTML = '<textarea id="ans" placeholder="' + lim + '字以内で解答" aria-describedby="cnt ansHint"></textarea>' +
+      '<div class="row"><button type="button" class="opt quiet" id="quit">やめる</button><span class="grow"></span>' +
+      (extraLabel ? '<button type="button" class="opt quiet" id="extra">' + esc(extraLabel) + "</button>" : "") +
+      '<button type="button" class="opt quiet" id="skip">答えを見る</button><button type="button" class="opt primary" id="send">送信</button></div>' +
+      '<div class="row"><span class="count" id="cnt" aria-live="polite">0 / ' + lim + '字</span></div>' +
+      '<p class="hint" id="ansHint">空白を除いて数えています（本番の数え方はIPAの案内で確認してください）。Ctrl＋Enter（Macは⌘＋Enter）でも送信できます。</p>';
+    $dock.appendChild(wrap);
+    const t = document.getElementById("ans"), c = document.getElementById("cnt"), h = document.getElementById("ansHint"), q = document.getElementById("quit");
+    t.setAttribute("aria-labelledby", "dockLead");
+    let armed = false;
+    const recount = () => {
+      const n = clen(t.value);
+      c.textContent = n + " / " + lim + "字" + (n > lim ? "（" + (n - lim) + "字オーバー）" : "");
+      c.classList.toggle("over", n > lim);
+    };
+    t.value = loadDraft(id); recount();
+    t.oninput = () => {
+      recount(); saveDraft(id, t.value);
+      if (t.value.trim()) { t.removeAttribute("aria-invalid"); h.className = "hint"; h.textContent = "Ctrl＋Enter（Macは⌘＋Enter）でも送信できます。"; }
+      if (armed) { armed = false; q.textContent = "やめる"; }
+    };
+    const send = () => {
+      const v = t.value.trim();
+      if (!v) { t.setAttribute("aria-invalid", "true"); h.className = "hint err"; h.textContent = "解答を入力するか、「答えを見る」を押してください。"; t.focus(); return; }
+      saveDraft(id, ""); clearDock(); me(v); res({ text: v });
+    };
+    t.onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); send(); } };
+    document.getElementById("send").onclick = send;
+    document.getElementById("skip").onclick = () => { saveDraft(id, ""); clearDock(); me("答えを見る"); res({ skip: true }); };
+    if (extraLabel) document.getElementById("extra").onclick = () => { clearDock(); me(extraLabel); res({ extra: true }); };
+    q.onclick = () => {
+      if (t.value.trim() && !armed) {
+        armed = true; q.textContent = "消してやめる";
+        h.className = "hint err"; h.textContent = "書いた内容は消えます。やめる場合は「消してやめる」を押してください。";
+        return;
+      }
+      saveDraft(id, ""); clearDock(); me("やめる"); res({ quit: true });
+    };
+    focusDock(t);
+    settle();
+  });
+}
+/* 勉強時間：よく使う値のボタンと、自由入力欄。戻り値は時間（整数）か BACK */
+function askHours(def, o = {}) {
+  return new Promise(res => {
+    clearDock();
+    setLead("1週間の勉強時間");
+    const done = (v, label) => { clearDock(); me(label); res(v); };
+    HOURS.forEach(h => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = h + "時間";
+      b.onclick = () => done(h, h + "時間");
+      $dock.appendChild(b);
+    });
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = '<label for="hrs" class="small">自由に入力</label><input type="number" id="hrs" inputmode="numeric" min="' + H_MIN + '" max="' + H_MAX + '" step="1" placeholder="例：8" aria-describedby="hrsHint"' + (def && !HOURS.includes(def) ? ' value="' + def + '"' : "") + '><span class="small">時間</span><button type="button" class="opt primary" id="hrsOk">この時間で決定</button>';
+    $dock.appendChild(row);
+    const h = hint(H_MIN + "〜" + H_MAX + "時間の整数で入力できます。"); h.id = "hrsHint"; $dock.appendChild(h);
+    if (o.back) {
+      const r2 = document.createElement("div"); r2.className = "row end";
+      const bk = document.createElement("button"); bk.type = "button"; bk.className = "opt quiet"; bk.textContent = "← 前の質問";
+      bk.onclick = () => done(BACK, "← 前の質問");
+      r2.appendChild(bk); $dock.appendChild(r2);
+    }
+    const inp = document.getElementById("hrs");
+    const submit = () => {
+      const v = Number(String(inp.value).normalize("NFKC").trim());
+      if (!validHours(v)) {
+        inp.setAttribute("aria-invalid", "true"); h.className = "hint err";
+        h.textContent = H_MIN + "〜" + H_MAX + "の整数を入力してください。";
+        inp.focus(); return;
+      }
+      done(v, v + "時間");
+    };
+    inp.oninput = () => { inp.removeAttribute("aria-invalid"); h.className = "hint"; h.textContent = H_MIN + "〜" + H_MAX + "時間の整数で入力できます。"; };
+    inp.onkeydown = e => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); submit(); } };
+    document.getElementById("hrsOk").onclick = submit;
+    focusDock($dock.querySelector("button"));
+    settle();
+  });
+}
+function askDate(def, hintText, o = {}) {
+  return new Promise(res => {
+    clearDock();
+    const min = o.min || addDays(todayStr(), 1), max = o.max || "";
+    if (def < min) def = min;
+    if (max && def > max) def = max;
+    const row = document.createElement("div"); row.className = "row";
+    row.innerHTML = '<input type="date" id="exam" value="' + esc(def) + '" min="' + esc(min) + '"' + (max ? ' max="' + esc(max) + '"' : "") + ' aria-label="日付" aria-describedby="dateHint"><button type="button" class="opt primary" id="ok">この日で決定</button>';
+    $dock.appendChild(row);
+    const h = hint(hintText); h.id = "dateHint"; $dock.appendChild(h);
+    if (o.back) {
+      const r2 = document.createElement("div"); r2.className = "row end";
+      const bk = document.createElement("button"); bk.type = "button"; bk.className = "opt quiet"; bk.textContent = "← 前の質問";
+      bk.onclick = () => { clearDock(); me("← 前の質問"); res(BACK); };
+      r2.appendChild(bk); $dock.appendChild(r2);
+    }
+    const inp = document.getElementById("exam");
+    document.getElementById("ok").onclick = () => {
+      const v = inp.value;
+      if (!isDate(v) || v < min || (max && v > max)) {
+        inp.setAttribute("aria-invalid", "true"); h.className = "hint err";
+        h.textContent = max ? mds(min) + "〜" + mds(max) + "の日付を選んでください。" : mds(min) + "以降の日付を選んでください。";
+        inp.focus(); return;
+      }
+      clearDock(); me(slash(v)); res(v);
+    };
+    focusDock(inp);
+    settle();
+  });
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ===== 試験情報の表示 ===== */
+function applyState(x) { const t = todayStr(); return t > x.applyEnd ? "（受付終了）" : t >= x.applyStart ? "（受付中）" : ""; }
+function fmtHTML() { return '<div class="card"><dl class="kv">' + EXAM.fmt.map(([k, v]) => "<dt>" + esc(k) + "</dt><dd>" + esc(v) + "</dd>").join("") + "</dl></div>"; }
+function curCard() {
+  const c = EXAM.cur, t = todayStr();
+  return '<div class="card"><dl class="kv"><dt>前期</dt><dd>' + esc(c.name) + "</dd><dt>申込受付</dt><dd>" + esc(c.apply + applyState(c)) + "</dd><dt>科目A</dt><dd>" + esc(c.a + (t > c.aEnd ? "（終了）" : "")) + "</dd><dt>科目B</dt><dd><strong>" + esc(c.b + (t > c.bEnd ? "（終了）" : "")) + "</strong></dd></dl><p class=\"small\">" + esc(c.note) + "</p></div>";
+}
+function lateCard() { return '<div class="card"><dl class="kv"><dt>後期</dt><dd><strong>ネスペは実施なし</strong></dd><dt>後期の区分</dt><dd>' + esc(EXAM.late.kubun) + "</dd><dt>応用情報</dt><dd>" + esc(EXAM.late.ap) + "</dd></dl></div>"; }
+function nextCard() { return '<div class="card"><dl class="kv"><dt>2027年度〜</dt><dd>' + esc(EXAM.next) + "</dd></dl></div>"; }
+function sourceHTML() {
+  return '<p class="small">IPA公式サイトの掲載内容を' + esc(EXAM.asof) + "時点で確認したものです。最新情報は次のページで確認してください。</p><ul class=\"small\">" +
+    EXAM.links.map(([t, u]) => '<li><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + "</a></li>").join("") + "</ul>";
+}
+function examHTML() { return fmtHTML() + curCard() + lateCard() + nextCard() + sourceHTML(); }
+/* ===== 計画 =====
+   計画は作成日（profile.start）を起点に固定し、日がたつとフェーズが進む */
+function allocate(days, ratios) {
+  const n = ratios.length;
+  const sum = ratios.reduce((a, b) => a + b, 0);
+  const extra = days - n;
+  const raw = ratios.map(r => extra * r / sum);
+  const out = raw.map(x => 1 + Math.floor(x));
+  let left = days - out.reduce((a, b) => a + b, 0);
+  raw.map((x, i) => [x - Math.floor(x), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { out[i]++; left--; } });
+  return out;
+}
+const written = () => true;
+function phaseInfo(key) {
+  return {
+    base:  { t: "基礎固め", f: "科目A-2（旧午前II）・用語" },
+    deep:  { t: "分野別の深掘り", f: "仕組みの理解＋科目B-1" },
+    b1:    { t: "科目B-1 演習", f: "旧午後I・90分で2問" },
+    b2:    { t: "科目B-2 演習", f: "旧午後II・120分で1問" },
+    bmix:  { t: "科目B 演習", f: "旧午後I・午後IIの過去問" },
+    last:  { t: "直前仕上げ", f: "本番リハーサル" },
+    sprint:{ t: "最終確認", f: "弱点と頻出論点だけ" }
+  }[key];
+}
+function tasksFor(key, p, len) {
+  const weak = p.weak.map(k => DOMAINS[k]);
+  const a1 = p.target !== "r8b" && p.amI !== "exempt";
+  const per = len < 7 ? "期間中に" : "週";
+  return {
+    base:  ["科目A-2の過去問を3〜4回分くり返し、正答率8割を安定させる", "間違えた用語は「何のために・どう動くか」を自分の言葉で1行にまとめる", a1 ? "科目A-1（旧午前I）は応用情報の午前過去問を週2〜3回。新制度での扱いが発表されたら見直す" : null],
+    deep:  [weak.length ? "苦手分野を優先：" + weak.join("、") : "全分野をひととおり", "パケットの流れ（どの機器で何が書き換わるか）を図に描いて説明する", "科目B-1（旧午後I）の過去問を" + per + "1問。記述トレーニングも" + per + "2回"],
+    b1:    ["過去問を1問45分で解く", "解答の根拠になった本文・図の箇所をメモし、解答例と照らし合わせる", "解答例との差を「キーワード不足」「論点ずれ」「字数」に分類する", "CBTに合わせ、過去問のPDFを画面だけで読み、解答はキーボードで入力する", "事例演習を" + per + "2問"],
+    b2:    ["長文を時間内に読み切る練習。構成図に設問の情報を書き込む", "設問どうしのつながり（前の設問が後のヒント）を意識する", per + "1回は120分を計って通しで解く"],
+    bmix:  ["旧午後I・午後IIの過去問を時間を計って解く", "解答例と比べ、足りなかったキーワードを弱点ノートに書く", "毎日記述トレーニングを2題。事例演習も1問"],
+    last:  [p.target === "r8b" ? "予約した時間帯と同じ時間に、B-1（90分）とB-2（120分）を画面とキーボードで通しで解く" : "本番と同じ時間割で、科目A-2から科目B-2までを通しで解く", "弱点ノートと間違えた問題だけを見直す", "前日は新しい問題に手を出さず、睡眠を優先する"],
+    sprint:["弱点ノートと頻出論点（冗長化・DNS・VPN・無線）を見直す", "記述トレーニングで解答の書き方を確認する", "前日は早めに休み、本人確認書類と予約内容を確認する"]
+  }[key].filter(Boolean);
+}
+function buildPlan(p) {
+  const t = todayStr();
+  const left = diff(t, p.exam);
+  if (left <= 0) return { done: left < 0, today: left === 0, days: left, phases: [] };
+  const start = p.start <= t ? p.start : t;
+  const total = diff(start, p.exam);
+  let keys, ratios;
+  if (total <= 3) { keys = ["sprint"]; ratios = [1]; }
+  else if (p.target === "r8b") {
+    if (total < 10) { keys = ["bmix", "last"]; ratios = [.65, .35]; }
+    else { keys = ["b1", "b2", "last"]; ratios = [.4, .4, .2]; }
+  } else if (total < 35) { keys = ["base", "bmix", "last"]; ratios = [.3, .5, .2]; }
+  else { keys = ["base", "deep", "b1", "b2", "last"]; ratios = [{ none: .22, some: .17, pro: .12 }[p.exp] || .17, .26, .24, .2, .1]; }
+  const lens = allocate(total, ratios);
+  let cur = start;
+  const phases = keys.map((k, i) => {
+    const from = cur; cur = addDays(cur, lens[i]);
+    return Object.assign({ key: k, tasks: tasksFor(k, p, lens[i]), from, to: addDays(cur, -1) }, phaseInfo(k));
+  });
+  const hpw = p.hours;
+  const weekday = Math.min(Math.round(hpw * 60 * .4 / 5 / 30) * 30, Math.floor(hpw * 60 / 5 / 30) * 30);
+  const weekend = (hpw * 60 - weekday * 5) / 2;
+  return { days: left, total: Math.round(left / 7 * hpw), weekday, weekend, phases };
+}
+function currentPhase(plan) {
+  const t = todayStr();
+  const i = plan.phases.findIndex(ph => t <= ph.to);
+  return i < 0 ? plan.phases.length - 1 : i;
+}
+function planHTML(plan) {
+  const ci = currentPhase(plan);
+  return '<div class="card">' + plan.phases.map((p, i) =>
+    '<div class="phase"><span class="n">P' + (i+1) + '</span><div><h4>' + esc(p.t) + "｜" + esc(p.f) + (i === ci ? '<span class="pill">いまここ</span>' : "") +
+    '</h4><div class="d">' + esc(mds(p.from)) + " 〜 " + esc(mds(p.to)) + "</div></div>" +
+    (i === ci || plan.phases.length <= 3 ? "<ul>" + p.tasks.map(t => "<li>" + esc(t) + "</li>").join("") + "</ul>" : "") + "</div>").join("") + "</div>" +
+    (plan.phases.length > 3 ? '<p class="small">いまのフェーズだけ、やることを表示しています。</p>' : "");
+}
+function datesHTML(p) {
+  const rows = p.target === "r8b" ? [["科目B", slash(p.exam)]] : [["目標日", slash(p.exam) + "（仮。日程は未発表）"]];
+  return '<div class="card"><dl class="kv">' + rows.map(([k, v]) => "<dt>" + esc(k) + "</dt><dd>" + esc(v) + "</dd>").join("") + "</dl></div>";
+}
+/* ===== 状態表示 ===== */
+function totals() { let c = 0, n = 0; Object.values(S.stats).forEach(s => { c += s.c; n += s.n; }); return { c, n }; }
+function renderStatus() {
+  const el = document.getElementById("status");
+  if (!S.profile) { el.innerHTML = "<span>初回設定</span>"; return; }
+  const plan = buildPlan(S.profile);
+  const t = totals();
+  const head = plan.done ? "試験終了" : plan.today ? "本日試験" : "あと" + plan.days + "日";
+  let ph = "";
+  if (plan.phases.length) { const i = currentPhase(plan); ph = "<span>P" + (i+1) + '<span class="ph-name"> ' + esc(plan.phases[i].t) + "</span></span>"; }
+  const acc = t.n >= 5 ? "正答率 " + Math.round(t.c / t.n * 100) + "%" : "4択 " + t.n + "問";
+  el.innerHTML = "<span>" + head + "</span>" + ph + '<span class="acc">' + acc + "</span>";
+}
+function markDay() { const d = todayStr(); if (!S.days.includes(d)) { S.days.push(d); S.days = S.days.slice(-120); } }
+function streak() {
+  let n = 0; let d = todayStr();
+  if (!S.days.includes(d)) d = addDays(d, -1);
+  while (S.days.includes(d)) { n++; d = addDays(d, -1); }
+  return n;
+}
+function weekDays() { const t = todayStr(); return S.days.filter(d => diff(d, t) < 7 && diff(d, t) >= 0).length; }
+
+/* ===== 4択 ===== */
+function pickQuiz(n, domain, ids) {
+  const weak = new Set(S.profile ? S.profile.weak : []);
+  const pool = QUIZ.filter(q => (!domain || q.d === domain) && (!ids || ids.includes(q.id))).map(q => {
+    const st = S.stats[q.d], rate = st && st.n ? st.c / st.n : .5;
+    let w = 1 + (weak.has(q.d) ? 2 : 0) + (rate < .6 ? 1 : 0);
+    if (S.last[q.id] === true) w *= .25;
+    if (S.last[q.id] === false) w *= 2;
+    if (!(q.id in S.last)) w *= 1.5;
+    return { q, w: w * Math.random() };
+  });
+  pool.sort((a, b) => b.w - a.w);
+  return pool.slice(0, n).map(x => x.q);
+}
+async function runQuiz(n, domain, ids) {
+  const qs = pickQuiz(n, domain, ids);
+  let ok = 0, done = 0, quit = false;
+  await coach("<p>" + (ids ? "前回間違えた問題を" : "科目A-2（旧午前II）形式の4択を") + qs.length + "問いきます。ほかの選択肢がなぜ違うかも考えてみてください。</p><p class=\"small\">キーボードなら1〜4キーでも答えられます。</p>");
+  for (let i = 0; i < qs.length; i++) {
+    const q = qs[i];
+    const order = shuffle(q.c.map((t, k) => ({ t, k })));
+    await coach('<span class="tag">Q' + (i+1) + "/" + qs.length + "　正解" + ok + '</span><p class="qtext">' + esc(q.q) + "</p>", i ? 250 : 450);
+    const pick = await ask(order.map(o => ({ label: o.t, value: o.k })), { wide: true, lead: "答えを選んでください", extra: [{ label: "やめる", value: -1 }] });
+    if (pick === -1) { quit = true; break; }
+    const right = pick === 0;
+    if (right) ok++;
+    done++;
+    const st = S.stats[q.d] || (S.stats[q.d] = { c: 0, n: 0 });
+    st.n++; if (right) st.c++;
+    S.last[q.id] = right; markDay(); save();
+    const ansKana = KANA[order.findIndex(o => o.k === 0)], mineKana = KANA[order.findIndex(o => o.k === pick)];
+    await coach('<span class="tag">' + esc(DOMAINS[q.d]) + "</span>" +
+      (right ? '<p><span class="ok">✓ 正解</span>　' + ansKana + "　" + esc(q.c[0]) + "</p>"
+             : '<p><span class="ng">✕ 不正解</span></p><ul><li>あなたの解答：' + mineKana + "　" + esc(q.c[pick]) + "</li><li><strong>正解：" + ansKana + "　" + esc(q.c[0]) + "</strong></li></ul>") +
+      "<p>" + esc(q.e) + "</p>", 250);
+    if (i < qs.length - 1) {
+      const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
+      if (!go) { quit = true; break; }
+    }
+  }
+  if (!done) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, ok: 0, quit: true }; }
+  const rate = Math.round(ok / done * 100);
+  const msg = done < 10
+    ? "今回は" + done + "問中 <strong>" + ok + "問正解</strong>でした。" + (rate >= 80 ? "この調子で続けましょう。" : rate >= 60 ? "間違えた問題は、メニューの「間違えた問題」から復習できます。" : "解説の用語をテキストで確認してから、もう一度挑戦しましょう。")
+    : done + "問中 <strong>" + ok + "問正解</strong>（" + rate + "%）でした。" + (rate >= 80 ? "科目A-2の合格ラインを十分に越えています。" : rate >= 60 ? "合格ラインの60%は越えています。間違えた問題は今日中に見直しましょう。" : "まだ伸びしろが大きいところです。解説の用語を確認してから、もう一度挑戦しましょう。");
+  await coach("<p>" + msg + (quit ? "（途中でやめました。ここまでの記録は保存しています）" : "") + "</p>");
+  return { n: done, ok, quit };
+}
+
+/* ===== 記述 ===== */
+const GAP = [1, 3, 14];
+const GAP_TXT = ["明日もう一度出します。", "3日後にもう一度出します。", "2週間後に確認で出します。"];
+function gradeHTML(ans, item) {
+  const g = grade(ans, item);
+  const ratio = g.h / g.g.length;
+  const sug = ratio >= 1 ? "○" : ratio >= .5 ? "△" : "×";
+  const rows = g.g.map((grp, i) => "<li>" + (g.hits[i] ? '<span class="ok">✓ 含む</span>' : '<span class="na">－ 見当たらない</span>') + "　" + esc(grp[0]) + (grp.length > 1 ? " など" : "") + "</li>").join("");
+  const len = clen(ans);
+  return { sug, html: "<p>解答例の要素のうち <strong>" + g.h + " / " + g.g.length + "</strong> が含まれています" + (len > item.lim ? "。字数が" + (len - item.lim) + "字オーバーしています。本番では減点や採点対象外になりえます" : "") + "。</p><ul>" + rows + "</ul><p class=\"small\">語句の一致による目安です。言い回しが違っても、論点が合っていれば正解です。</p>" };
+}
+function pickWrite(domain) {
+  const t = todayStr();
+  const weak = new Set(S.profile ? S.profile.weak : []);
+  const pool = WRITE.filter(w => !domain || w.d === domain).map(w => {
+    const r = S.write[w.id];
+    let s;
+    if (!r) s = 3;
+    else { const due = addDays(r.t, GAP[r.r]); s = due <= t ? 4 + diff(due, t) * .01 : -diff(t, due) * .05; }
+    return { w, s: s + (weak.has(w.d) ? 1.5 : 0) + Math.random() };
+  }).sort((a, b) => b.s - a.s);
+  return pool[0].w;
+}
+async function runWrite(domain) {
+  const w = pickWrite(domain);
+  await coach('<span class="tag">記述　' + esc(DOMAINS[w.d]) + "</span><p>" + esc(w.s) + "</p><p><strong>" + esc(w.q.replace(/。$/, "")) + "（" + w.lim + "字以内）。</strong></p><p class=\"small\">科目Bでは「何が起きたか」と「なぜそうなるか」をセットで書くのがコツです。</p>");
+  const r = await askText(w.id, "設問：" + w.q.replace(/。$/, "") + "（" + w.lim + "字以内）", w.lim);
+  if (r.quit) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, quit: true }; }
+  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p><p>" + esc(w.note) + "</p>";
+  if (r.skip) {
+    S.write[w.id] = { r: 0, t: todayStr() }; save();
+    await coach(ansHTML + "<p>解答例を一度書き写すと、言い回しが身につきます。この問題は" + GAP_TXT[0] + "</p>");
+    return { n: 0 };
+  }
+  const gh = gradeHTML(r.text, w);
+  await coach(gh.html + ansHTML);
+  const g = await ask([{ label: "○ 書けた", value: 2 }, { label: "△ 惜しい", value: 1 }, { label: "× 書けなかった", value: 0 }], { lead: "解答例と比べて自己採点してください（語句の一致からの目安：" + gh.sug + "）" });
+  S.write[w.id] = { r: g, t: todayStr() }; markDay(); save();
+  await coach("<p>" + ["大丈夫です。解答例を一度書き写すと、言い回しが身につきます。", "あと一歩です。足りなかった要素を意識して、また書いてみましょう。", "いい調子です。本番でもこの書き方で十分戦えます。"][g] + "この問題は" + GAP_TXT[g] + "</p>", 250);
+  return { n: 1 };
+}
+
+/* ===== 事例演習（科目B形式） ===== */
+function figHTML(f) {
+  if (f.type === "table") return '<div class="fig"><p class="cap">' + esc(f.cap) + '</p><div class="tw"><table class="t"><thead><tr>' + f.head.map(h => '<th scope="col">' + esc(h) + "</th>").join("") + "</tr></thead><tbody>" + f.rows.map(r => "<tr>" + r.map(c => "<td>" + esc(c) + "</td>").join("") + "</tr>").join("") + "</tbody></table></div></div>";
+  return '<div class="fig"><p class="cap">' + esc(f.cap) + '</p><pre class="log" tabindex="0">' + esc(f.lines.join("\n")) + "</pre></div>";
+}
+function pickCase() {
+  const weak = new Set(S.profile ? S.profile.weak : []);
+  return CASES.map(c => ({ c, s: (S.cases[c.id] ? (100 - S.cases[c.id].p) / 50 : 3) + (weak.has(c.d) ? 1 : 0) + Math.random() })).sort((a, b) => b.s - a.s)[0].c;
+}
+async function runCase() {
+  const c = pickCase();
+  const n = c.qs.length;
+  await coach('<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>", 600);
+  let score = 0, answered = 0, quit = false;
+  for (let i = 0; i < n && !quit; i++) {
+    const sq = c.qs[i];
+    const head = '<span class="tag">設問' + (i+1) + "/" + n + "</span><p>" + esc(sq.q) + "</p>";
+    await coach(head, 250);
+    if (sq.type === "pick") {
+      const order = sq.fixed ? sq.c.map((t, k) => ({ t, k })) : shuffle(sq.c.map((t, k) => ({ t, k })));
+      let pick;
+      for (;;) {
+        pick = await ask(order.map(o => ({ label: o.t, value: o.k })), { wide: true, lead: "設問" + (i+1) + "：答えを選んでください", extra: [{ label: "図表を見る", value: -2 }, { label: "やめる", value: -1 }] });
+        if (pick !== -2) break;
+        await coach(figHTML(c.fig), 150); await coach(head, 150);
+      }
+      if (pick === -1) { quit = true; break; }
+      const right = pick === sq.ans;
+      if (right) score++;
+      const ak = KANA[order.findIndex(o => o.k === sq.ans)];
+      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + "<p>" + esc(sq.e) + "</p>", 250);
+    } else {
+      let r;
+      for (;;) {
+        r = await askText(c.id + "-" + i, "設問" + (i+1) + "：" + sq.q, sq.lim, "図表を見る");
+        if (!r.extra) break;
+        await coach(figHTML(c.fig), 150); await coach(head, 150);
+      }
+      if (r.quit) { quit = true; break; }
+      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p><p>" + esc(sq.note) + "</p>";
+      if (r.skip) await coach(ansHTML, 250);
+      else {
+        const gh = gradeHTML(r.text, sq);
+        await coach(gh.html + ansHTML, 250);
+        const g = await ask([{ label: "○ 書けた", value: 2 }, { label: "△ 惜しい", value: 1 }, { label: "× 書けなかった", value: 0 }], { lead: "自己採点してください（語句の一致からの目安：" + gh.sug + "）" });
+        score += [0, .5, 1][g];
+      }
+    }
+    answered++;
+    if (i < n - 1) {
+      const go = await ask([{ label: "次の設問へ", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
+      if (!go) quit = true;
+    }
+  }
+  if (quit && answered < n) {
+    await coach("<p>中断しました。" + (answered ? "途中までの結果は記録しません。" : "") + "メニューに戻ります。</p>", 200);
+    return { n: 0, quit: true };
+  }
+  const p = Math.round(score / n * 100);
+  S.cases[c.id] = { p, t: todayStr() }; markDay(); save();
+  await coach("<p>この事例の得点の目安は <strong>" + p + "点</strong> です（設問ごとに等配点で計算）。本番の科目Bは60点が合格基準です。</p><p class=\"small\">本番の事例は数ページあり、設問も10前後あります。IPAの過去問でも同じ手順（図表から根拠を探す→指定の字句を使う→字数内でまとめる）で練習しましょう。</p>");
+  return { n: 1 };
+}
+
+/* ===== 分析 ===== */
+function domainScore(k) {
+  const weak = S.profile ? S.profile.weak : [];
+  const s = S.stats[k];
+  const qr = s && s.n ? s.c / s.n : null;
+  const ws = WRITE.filter(w => w.d === k && S.write[w.id]).map(w => S.write[w.id].r / 2);
+  const wr = ws.length ? ws.reduce((a, b) => a + b, 0) / ws.length : null;
+  if (qr === null && wr === null) return weak.includes(k) ? .3 : .55;
+  if (qr === null) return wr;
+  if (wr === null) return qr;
+  return (qr + wr) / 2;
+}
+function weakest() { return Object.keys(DOMAINS).map(k => [k, domainScore(k)]).sort((a, b) => a[1] - b[1])[0][0]; }
+const wrongIds = () => Object.keys(S.last).filter(k => S.last[k] === false);
+
+async function showProgress() {
+  const t = totals();
+  const weakSet = new Set(S.profile.weak);
+  const bars = Object.entries(DOMAINS).map(([k, label]) => {
+    const s = S.stats[k]; const r = s && s.n ? s.c / s.n : 0;
+    const pct = Math.round(r * 100);
+    return '<div class="bar" role="img" aria-label="' + esc(label) + "：" + (s && s.n ? "正答率" + pct + "%、" + s.n + "問" : "未着手") + '"><span>' + esc(label) + (weakSet.has(k) ? "（苦手）" : "") + '</span><span class="t"><b class="' + (s && s.n && r < .6 ? "low" : "") + '" style="width:' + Math.max(s && s.n ? 3 : 0, pct) + '%"></b></span><span class="v">' + (s && s.n ? pct + "%（" + s.n + "問）" : "未着手") + "</span></div>";
+  }).join("");
+  const wv = Object.values(S.write);
+  const cv = Object.values(S.cases);
+  const plan = buildPlan(S.profile);
+  const phaseTxt = plan.phases.length ? "P" + (currentPhase(plan)+1) + "　" + plan.phases[currentPhase(plan)].t : "—";
+  const dayTxt = plan.done ? "試験日を過ぎました" : plan.today ? "本日" : plan.days + "日";
+  const weakNow = Object.entries(S.stats).filter(([, s]) => s.n >= 3 && s.c / s.n < .6).map(([k]) => DOMAINS[k]);
+  await coach('<div class="card"><dl class="kv"><dt>試験まで</dt><dd>' + esc(dayTxt) + "（" + esc(slash(S.profile.exam)) + "）</dd><dt>現在のフェーズ</dt><dd>" + esc(phaseTxt) +
+    "</dd><dt>4択</dt><dd>" + t.n + "問・正答率 " + (t.n ? Math.round(t.c / t.n * 100) + "%" : "—") + "（全" + QUIZ.length + "問）</dd><dt>記述</dt><dd>" + wv.length + " / " + WRITE.length + "題（○ " + wv.filter(v => v.r === 2).length + "）</dd><dt>事例</dt><dd>" + cv.length + " / " + CASES.length + "事例" + (cv.length ? "（平均 " + Math.round(cv.reduce((a, b) => a + b.p, 0) / cv.length) + "点）" : "") +
+    "</dd><dt>間違えた問題</dt><dd>" + wrongIds().length + "問</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日（連続 " + streak() + "日）</dd><dt>記録の保存先</dt><dd>" + (cloud ? "Claudeの保存領域（別の端末でも続きから再開できます）" : "この端末（ブラウザ）の中") + "</dd></dl></div><div class=\"card\">" + bars + "</div>" +
+    (weakNow.length ? "<p>正答率が60%を下回っている分野：<strong>" + esc(weakNow.join("、")) + "</strong>。ここを集中的に回しましょう。</p>" : t.n ? "<p>60%を下回っている分野はありません。未着手の分野を埋めていきましょう。</p>" : "<p>まだ記録がありません。「今日の学習」から始めましょう。</p>"), 450);
+}
+
+/* ===== 会話の流れ ===== */
+function targetOptions() {
+  const t = todayStr(), C = EXAM.cur;
+  const o = [];
+  if (t <= C.bEnd) o.push({ label: "今年度前期の科目Bを受ける（申込済みの方・" + mds(maxD(t, C.bStart)) + "〜" + mds(C.bEnd) + "）", value: "r8b" });
+  o.push({ label: "2027年度以降の試験を目指す（新制度）", value: "next" });
+  return o;
+}
+async function onboarding(redo) {
+  const old = redo ? S.profile : null;
+  if (!redo) await coach("<p>はじめまして。ネットワークスペシャリスト試験（ネスペ）の合格まで伴走するコーチです。</p><p>6つほどの質問に答えてもらえれば、あなた専用の学習計画を作ります。1分ほどで終わります。答えを間違えたら「← 前の質問」で戻れます。</p>");
+  const A = old ? Object.assign({}, old, { weak: old.weak.slice() }) : { weak: [], exp: "some", amI: "none" };
+  const t = () => todayStr();
+  const steps = [
+    { run: async back => {
+        await coach("<p>どの試験を目指しますか。</p><p class=\"small\">今年度の後期にネスペは実施されません。</p>", 300);
+        const opts = targetOptions();
+        if (S.profile) opts.push({ label: "作り直しをやめる", value: "cancel", quiet: true });
+        const v = await ask(opts, { lead: "目指す試験", back });
+        if (v === BACK || v === "cancel") return v;
+        A.target = v;
+        if (v === "r8b") await coach("<p>科目Bの期間中ですね。ここからは記述対策に絞った短期集中プランにします。2026年度からCBT方式になり、科目名も変わりました（午前I→科目A-1、午前II→A-2、午後I→B-1、午後II→B-2）。</p>" + fmtHTML() + curCard(), 400);
+        else await coach("<p>2027年度からは新しい試験制度に移行する予定で、ネットワーク分野がどの区分で出題されるかはまだ発表されていません。ネットワークの技術内容は変わらず役に立つので、このまま準備を進めましょう。</p>" + nextCard() + lateCard() + sourceHTML(), 400);
+        return v;
+      } },
+    { skip: () => A.target === "r8b", run: async back => {
+        await coach("<p>科目A-1（旧午前I）の免除について教えてください。次のいずれかから2年以内で、申込時に申請すれば免除されます。</p><ul><li>応用情報技術者試験に合格</li><li>高度試験または情報処理安全確保支援士試験に合格</li><li>高度試験・支援士試験の科目A-1（午前I）で基準点以上</li></ul><p class=\"small\">新制度での免除の扱いは公表待ちです。</p>", 300);
+        const v = await ask([{ label: "免除される", value: "exempt" }, { label: "免除されない", value: "none" }, { label: "よくわからない", value: "unknown" }], { lead: "科目A-1の免除", back });
+        if (v === BACK) return v;
+        A.amI = v;
+        if (v === "unknown") await coach("<p>わかりました。免除されない前提で、科目A-1の対策も計画に入れておきます。</p>", 250);
+        return v;
+      } },
+    { skip: () => A.target === "r8b", run: async back => {
+        await coach("<p>ネットワークの実務経験はどのくらいありますか。</p>", 300);
+        const v = await ask([{ label: "ほぼない（独学・学生）", value: "none" }, { label: "少しある（運用・ヘルプデスク）", value: "some" }, { label: "設計・構築をしている", value: "pro" }], { lead: "実務経験", back });
+        if (v !== BACK) A.exp = v;
+        return v;
+      } },
+    { run: async back => {
+        await coach("<p>1週間で勉強に使えるのは何時間くらいですか。無理のない数字で大丈夫です。</p>", 300);
+        const v = await askHours(A.hours, { back });
+        if (v !== BACK) A.hours = v;
+        return v;
+      } },
+    { run: async back => {
+        await coach("<p>苦手、または自信がない分野を選んでください。選んだ分野から優先して出題します。</p>", 300);
+        const v = await askMulti(Object.entries(DOMAINS).map(([value, label]) => ({ value, label })), A.weak, { lead: "苦手な分野（複数選べます）", back });
+        if (v !== BACK) A.weak = v;
+        return v;
+      } },
+    { run: async back => {
+        let v;
+        if (A.target === "r8b") {
+          await coach("<p>予約した科目Bの受験日を教えてください。</p>", 300);
+          const min = maxD(t(), EXAM.cur.bStart);
+          v = await askDate(old && old.target === "r8b" && old.exam >= min ? old.exam : min, "科目Bの実施期間は " + EXAM.cur.b + " です。予約内容はIPAのマイページで確認できます。", { min, max: EXAM.cur.bEnd, back });
+        } else {
+          await coach("<p>目標の受験日を決めましょう。2027年度の日程は未発表なので、仮の日付で計画を作ります。日程が発表されたら「その他」→「計画を作り直す」で更新してください。</p>", 300);
+          const min = "2027-04-01" > t() ? "2027-04-01" : addDays(t(), 1);
+          const d0 = "2027-10-16";
+          v = await askDate(old && old.target === "next" && old.exam >= min ? old.exam : (d0 >= min ? d0 : addDays(t(), 180)), "初期値は仮の日付です（2026年度の科目A開始時期を参考にした目安）。", { min, back });
+        }
+        if (v !== BACK) A.exam = v;
+        return v;
+      } }
+  ];
+  for (;;) {
+    let i = 0, dir = 1;
+    if (!redo && !S.profile && S.ob) { Object.assign(A, S.ob.A); i = Math.min(S.ob.i, steps.length - 1); await coach("<p>前回の続きから再開します。</p>", 200); }
+    while (i < steps.length) {
+      const st = steps[i];
+      if (st.skip && st.skip()) { i += dir; if (i < 0) { i = 0; dir = 1; } continue; }
+      const r = await st.run(i > 0);
+      if (r === "cancel") { await coach("<p>今の計画のままにしておきます。</p>", 200); return false; }
+      if (r === BACK) { dir = -1; i = Math.max(0, i - 1); } else { dir = 1; i++; }
+      if (!S.profile) { S.ob = { A: Object.assign({}, A, { weak: A.weak.slice() }), i }; save(); }
+    }
+    S.profile = { target: A.target, amI: A.target === "r8b" ? "exempt" : A.amI, exp: A.exp, hours: A.hours, weak: A.weak, exam: A.exam, aDate: "", start: todayStr() };
+    S.ob = null;
+    save();
+    await showPlan(true);
+    const ok = await ask([{ label: "この計画で始める", value: true, primary: true }], { lead: "この計画でよいですか", extra: [{ label: "回答を直す", value: false }] });
+    if (ok) { await coach("<p>では始めましょう。まずは「今日の学習」がおすすめです。</p>", 250); return true; }
+    redo = true;
+  }
+}
+async function showPlan(first) {
+  const p = S.profile;
+  const plan = buildPlan(p);
+  if (plan.done || plan.today) { await coach(plan.today ? "<p>今日が試験日です。ここまでの積み重ねを信じて、落ち着いていきましょう。</p>" : "<p>設定した試験日を過ぎています。「その他」→「計画を作り直す」で次の目標を設定してください。</p>", 300); return; }
+  if (first && p.target !== "r8b") {
+    const need = { none: 300, some: 200, pro: 120 }[p.exp];
+    const who = { none: "ネットワークの実務経験がほぼない人", some: "運用などの実務経験が少しある人", pro: "設計・構築をしている人" }[p.exp];
+    if (plan.total < need) await coach('<div class="card warn"><p><strong>先に一つだけ。</strong>' + who + "の一般的な目安は、合格まで" + need + "時間前後です。今の設定だと約" + plan.total + "時間なので、週の時間を増やすか、過去問を解く量で補うと安心です。</p></div>", 300);
+  }
+  const msg = first ? "<p>計画ができました。試験まで <strong>" + plan.days + "日</strong>、勉強時間は合計で約 <strong>" + plan.total + "時間</strong> の見込みです。</p>" : "<p>現在の学習計画です。</p>";
+  await coach(msg + datesHTML(p) + planHTML(plan) + "<p>目安の時間割は <strong>" + (plan.weekday ? "平日" + hm(plan.weekday) + " ＋ " : "") + "土日" + hm(plan.weekend) + "ずつ</strong>（週" + p.hours + "時間）です。</p>", 600);
+}
+async function todaySession() {
+  const plan = buildPlan(S.profile);
+  const ph = plan.phases.length ? plan.phases[currentPhase(plan)] : null;
+  const key = ph ? ph.key : "base";
+  const early = ["base", "deep"].includes(key);
+  const nq = early ? 5 : 3;
+  let intro;
+  if (plan.done) intro = "試験日を過ぎたので、復習モードです。苦手分野を中心に4択" + nq + "問と記述1題をやりましょう。次の目標は「その他」→「計画を作り直す」で設定できます。";
+  else {
+    const label = ph ? "今日はP" + (currentPhase(plan)+1) + "「" + ph.t + "」の期間です。" : "";
+    intro = label + (early ? "4択5問で知識を確認してから、記述を1題やりましょう。" : "科目B対策の時期なので記述が中心です。まず4択3問でウォームアップしましょう。" );
+  }
+  await coach("<p>" + esc(intro) + "</p>");
+  const q = await runQuiz(nq);
+  if (q.n) { S.done = todayStr(); markDay(); save(); }
+  if (q.quit) return;
+  let wrote = 0, cased = 0;
+  const go = await ask([{ label: "記述に進む", value: true, primary: true }], { extra: [{ label: "今日はここまで", value: false }] });
+  if (go) {
+    const w = await runWrite();
+    if (w.quit) return;
+    wrote += w.n;
+    if (!early && !plan.done) {
+      const more = await ask([{ label: "もう1題書く", value: "w", primary: true }, { label: "事例演習を1問", value: "c" }], { extra: [{ label: "今日はここまで", value: "" }] });
+      if (more === "w") { const w2 = await runWrite(); if (w2.quit) return; wrote += w2.n; }
+      else if (more === "c") { const c2 = await runCase(); if (c2.quit) return; cased += c2.n; }
+    }
+  }
+  S.done = todayStr(); markDay(); save();
+  const next = DOMAINS[weakest()];
+  await coach('<div class="card"><dl class="kv"><dt>今日の成果</dt><dd>4択 ' + q.n + "問（正解" + q.ok + "）・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div><p>おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。</p>", 350);
+}
+async function pickDomain(kind) {
+  const keys = Object.keys(DOMAINS).filter(k => kind !== "write" || WRITE.some(w => w.d === k));
+  const opts = [{ label: "おまかせ（苦手優先）", value: "", primary: true, full: true }].concat(keys.map(k => ({ label: DOMAINS[k], value: k })));
+  return ask(opts, { lead: "分野を選んでください", grid: true, extra: [{ label: "← メニューへ", value: null }] });
+}
+async function resetFlow() {
+  await coach("<p>学習記録と計画をすべて消去します。元に戻せませんが、よろしいですか。</p>", 250);
+  const y = await ask([{ label: "やめておく", value: false, primary: true }], { extra: [{ label: "記録をすべて消去する", value: true }] });
+  if (!y) return;
+  S = blank(); save(); saveDraft("", ""); $log.innerHTML = "";
+  await onboarding(false);
+}
+async function otherMenu() {
+  const v = await ask([
+    { label: "学習計画を見る", value: "plan" },
+    { label: "試験日程を見る", value: "exam" },
+    { label: "計画を作り直す", value: "redo" },
+    { label: "記録を消去", value: "reset", danger: true }
+  ], { lead: "その他", grid: true, extra: [{ label: "← 戻る", value: null }] });
+  if (v === "plan") await showPlan(false);
+  else if (v === "exam") await coach(examHTML(), 300);
+  else if (v === "redo") { await coach("<p>学習記録は残したまま、計画を作り直します。</p>", 250); await onboarding(true); }
+  else if (v === "reset") await resetFlow();
+}
+async function menuOnce() {
+  renderStatus();
+  if (storageNotice && !cloud) { storageNotice = false; await coach("<p>この環境では学習記録を保存できません。ページを閉じると記録が消えます。</p>", 200); }
+  const doneToday = S.done === todayStr();
+  const wrong = wrongIds();
+  const rec = weakest();
+  const opts = [];
+  if (doneToday) opts.push({ label: "おすすめ：" + DOMAINS[rec] + "の4択", value: "rec", primary: true, full: true }, { label: "今日の学習をもう一度", value: "today" });
+  else opts.push({ label: "今日の学習", value: "today", primary: true, full: true });
+  opts.push({ label: "4択演習（科目A-2）", value: "quiz" }, { label: "記述トレーニング", value: "write" }, { label: "事例演習（科目B形式）", value: "case" });
+  if (wrong.length) opts.push({ label: "間違えた問題（" + wrong.length + "問）", value: "wrong" });
+  opts.push({ label: "進捗を見る", value: "progress" });
+  const v = await ask(opts, { lead: doneToday ? "今日の学習は完了しています ✓　次は何をしますか" : "次は何をしますか", grid: true, extra: [{ label: "その他", value: "other" }] });
+  if (v === "today") await todaySession();
+  else if (v === "rec") await runQuiz(5, rec);
+  else if (v === "quiz") { const d = await pickDomain("quiz"); if (d !== null) await runQuiz(5, d || null); }
+  else if (v === "write") { const d = await pickDomain("write"); if (d !== null) await runWrite(d || null); }
+  else if (v === "case") await runCase();
+  else if (v === "wrong") await runQuiz(Math.min(10, wrong.length), null, wrong);
+  else if (v === "progress") await showProgress();
+  else if (v === "other") await otherMenu();
+}
+async function menu() {
+  for (;;) {
+    try { await menuOnce(); }
+    catch (e) { console.error(e); await coach("<p>表示中に問題が起きました。メニューに戻ります。</p>", 0); }
+  }
+}
+async function main() {
+  // 端末内の保存データをブラウザに自動削除させないよう依頼する（対応ブラウザのみ）
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  const wait = document.createElement("div");
+  wait.className = "msg";
+  wait.innerHTML = '<div class="av" aria-hidden="true">' + AV + '</div><div class="bub"><span class="typing" aria-hidden="true"><i></i><i></i><i></i></span> <span class="small">記録を読み込んでいます</span></div>';
+  $log.appendChild(wait);
+  await cloudInit();
+  wait.remove();
+  renderStatus();
+  if (!cloud && window.claude && (S.profile || S.ob)) await coach('<p class="small">この表示では、記録はこのブラウザの中にだけ保存されます。Claudeにログインした状態で開くと、どの端末からでも続きから再開できます。</p>', 0);
+  if (!S.profile) await onboarding(false);
+  else {
+    const p = S.profile;
+    const plan = buildPlan(p);
+    const s = streak();
+    const t = todayStr();
+    let extra = "";
+    if (plan.done) await coach("<p>おかえりなさい。設定した試験日（" + esc(slash(p.exam)) + "）を過ぎました。おつかれさまでした。</p><p>次の試験を目指すなら「その他」→「計画を作り直す」で目標を設定してください。演習はこのまま続けられます。</p>");
+    else if (plan.today) await coach("<p>おかえりなさい。今日が試験日です。新しいことには手を出さず、弱点ノートを軽く見直して臨みましょう。</p>");
+    else await coach("<p>おかえりなさい。試験まであと <strong>" + plan.days + "日</strong>、いまはP" + (currentPhase(plan)+1) + "「" + esc(plan.phases[currentPhase(plan)].t) + "」の期間です。" +
+      (s ? "連続" + s + "日学習中です。" : S.days.length ? "また今日から始めましょう。" : "") + "</p>" + extra);
+  }
+  await menu();
+}
+main().catch(e => {
+  console.error(e);
+  $dock.innerHTML = '<p class="lead">読み込み中に問題が起きました。</p><button type="button" class="opt primary" id="rl">再読み込み</button><button type="button" class="opt danger" id="wipe">記録を消去して再開</button>';
+  document.getElementById("rl").onclick = () => location.reload();
+  document.getElementById("wipe").onclick = () => { try { localStorage.removeItem(KEY); } catch (_) {} location.reload(); };
+});
+</script>
+
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
+</body></html>
