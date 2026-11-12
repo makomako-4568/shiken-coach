@@ -19,10 +19,10 @@ RESET = (':root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-ar
          'img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}')
 
 APPS = [
-    {"dir": "sc", "parts": ["h_head.html", "d1_quiz.js", "d2_write.js", "e_engine.js"], "name": "支援士合格コーチ", "short": "支援士コーチ",
+    {"dir": "sc", "parts": ["h_head.html", "d1_quiz.js", "d2_write.js", "d_past.js", "e_engine.js"], "name": "支援士合格コーチ", "short": "支援士コーチ",
      "light": "#FFFFFF", "dark": "#15211E", "bg": "#F1F5F4", "color": (11, 110, 95), "icon": "shield",
      "desc": "情報処理安全確保支援士試験の学習計画づくり、4択・記述・事例演習、進捗管理"},
-    {"dir": "nespe", "parts": ["h_head.html", "d_exam.js", "d_data.js", "d_cases.js", "e_engine.js"], "name": "ネスペ合格コーチ", "short": "ネスペコーチ",
+    {"dir": "nespe", "parts": ["h_head.html", "d_exam.js", "d_data.js", "d_cases.js", "d_past.js", "e_engine.js"], "name": "ネスペ合格コーチ", "short": "ネスペコーチ",
      "light": "#FFFFFF", "dark": "#16212A", "bg": "#F2F5F7", "color": (31, 111, 178), "icon": "port",
      "desc": "ネットワークスペシャリスト試験の学習計画づくり、4択・記述・事例演習、進捗管理"},
 ]
@@ -102,7 +102,11 @@ self.addEventListener("fetch", e => {{
       .catch(() => caches.match("./index.html")));
     return;
   }}
-  e.respondWith(caches.match(r).then(hit => hit || fetch(r)));
+  // それ以外（過去問の画像など）は、一度読み込んだものを保存しておき、次からはオフラインでも表示する
+  e.respondWith(caches.match(r).then(hit => hit || fetch(r).then(res => {{
+    if (res.ok) {{ const c = res.clone(); caches.open(CACHE).then(x => x.put(r, c)); }}
+    return res;
+  }})));
 }});
 """
     open(os.path.join(out, "sw.js"), "w", encoding="utf-8").write(sw)
@@ -151,7 +155,10 @@ ol {{ margin: 0; padding-left: 1.3em; }}
 
 if __name__ == "__main__":
     for a in APPS:
-        shutil.rmtree(os.path.join(OUT, a["dir"]), ignore_errors=True)
+        # 生成するファイルだけを消す（past/ の過去問画像は tools/past/make_past.py が作るので残す）
+        for f in ("index.html", "manifest.webmanifest", "sw.js", "icon-180.png", "icon-192.png", "icon-512.png"):
+            fp = os.path.join(OUT, a["dir"], f)
+            if os.path.exists(fp): os.remove(fp)
         build_app(a)
     build_portal()
     print("built", OUT)

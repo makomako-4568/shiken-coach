@@ -95,6 +95,18 @@ main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; p
 .bar .t b.low { background: var(--bad); }
 .bar .v { font-family: var(--f-mono); font-size: 12px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
 .answer { border-left: 3px solid var(--led); padding-left: 10px; }
+/* IPAの過去問の画像。紙面の画像なので、どちらのテーマでも白地のまま表示する */
+.pq { margin: 0; }
+.pq img { display: block; width: 100%; height: auto; background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; cursor: zoom-in; }
+.pq figcaption { margin-top: 4px; }
+.zoom { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; gap: 8px; background: rgba(8, 12, 16, .88);
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+.zoom .zclose { align-self: flex-end; }
+.zoom .zwrap { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; border-radius: 6px; }
+.zoom .zwrap img { display: block; max-width: none; width: auto; }
+.dock .col.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); align-items: stretch; }
+.dock .col.grid4 > .lead, .dock .col.grid4 > .row { grid-column: 1 / -1; }
+.dock .col.grid4 > .opt { text-align: center; font-size: 18px; font-weight: 700; min-height: 52px; }
 .fig .cap { font-size: 13px; font-weight: 700; margin: 0 0 4px; }
 .tw { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
 table.t { border-collapse: collapse; font-size: 13px; width: 100%; font-variant-numeric: tabular-nums; }

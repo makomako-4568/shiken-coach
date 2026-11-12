@@ -21,7 +21,9 @@ const HOURS = [5, 10, 15, 20];
 const H_MIN = 1, H_MAX = 60;
 const validHours = h => Number.isInteger(h) && h >= H_MIN && h <= H_MAX;
 const QIDS = new Set(QUIZ.map(q => q.id)), WIDS = new Set(WRITE.map(w => w.id)), CIDS = new Set(CASES.map(c => c.id));
-const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, days: [], done: "", ob: null });
+const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, past: {}, days: [], done: "", ob: null });
+const HAS_PAST = typeof PAST !== "undefined" && Array.isArray(PAST) && PAST.length > 0;
+const PID = (key, n) => key + "-" + n;
 // 最初の設定の途中経過（再開用）を検査して取り込む
 function cleanA(a) {
   const o = { weak: Array.isArray(a.weak) ? a.weak.filter(k => DOMAINS[k]) : [], exp: ["none", "some", "pro"].includes(a.exp) ? a.exp : "some", amI: ["exempt", "none", "unknown"].includes(a.amI) ? a.amI : "none" };
@@ -57,6 +59,7 @@ function migrate(d) {
     else if (v && [0, 1, 2].includes(v.r) && isDate(v.t)) s.write[k] = { r: v.r, t: v.t };
   }
   for (const [k, v] of Object.entries(obj(d.cases))) if (CIDS.has(k) && v && Number.isFinite(v.p) && v.p >= 0 && v.p <= 100 && isDate(v.t)) s.cases[k] = { p: v.p, t: v.t };
+  for (const [k, v] of Object.entries(obj(d.past))) if (/^\d{4}r\d\d[ah]_(sc|nw)-\d{1,2}$/.test(k) && v && typeof v.ok === "boolean" && isDate(v.t)) s.past[k] = { ok: v.ok, t: v.t };
   if (Array.isArray(d.days)) s.days = d.days.filter(isDate).slice(-120);
   if (isDate(d.done)) s.done = d.done;
   if (Number.isFinite(d.at) && d.at > 0) s.at = d.at;
@@ -231,6 +234,7 @@ function ask(options, opts = {}) {
   return new Promise(res => {
     clearDock();
     if (opts.grid) $dock.classList.add("grid2");
+    if (opts.row4) $dock.classList.add("grid4");
     let doneFlag = false;
     const finish = (label, value) => { if (doneFlag) return; doneFlag = true; document.removeEventListener("keydown", onKey); clearDock(); if (label !== null) me(label); res(value); $dock.focus({ preventScroll: true }); };
     if (opts.lead) setLead(opts.lead);
@@ -257,14 +261,14 @@ function ask(options, opts = {}) {
     }
     if (opts.hint) $dock.appendChild(hint(opts.hint));
     function onKey(e) {
-      if (!opts.wide || e.ctrlKey || e.metaKey || e.altKey || e.repeat || e.isComposing) return;
+      if (!(opts.wide || opts.row4) || e.ctrlKey || e.metaKey || e.altKey || e.repeat || e.isComposing) return;
       if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
       const i = ["1","2","3","4"].indexOf(e.key);
-      if (i >= 0 && options[i]) { e.preventDefault(); finish(KANA[i] + "　" + options[i].label, options[i].value); }
+      if (i >= 0 && options[i]) { e.preventDefault(); finish(opts.wide ? KANA[i] + "　" + options[i].label : options[i].label, options[i].value); }
     }
     document.addEventListener("keydown", onKey);
     // 4択は誤答防止のため選択肢にフォーカスしない
-    focusDock(opts.wide ? null : ($dock.querySelector(".opt.primary") || $dock.querySelector("button")));
+    focusDock(opts.wide || opts.row4 ? null : ($dock.querySelector(".opt.primary") || $dock.querySelector("button")));
     settle();
   });
 }
@@ -465,7 +469,7 @@ function tasksFor(key, p, len) {
   const a1 = p.target !== "r8b" && p.amI !== "exempt";
   const per = len < 7 ? "期間中に" : "週";
   return {
-    base:  ["科目A-2の過去問を3〜4回分くり返し、正答率8割を安定させる", "間違えた用語は「何のために・どう動くか」を自分の言葉で1行にまとめる", a1 ? "科目A-1（旧午前I）は応用情報の午前過去問を週2〜3回。新制度での扱いが発表されたら見直す" : null],
+    base:  [(HAS_PAST ? "「IPAの過去問」で" : "") + "科目A-2の過去問を3〜4回分くり返し、正答率8割を安定させる", "間違えた用語は「何のために・どう動くか」を自分の言葉で1行にまとめる", a1 ? "科目A-1（旧午前I）は応用情報の午前過去問を週2〜3回。新制度での扱いが発表されたら見直す" : null],
     deep:  [weak.length ? "苦手分野を優先：" + weak.join("、") : "全分野をひととおり", "パケットの流れ（どの機器で何が書き換わるか）を図に描いて説明する", "科目B-1（旧午後I）の過去問を" + per + "1問。記述トレーニングも" + per + "2回"],
     b1:    ["過去問を1問45分で解く", "解答の根拠になった本文・図の箇所をメモし、解答例と照らし合わせる", "解答例との差を「キーワード不足」「論点ずれ」「字数」に分類する", "CBTに合わせ、過去問のPDFを画面だけで読み、解答はキーボードで入力する", "事例演習を" + per + "2問"],
     b2:    ["長文を時間内に読み切る練習。構成図に設問の情報を書き込む", "設問どうしのつながり（前の設問が後のヒント）を意識する", per + "1回は120分を計って通しで解く"],
@@ -692,6 +696,110 @@ async function runCase() {
   return { n: 1 };
 }
 
+
+/* ===== IPAの過去問（午前II） ===== */
+function pastSummary() {
+  const v = Object.values(S.past);
+  const total = PAST.length * 25;
+  return v.length + " / " + total + "問" + (v.length ? "・正答率 " + Math.round(v.filter(x => x.ok).length / v.length * 100) + "%" : "");
+}
+function pastImg(set, n) {
+  const f = "past/" + set.key + "/q" + String(n).padStart(2, "0");
+  const alt = set.src + " 問" + n + "の問題（画像）";
+  return '<figure class="pq"><picture><source media="(max-width: 640px)" srcset="' + f + 'n.png"><img src="' + f + '.png" alt="' + esc(alt) + '" data-full="' + f + '.png"></picture>' +
+    '<figcaption class="small">出典：' + esc(set.src) + " 問" + n + "（IPA）。スマホでは行を折り返して表示しています。画像をタップすると拡大します。</figcaption></figure>";
+}
+// 問題画像のタップで、元の大きさの画像を全画面に表示する
+function openZoom(src, alt) {
+  const o = document.createElement("div");
+  o.className = "zoom"; o.setAttribute("role", "dialog"); o.setAttribute("aria-modal", "true"); o.setAttribute("aria-label", alt);
+  o.innerHTML = '<button type="button" class="opt zclose">閉じる</button><div class="zwrap"><img src="' + esc(src) + '" alt="' + esc(alt) + '"></div>';
+  document.body.appendChild(o);
+  const back = document.activeElement;
+  const onKey = e => { if (e.key === "Escape") close(); };
+  const close = () => { o.remove(); document.removeEventListener("keydown", onKey); if (back && back.focus) back.focus({ preventScroll: true }); };
+  o.querySelector(".zclose").onclick = close;
+  document.addEventListener("keydown", onKey);
+  o.querySelector(".zclose").focus();
+}
+document.addEventListener("click", e => {
+  const im = e.target && e.target.closest ? e.target.closest(".pq img") : null;
+  if (im) openZoom(im.dataset.full || im.src, im.alt);
+});
+function pastLink(set, kind) {
+  const p = set.pdf.find(x => x.name === "午前II");
+  return p && p[kind] ? '<a href="' + esc(p[kind]) + '" target="_blank" rel="noopener">' + (kind === "ans" ? "解答例" : "問題冊子") + "（IPA・PDF）</a>" : "";
+}
+/* items: [{set, n}]。o.exam=true は本番形式（途中で正誤を出さず、最後にまとめて表示） */
+async function runPast(items, o = {}) {
+  let ok = 0, done = 0, quit = false;
+  const t0 = Date.now(), res = [];
+  await coach("<p>" + esc(o.intro) + "</p><p class=\"small\">問題は、IPAが公表している問題冊子の画像です。解説は公表されていないため、正解だけを表示します。キーボードなら1〜4キーでも答えられます。</p>", 300);
+  for (let i = 0; i < items.length; i++) {
+    const { set, n } = items[i];
+    await coach('<span class="tag">' + (i + 1) + "/" + items.length + (o.exam ? "" : "　正解" + ok) + "</span>" + pastImg(set, n), i ? 200 : 350);
+    const pick = await ask(KANA.map((k, j) => ({ label: k, value: j })), { row4: true, lead: set.label + " 問" + n + "：答えを選んでください", extra: [{ label: "やめる", value: -1 }] });
+    if (pick === -1) { quit = true; break; }
+    const correct = set.ans[n - 1], mine = KANA[pick], right = mine === correct;
+    if (right) ok++;
+    done++;
+    res.push({ set, n, mine, correct, right });
+    S.past[PID(set.key, n)] = { ok: right, t: todayStr() }; markDay(); save();
+    if (!o.exam) {
+      await coach((right ? '<p><span class="ok">✓ 正解</span>　' + correct + "</p>" : '<p><span class="ng">✕ 不正解</span>　あなたの解答は ' + mine + "、<strong>正解は " + correct + "</strong></p>") +
+        '<p class="small">' + pastLink(set, "ans") + "</p>", 200);
+      if (i < items.length - 1) {
+        const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
+        if (!go) { quit = true; break; }
+      }
+    }
+  }
+  if (!done) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, ok: 0, quit: true }; }
+  const rate = Math.round(ok / done * 100);
+  const min = Math.round((Date.now() - t0) / 60000);
+  let html = "<p>" + done + "問中 <strong>" + ok + "問正解</strong>（" + rate + "%）でした。" + (o.exam && done === 25 ? "解答時間は約" + min + "分（本番は40分）。" + (rate >= 60 ? "科目A-2の基準点（60点）を越えています。" : "科目A-2の基準点（60点）まであと少しです。") : "") + "</p>";
+  const wrong = res.filter(r => !r.right);
+  if (o.exam && wrong.length) html += '<div class="card"><p class="small">間違えた問題</p><ul>' + wrong.map(r => "<li>問" + r.n + "：あなた " + r.mine + " → 正解 " + r.correct + "</li>").join("") + "</ul></div>";
+  if (o.exam) html += '<p class="small">' + pastLink(items[0].set, "ans") + "　間違えた問題は、メニューの「IPAの過去問」→「間違えた過去問」から解き直せます。</p>";
+  await coach(html + (quit ? "<p class=\"small\">（途中でやめました。ここまでの記録は保存しています）</p>" : ""));
+  return { n: done, ok, quit };
+}
+function pastPool(filter) {
+  const out = [];
+  for (const set of PAST) for (let n = 1; n <= 25; n++) if (filter(PID(set.key, n))) out.push({ set, n });
+  return out;
+}
+async function pastMenu() {
+  const wrong = pastPool(id => S.past[id] && !S.past[id].ok);
+  const fresh = pastPool(id => !S.past[id]);
+  const v = await ask([
+    { label: "回を選んで25問（本番形式・40分）", value: "set", primary: true, full: true },
+    { label: "全回からランダムに10問", value: "rand" },
+    { label: "まだ解いていない問題から10問（残り" + fresh.length + "問）", value: "new" },
+    wrong.length ? { label: "間違えた過去問（" + wrong.length + "問）", value: "wrong" } : null,
+    { label: "午後（科目B）の過去問", value: "pm" }
+  ].filter(Boolean), { lead: "IPAの過去問（午前II・直近5年）", grid: true, extra: [{ label: "← メニューへ", value: null }] });
+  if (v === "set") {
+    const key = await ask(PAST.map(s => ({ label: s.label + "（" + pastPool(id => id.startsWith(s.key + "-") && S.past[id]).length + "/25）", value: s.key })), { lead: "解く回を選んでください", grid: true, extra: [{ label: "← 戻る", value: null }] });
+    if (!key) return;
+    const set = PAST.find(s => s.key === key);
+    await runPast(Array.from({ length: 25 }, (_, i) => ({ set, n: i + 1 })), { exam: true, intro: set.src + "の25問を、本番と同じく40分を目安に解きます。正誤は最後にまとめて表示します。" });
+  } else if (v === "rand") await runPast(shuffle(pastPool(() => true)).slice(0, 10), { intro: "直近5年の午前IIから、ランダムに10問出します。" });
+  else if (v === "new") {
+    if (!fresh.length) { await coach("<p>すべての過去問を一度は解きました。おつかれさまでした。間違えた問題の解き直しがおすすめです。</p>", 200); return; }
+    await runPast(shuffle(fresh).slice(0, 10), { intro: "まだ解いていない過去問から10問出します。" });
+  } else if (v === "wrong") await runPast(shuffle(wrong).slice(0, 10), { intro: "前回間違えた過去問を、最大10問解き直します。" });
+  else if (v === "pm") await coach(pmHTML(), 300);
+}
+function pmHTML() {
+  const kind = { qs: "問題", ans: "解答例", cmnt: "採点講評" };
+  const rows = PAST.map(s => {
+    const parts = s.pdf.filter(p => p.name !== "午前II").map(p => "<li>" + esc(p.name) + "：" + ["qs", "ans", "cmnt"].filter(k => p[k]).map(k => '<a href="' + esc(p[k]) + '" target="_blank" rel="noopener">' + kind[k] + "</a>").join("　") + "</li>").join("");
+    return '<div class="card"><p><strong>' + esc(s.label) + "</strong></p><ul>" + parts + "</ul></div>";
+  }).join("");
+  return "<p>午後（科目B）は長文と図が中心なので、IPAのPDFで解きます。時間を計って解き、解答例と採点講評で答え合わせをしましょう。</p>" + rows + '<p class="small">リンク先はIPAの公式サイトのPDFです。</p>';
+}
+
 /* ===== 分析 ===== */
 function domainScore(k) {
   const weak = S.profile ? S.profile.weak : [];
@@ -723,7 +831,7 @@ async function showProgress() {
   const weakNow = Object.entries(S.stats).filter(([, s]) => s.n >= 3 && s.c / s.n < .6).map(([k]) => DOMAINS[k]);
   await coach('<div class="card"><dl class="kv"><dt>試験まで</dt><dd>' + esc(dayTxt) + "（" + esc(slash(S.profile.exam)) + "）</dd><dt>現在のフェーズ</dt><dd>" + esc(phaseTxt) +
     "</dd><dt>4択</dt><dd>" + t.n + "問・正答率 " + (t.n ? Math.round(t.c / t.n * 100) + "%" : "—") + "（全" + QUIZ.length + "問）</dd><dt>記述</dt><dd>" + wv.length + " / " + WRITE.length + "題（○ " + wv.filter(v => v.r === 2).length + "）</dd><dt>事例</dt><dd>" + cv.length + " / " + CASES.length + "事例" + (cv.length ? "（平均 " + Math.round(cv.reduce((a, b) => a + b.p, 0) / cv.length) + "点）" : "") +
-    "</dd><dt>間違えた問題</dt><dd>" + wrongIds().length + "問</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日（連続 " + streak() + "日）</dd><dt>記録の保存先</dt><dd>" + (cloud ? "Claudeの保存領域（別の端末でも続きから再開できます）" : "この端末（ブラウザ）の中") + "</dd></dl></div><div class=\"card\">" + bars + "</div>" +
+    "</dd>" + (HAS_PAST ? "<dt>IPAの過去問</dt><dd>" + pastSummary() + "</dd>" : "") + "<dt>間違えた問題</dt><dd>" + wrongIds().length + "問</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日（連続 " + streak() + "日）</dd><dt>記録の保存先</dt><dd>" + (cloud ? "Claudeの保存領域（別の端末でも続きから再開できます）" : "この端末（ブラウザ）の中") + "</dd></dl></div><div class=\"card\">" + bars + "</div>" +
     (weakNow.length ? "<p>正答率が60%を下回っている分野：<strong>" + esc(weakNow.join("、")) + "</strong>。ここを集中的に回しましょう。</p>" : t.n ? "<p>60%を下回っている分野はありません。未着手の分野を埋めていきましょう。</p>" : "<p>まだ記録がありません。「今日の学習」から始めましょう。</p>"), 450);
 }
 
@@ -856,7 +964,7 @@ async function todaySession() {
   }
   S.done = todayStr(); markDay(); save();
   const next = DOMAINS[weakest()];
-  await coach('<div class="card"><dl class="kv"><dt>今日の成果</dt><dd>4択 ' + q.n + "問（正解" + q.ok + "）・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div><p>おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。</p>", 350);
+  await coach('<div class="card"><dl class="kv"><dt>今日の成果</dt><dd>4択 ' + q.n + "問（正解" + q.ok + "）・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div><p>" + (HAS_PAST ? "おつかれさまでした。IPAの過去問は、メニューの「IPAの過去問」から回ごとに解けます。" : "おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。") + "</p>", 350);
 }
 async function pickDomain(kind) {
   const keys = Object.keys(DOMAINS).filter(k => kind !== "write" || WRITE.some(w => w.d === k));
@@ -893,6 +1001,7 @@ async function menuOnce() {
   else opts.push({ label: "今日の学習", value: "today", primary: true, full: true });
   opts.push({ label: "4択演習（科目A-2）", value: "quiz" }, { label: "記述トレーニング", value: "write" }, { label: "事例演習（科目B形式）", value: "case" });
   if (wrong.length) opts.push({ label: "間違えた問題（" + wrong.length + "問）", value: "wrong" });
+  if (HAS_PAST) opts.push({ label: "IPAの過去問（直近5年）", value: "past" });
   opts.push({ label: "進捗を見る", value: "progress" });
   const v = await ask(opts, { lead: doneToday ? "今日の学習は完了しています ✓　次は何をしますか" : "次は何をしますか", grid: true, extra: [{ label: "その他", value: "other" }] });
   if (v === "today") await todaySession();
@@ -901,6 +1010,7 @@ async function menuOnce() {
   else if (v === "write") { const d = await pickDomain("write"); if (d !== null) await runWrite(d || null); }
   else if (v === "case") await runCase();
   else if (v === "wrong") await runQuiz(Math.min(10, wrong.length), null, wrong);
+  else if (v === "past") await pastMenu();
   else if (v === "progress") await showProgress();
   else if (v === "other") await otherMenu();
 }

@@ -1,5 +1,5 @@
 // オフラインでも開けるようにする。画面は通信できればいつも最新版を取り、できなければ保存済みの版を使う
-const CACHE = "nespe-9106cb67d7";
+const CACHE = "nespe-a175b35799";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
@@ -13,5 +13,9 @@ self.addEventListener("fetch", e => {
       .catch(() => caches.match("./index.html")));
     return;
   }
-  e.respondWith(caches.match(r).then(hit => hit || fetch(r)));
+  // それ以外（過去問の画像など）は、一度読み込んだものを保存しておき、次からはオフラインでも表示する
+  e.respondWith(caches.match(r).then(hit => hit || fetch(r).then(res => {
+    if (res.ok) { const c = res.clone(); caches.open(CACHE).then(x => x.put(r, c)); }
+    return res;
+  })));
 });
