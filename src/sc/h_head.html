@@ -104,7 +104,18 @@ main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; p
 .zoom .zclose { align-self: flex-end; }
 .zoom .zwrap { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; border-radius: 6px; }
 .zoom .zwrap img { display: block; max-width: none; width: auto; }
+/* 午後のページ画像。PCやタブレットはページ全体、スマホは本文を折り返したかたまりで表示する */
+.pg + .pg { margin-top: 10px; }
+.pg img { display: block; max-width: 100%; height: auto; cursor: zoom-in; }
+.pg-wide img { width: 100%; background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; }
+.pg-narrow { display: none; background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 6px; }
+.pg-narrow .pb + .pb { margin-top: 4px; }
+@media (max-width: 640px) { .pg-wide { display: none; } .pg-narrow { display: block; } }
 .dock .col.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); align-items: stretch; }
+.dock .col.pmdock { gap: 6px; padding-block: 8px; }
+.pmdock .row { flex-wrap: nowrap; gap: 6px; }
+.pmdock .row > .opt { flex: 1; text-align: center; padding: 6px 8px; min-height: 40px; white-space: nowrap; }
+.pmdock .lead { font-variant-numeric: tabular-nums; }
 .dock .col.grid4 > .lead, .dock .col.grid4 > .row { grid-column: 1 / -1; }
 .dock .col.grid4 > .opt { text-align: center; font-size: 18px; font-weight: 700; min-height: 52px; }
 .fig .cap { font-size: 13px; font-weight: 700; margin: 0 0 4px; }
