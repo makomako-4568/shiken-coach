@@ -1,5 +1,5 @@
 // オフラインでも開けるようにする。画面は通信できればいつも最新版を取り、できなければ保存済みの版を使う
-const CACHE = "sc-825b289e6e";
+const CACHE = "sc-ea758e2a6f";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {

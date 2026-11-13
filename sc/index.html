@@ -105,6 +105,29 @@ main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; p
 .zoom .zclose { align-self: flex-end; }
 .zoom .zwrap { flex: 1; min-height: 0; overflow: auto; background: #FFFFFF; border-radius: 6px; }
 .zoom .zwrap img { display: block; max-width: none; width: auto; }
+/* 解説の図解（SVG）。色はテーマの色を使う */
+.fig { margin: 0; }
+.fig svg { display: block; width: 100%; max-width: 480px; height: auto; margin-top: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.fig text { fill: var(--ink); font-family: var(--f-body); font-size: 11px; }
+.fig .lbl, .fig .note { font-size: 10px; }
+.fig .lbl { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.fig .note { fill: var(--muted); }
+.fig .box { fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; }
+.fig .box.ok { stroke: var(--ok); stroke-width: 2; }
+.fig .box.bad { stroke: var(--bad); stroke-width: 2; }
+.fig .ln { stroke: var(--ink); stroke-width: 1.4; fill: none; }
+.fig .ln.ok { stroke: var(--ok); }
+.fig .ln.bad { stroke: var(--bad); }
+.fig .ln.dash { stroke-dasharray: 4 3; }
+.fig .life { stroke: var(--edge); stroke-dasharray: 3 3; }
+.fig .ah, .fig .dot { fill: var(--ink); }
+.fig .dot.ok { fill: var(--ok); } .fig .dot.bad { fill: var(--bad); }
+/* 略語の正式名称 */
+.abbr summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+.abbr dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 6px 0 0; font-size: 13px; }
+.abbr dt { font-family: var(--f-mono); font-weight: 500; }
+.abbr dd { margin: 0; min-width: 0; }
+.abbr dd span { display: block; color: var(--muted); font-size: 12px; }
 /* 午後のページ画像。PCやタブレットはページ全体、スマホは本文を折り返したかたまりで表示する */
 .pg + .pg { margin-top: 10px; }
 .pg img { display: block; max-width: 100%; height: auto; cursor: zoom-in; }
@@ -431,6 +454,377 @@ const CASES = [
    スマホ向けに、行を左右に分けて折り返した画像も用意している。正解はIPA公表の解答例による。
    出典の表記はIPAの案内（試験に関するよくある質問「その他」）に従う ===== */
 const PAST = {"a2":[{"key":"2025r07a_sc","label":"令和7年度 秋期","subj":"科目A-2","min":40,"dir":"past","src":"令和7年度 秋期 情報処理安全確保支援士試験 午前Ⅱ","ans":"ウイエエアイアアエイアアイエイエアアイウエイウウエ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_sc_am2_ans.pdf"},"pm":[{"name":"午後","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_sc_pm_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_sc_pm_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_sc_pm_qs.pdf"}]},{"key":"2025r07h_sc","label":"令和7年度 春期","subj":"科目A-2","min":40,"dir":"past","src":"令和7年度 春期 情報処理安全確保支援士試験 午前Ⅱ","ans":"ウアウエアイエウウエウウウアアイイアエイウエイウエ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_sc_am2_ans.pdf"},"pm":[{"name":"午後","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_sc_pm_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_sc_pm_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_sc_pm_qs.pdf"}]},{"key":"2024r06a_sc","label":"令和6年度 秋期","subj":"科目A-2","min":40,"dir":"past","src":"令和6年度 秋期 情報処理安全確保支援士試験 午前Ⅱ","ans":"アイイエウアアエエイアアエエエアイアイアエイエエウ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_sc_am2_ans.pdf"},"pm":[{"name":"午後","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_sc_pm_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_sc_pm_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_sc_pm_qs.pdf"}]},{"key":"2024r06h_sc","label":"令和6年度 春期","subj":"科目A-2","min":40,"dir":"past","src":"令和6年度 春期 情報処理安全確保支援士試験 午前Ⅱ","ans":"エアエアアエウエエアイエエエエアウアエイエアエウウ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_sc_am2_ans.pdf"},"pm":[{"name":"午後","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_sc_pm_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_sc_pm_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_sc_pm_qs.pdf"}]},{"key":"2023r05a_sc","label":"令和5年度 秋期","subj":"科目A-2","min":40,"dir":"past","src":"令和5年度 秋期 情報処理安全確保支援士試験 午前Ⅱ","ans":"イアウアアエウイウイエイエイエイイエエアウウウウア","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_sc_am2_ans.pdf"},"pm":[{"name":"午後","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_sc_pm_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_sc_pm_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_sc_pm_qs.pdf"}]},{"key":"2023r05h_sc","label":"令和5年度 春期","subj":"科目A-2","min":40,"dir":"past","src":"令和5年度 春期 情報処理安全確保支援士試験 午前Ⅱ","ans":"ウイアエウイアエイアアエアエアイエイイアアエウイエ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_am2_ans.pdf"},"pm":[{"name":"午後I","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_pm1_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_pm1_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_pm1_qs.pdf"},{"name":"午後II","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_pm2_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_pm2_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_sc_pm2_qs.pdf"}]},{"key":"2022r04a_sc","label":"令和4年度 秋期","subj":"科目A-2","min":40,"dir":"past","src":"令和4年度 秋期 情報処理安全確保支援士試験 午前Ⅱ","ans":"アエアイアウエアアエエエアウアアイエエエウアイエイ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_am2_ans.pdf"},"pm":[{"name":"午後I","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_pm1_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_pm1_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_pm1_qs.pdf"},{"name":"午後II","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_pm2_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_pm2_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_sc_pm2_qs.pdf"}]},{"key":"2022r04h_sc","label":"令和4年度 春期","subj":"科目A-2","min":40,"dir":"past","src":"令和4年度 春期 情報処理安全確保支援士試験 午前Ⅱ","ans":"イエイアイエエイイアイウアエウイイアウエウアイウウ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_am2_ans.pdf"},"pm":[{"name":"午後I","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_pm1_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_pm1_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_pm1_qs.pdf"},{"name":"午後II","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_pm2_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_pm2_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_sc_pm2_qs.pdf"}]},{"key":"2021r03a_sc","label":"令和3年度 秋期","subj":"科目A-2","min":40,"dir":"past","src":"令和3年度 秋期 情報処理安全確保支援士試験 午前Ⅱ","ans":"イイイアウウアエアウアエウアエウエエアアウウアウウ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_am2_ans.pdf"},"pm":[{"name":"午後I","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_pm1_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_pm1_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_pm1_qs.pdf"},{"name":"午後II","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_pm2_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_pm2_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_sc_pm2_qs.pdf"}]},{"key":"2021r03h_sc","label":"令和3年度 春期","subj":"科目A-2","min":40,"dir":"past","src":"令和3年度 春期 情報処理安全確保支援士試験 午前Ⅱ","ans":"イウエアアエアウエエエアエイアイアウエウエアエエア","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_am2_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_am2_ans.pdf"},"pm":[{"name":"午後I","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_pm1_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_pm1_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_pm1_qs.pdf"},{"name":"午後II","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_pm2_ans.pdf","cmnt":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_pm2_cmnt.pdf","qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_sc_pm2_qs.pdf"}]}],"a1":[{"key":"2025r07a_koudo_am1","label":"令和7年度 秋期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和7年度 秋期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"イイイエイエアイアウアイウアアイエエウアエイアエウイイイイア","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07a_koudo_am1_ans.pdf"}},{"key":"2025r07h_koudo_am1","label":"令和7年度 春期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和7年度 春期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"アイウウイウウウイアイウイイウアイイエイウウイエイウイエウイ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/nl10bi0000009lh8-att/2025r07h_koudo_am1_ans.pdf"}},{"key":"2024r06a_koudo_am1","label":"令和6年度 秋期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和6年度 秋期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"エウイイエエウウエウウアアウイアイウエエアウイイアウウイウア","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06a_koudo_am1_ans.pdf"}},{"key":"2024r06h_koudo_am1","label":"令和6年度 春期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和6年度 春期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"エエエウウイウエアイエイイイアイウアアエアウエエエエアアウウ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/m42obm000000afqx-att/2024r06h_koudo_am1_ans.pdf"}},{"key":"2023r05a_koudo_am1","label":"令和5年度 秋期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和5年度 秋期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"アアウウエアアイアイエウウアアエアエアイイウイエエイウイイア","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05a_koudo_am1_ans.pdf"}},{"key":"2023r05h_koudo_am1","label":"令和5年度 春期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和5年度 春期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"アアアイイエイウエウイアイエエウエエイイイアアエアイイウアエ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/ps6vr70000010d6y-att/2023r05h_koudo_am1_ans.pdf"}},{"key":"2022r04a_koudo_am1","label":"令和4年度 秋期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和4年度 秋期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"エイイエウイウアウイウウイイアアウイウイエウエイエイエウウウ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000008smf-att/2022r04a_koudo_am1_ans.pdf"}},{"key":"2022r04h_koudo_am1","label":"令和4年度 春期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和4年度 春期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"アアエイウイウウアイエアエウウイアエウエイアイウアウエウイエ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt80000009sgk-att/2022r04h_koudo_am1_ans.pdf"}},{"key":"2021r03a_koudo_am1","label":"令和3年度 秋期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和3年度 秋期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"エアウエイアアエイアエイアアアアアイイエウイウイイアエアアア","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000apad-att/2021r03a_koudo_am1_ans.pdf"}},{"key":"2021r03h_koudo_am1","label":"令和3年度 春期","subj":"科目A-1","min":50,"dir":"../common/am1","src":"令和3年度 春期 高度試験・情報処理安全確保支援士試験 午前Ⅰ","ans":"アウウイエエエウエウエアアウイアアアアエアウウアウウイウイイ","pdf":{"qs":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_koudo_am1_qs.pdf","ans":"https://www.ipa.go.jp/shiken/mondai-kaiotu/gmcbt8000000d5ru-att/2021r03h_koudo_am1_ans.pdf"}}],"pm":[{"key":"2025r07a_sc_pm","label":"令和7年度 秋期","subj":"科目B","min":150,"pick":"4問中2問を選んで解答","dir":"pm","src":"令和7年度 秋期 情報処理安全確保支援士試験 午後","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"t"},{"id":"q04","b":"tft"},{"id":"q05","b":"ftft"},{"id":"q06","b":"tft"},{"id":"q07","b":"t"}]},{"n":2,"pages":[{"id":"q08","b":"tft"},{"id":"q09","b":"tftft"},{"id":"q10","b":"tft"},{"id":"q11","b":"ftft"},{"id":"q12","b":"tft"},{"id":"q13","b":"tft"},{"id":"q14","b":"t"}]},{"n":3,"pages":[{"id":"q15","b":"tf"},{"id":"q16","b":"tft"},{"id":"q17","b":"tftft"},{"id":"q18","b":"ftft"},{"id":"q19","b":"tftft"},{"id":"q20","b":"ftf"},{"id":"q21","b":"ft"},{"id":"q22","b":"tftft"},{"id":"q23","b":"ft"},{"id":"q24","b":"t"},{"id":"q25","b":"t"}]},{"n":4,"pages":[{"id":"q26","b":"tft"},{"id":"q27","b":"ftft"},{"id":"q29","b":"tftft"},{"id":"q30","b":"tftftft"},{"id":"q31","b":"tft"},{"id":"q32","b":"ftft"},{"id":"q33","b":"tftft"},{"id":"q34","b":"tft"},{"id":"q35","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"},{"id":"a02","b":"tfft"},{"id":"a03","b":"tfft"},{"id":"a04","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftftft"}]},{"key":"2025r07h_sc_pm","label":"令和7年度 春期","subj":"科目B","min":150,"pick":"4問中2問を選んで解答","dir":"pm","src":"令和7年度 春期 情報処理安全確保支援士試験 午後","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"t"},{"id":"q03","b":"tft"},{"id":"q04","b":"t"},{"id":"q05","b":"tft"},{"id":"q06","b":"ftftf"},{"id":"q07","b":"t"},{"id":"q08","b":"tft"},{"id":"q09","b":"t"}]},{"n":2,"pages":[{"id":"q10","b":"t"},{"id":"q11","b":"tftft"},{"id":"q12","b":"tft"},{"id":"q13","b":"tftft"},{"id":"q14","b":"tf"},{"id":"q15","b":"tftft"},{"id":"q16","b":"tft"},{"id":"q17","b":"tftftf"},{"id":"q18","b":"tft"},{"id":"q19","b":"t"}]},{"n":3,"pages":[{"id":"q20","b":"tft"},{"id":"q21","b":"ftft"},{"id":"q22","b":"ftft"},{"id":"q23","b":"ft"},{"id":"q24","b":"tft"},{"id":"q25","b":"ftft"},{"id":"q26","b":"tft"},{"id":"q27","b":"t"},{"id":"q28","b":"t"}]},{"n":4,"pages":[{"id":"q29","b":"tft"},{"id":"q31","b":"ft"},{"id":"q32","b":"tftft"},{"id":"q33","b":"tftftft"},{"id":"q34","b":"tft"},{"id":"q35","b":"tft"},{"id":"q36","b":"t"},{"id":"q37","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"},{"id":"a02","b":"tfft"},{"id":"a03","b":"tfft"},{"id":"a04","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftftft"}]},{"key":"2024r06a_sc_pm","label":"令和6年度 秋期","subj":"科目B","min":150,"pick":"4問中2問を選んで解答","dir":"pm","src":"令和6年度 秋期 情報処理安全確保支援士試験 午後","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"tft"},{"id":"q04","b":"tftft"},{"id":"q05","b":"tft"},{"id":"q07","b":"tftft"},{"id":"q08","b":"tftft"},{"id":"q09","b":"tft"},{"id":"q10","b":"tft"},{"id":"q11","b":"t"}]},{"n":2,"pages":[{"id":"q12","b":"tft"},{"id":"q13","b":"tftft"},{"id":"q14","b":"tftft"},{"id":"q15","b":"tftffft"},{"id":"q16","b":"tftft"},{"id":"q17","b":"tftft"},{"id":"q18","b":"ft"},{"id":"q19","b":"ftf"},{"id":"q20","b":"t"},{"id":"q21","b":"t"}]},{"n":3,"pages":[{"id":"q22","b":"tft"},{"id":"q23","b":"fft"},{"id":"q24","b":"tftft"},{"id":"q25","b":"t"},{"id":"q26","b":"ftft"},{"id":"q27","b":"tft"},{"id":"q28","b":"t"},{"id":"q29","b":"t"}]},{"n":4,"pages":[{"id":"q30","b":"tft"},{"id":"q31","b":"tft"},{"id":"q32","b":"fffft"},{"id":"q33","b":"ffftf"},{"id":"q34","b":"tft"},{"id":"q39","b":"tftft"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftftft"}]},{"key":"2024r06h_sc_pm","label":"令和6年度 春期","subj":"科目B","min":150,"pick":"4問中2問を選んで解答","dir":"pm","src":"令和6年度 春期 情報処理安全確保支援士試験 午後","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q03","b":"tft"},{"id":"q04","b":"tfftft"},{"id":"q06","b":"ft"},{"id":"q07","b":"tftft"},{"id":"q08","b":"tft"},{"id":"q09","b":"tft"},{"id":"q10","b":"ftft"},{"id":"q11","b":"ftft"},{"id":"q12","b":"t"}]},{"n":2,"pages":[{"id":"q13","b":"tft"},{"id":"q14","b":"tftft"},{"id":"q15","b":"tf"},{"id":"q16","b":"tft"},{"id":"q17","b":"tft"},{"id":"q18","b":"tft"},{"id":"q19","b":"tft"},{"id":"q20","b":"t"},{"id":"q21","b":"t"}]},{"n":3,"pages":[{"id":"q22","b":"t"},{"id":"q23","b":"tftftf"},{"id":"q24","b":"tft"},{"id":"q25","b":"tft"},{"id":"q26","b":"tftf"},{"id":"q27","b":"tft"},{"id":"q28","b":"ftft"},{"id":"q29","b":"tft"},{"id":"q30","b":"t"}]},{"n":4,"pages":[{"id":"q31","b":"tf"},{"id":"q32","b":"tft"},{"id":"q33","b":"tftft"},{"id":"q34","b":"tftft"},{"id":"q35","b":"tft"},{"id":"q37","b":"tft"},{"id":"q38","b":"ft"},{"id":"q39","b":"ft"},{"id":"q40","b":"tf"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftftftft"}]},{"key":"2023r05a_sc_pm","label":"令和5年度 秋期","subj":"科目B","min":150,"pick":"4問中2問を選んで解答","dir":"pm","src":"令和5年度 秋期 情報処理安全確保支援士試験 午後","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"tft"},{"id":"q03","b":"tft"},{"id":"q04","b":"ft"},{"id":"q05","b":"tft"},{"id":"q06","b":"t"}]},{"n":2,"pages":[{"id":"q07","b":"t"},{"id":"q08","b":"ft"},{"id":"q10","b":"tftftft"},{"id":"q11","b":"tft"},{"id":"q12","b":"tft"},{"id":"q13","b":"t"},{"id":"q14","b":"t"}]},{"n":3,"pages":[{"id":"q16","b":"tft"},{"id":"q17","b":"tftft"},{"id":"q18","b":"t"},{"id":"q19","b":"tft"},{"id":"q20","b":"tftft"},{"id":"q21","b":"t"},{"id":"q22","b":"t"}]},{"n":4,"pages":[{"id":"q23","b":"tft"},{"id":"q24","b":"tf"},{"id":"q25","b":"tftf"},{"id":"q26","b":"tft"},{"id":"q27","b":"ftft"},{"id":"q30","b":"tft"},{"id":"q31","b":"t"}]}],"ans":[{"id":"a01","b":"tfftfft"},{"id":"a02","b":"tfftfft"}],"cmnt":[{"id":"c01","b":"tftftft"}]},{"key":"2023r05h_sc_pm2","label":"令和5年度 春期","subj":"旧午後II","min":120,"pick":"2問中1問を選んで解答","dir":"pm","src":"令和5年度 春期 情報処理安全確保支援士試験 午後Ⅱ","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"t"},{"id":"q03","b":"tft"},{"id":"q04","b":"ft"},{"id":"q05","b":"tftft"},{"id":"q06","b":"ftft"},{"id":"q07","b":"t"},{"id":"q08","b":"tft"},{"id":"q09","b":"tft"},{"id":"q10","b":"ft"},{"id":"q11","b":"t"},{"id":"q12","b":"t"}]},{"n":2,"pages":[{"id":"q13","b":"tft"},{"id":"q14","b":"tftf"},{"id":"q15","b":"tftft"},{"id":"q16","b":"tftftft"},{"id":"q17","b":"tftf"},{"id":"q18","b":"tft"},{"id":"q19","b":"tft"},{"id":"q20","b":"tft"},{"id":"q21","b":"t"},{"id":"q22","b":"ft"},{"id":"q23","b":"t"},{"id":"q24","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftft"}]},{"key":"2022r04a_sc_pm2","label":"令和4年度 秋期","subj":"旧午後II","min":120,"pick":"2問中1問を選んで解答","dir":"pm","src":"令和4年度 秋期 情報処理安全確保支援士試験 午後Ⅱ","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"tftft"},{"id":"q03","b":"ftft"},{"id":"q04","b":"tftf"},{"id":"q05","b":"tft"},{"id":"q06","b":"tft"},{"id":"q07","b":"ft"},{"id":"q08","b":"tftft"},{"id":"q09","b":"tftftf"},{"id":"q10","b":"tft"},{"id":"q11","b":"ftft"},{"id":"q12","b":"ftft"},{"id":"q13","b":"t"},{"id":"q14","b":"t"}]},{"n":2,"pages":[{"id":"q15","b":"tftft"},{"id":"q16","b":"t"},{"id":"q17","b":"tftftft"},{"id":"q18","b":"ftft"},{"id":"q19","b":"tft"},{"id":"q20","b":"tft"},{"id":"q21","b":"tft"},{"id":"q22","b":"ft"},{"id":"q23","b":"tf"},{"id":"q24","b":"ft"},{"id":"q25","b":"tft"},{"id":"q26","b":"tft"},{"id":"q27","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftft"}]},{"key":"2022r04h_sc_pm2","label":"令和4年度 春期","subj":"旧午後II","min":120,"pick":"2問中1問を選んで解答","dir":"pm","src":"令和4年度 春期 情報処理安全確保支援士試験 午後Ⅱ","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"tf"},{"id":"q03","b":"tft"},{"id":"q04","b":"tfftft"},{"id":"q05","b":"tft"},{"id":"q06","b":"tftftft"},{"id":"q07","b":"tfft"},{"id":"q08","b":"fftft"},{"id":"q09","b":"tfft"},{"id":"q10","b":"t"},{"id":"q11","b":"t"},{"id":"q12","b":"t"}]},{"n":2,"pages":[{"id":"q13","b":"tft"},{"id":"q14","b":"tftft"},{"id":"q15","b":"ftftftft"},{"id":"q16","b":"tft"},{"id":"q17","b":"ftft"},{"id":"q18","b":"tft"},{"id":"q19","b":"tft"},{"id":"q20","b":"tft"},{"id":"q21","b":"ftft"},{"id":"q22","b":"t"},{"id":"q23","b":"ft"},{"id":"q24","b":"t"},{"id":"q25","b":"tftft"},{"id":"q26","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftft"}]},{"key":"2021r03a_sc_pm2","label":"令和3年度 秋期","subj":"旧午後II","min":120,"pick":"2問中1問を選んで解答","dir":"pm","src":"令和3年度 秋期 情報処理安全確保支援士試験 午後Ⅱ","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"tft"},{"id":"q03","b":"t"},{"id":"q04","b":"ftft"},{"id":"q05","b":"ftftftftftft"},{"id":"q06","b":"t"},{"id":"q07","b":"tftftft"},{"id":"q08","b":"tft"},{"id":"q09","b":"tft"},{"id":"q10","b":"tftft"},{"id":"q11","b":"tftft"},{"id":"q12","b":"t"},{"id":"q13","b":"t"}]},{"n":2,"pages":[{"id":"q14","b":"tft"},{"id":"q15","b":"tft"},{"id":"q16","b":"ftftft"},{"id":"q17","b":"tft"},{"id":"q18","b":"tftft"},{"id":"q19","b":"tfft"},{"id":"q20","b":"tfft"},{"id":"q21","b":"tft"},{"id":"q22","b":"t"},{"id":"q23","b":"tfftft"},{"id":"q24","b":"t"},{"id":"q25","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftft"}]},{"key":"2021r03h_sc_pm2","label":"令和3年度 春期","subj":"旧午後II","min":120,"pick":"2問中1問を選んで解答","dir":"pm","src":"令和3年度 春期 情報処理安全確保支援士試験 午後Ⅱ","subjAll":"科目B・旧午後II","probs":[{"n":1,"pages":[{"id":"q02","b":"tfft"},{"id":"q03","b":"tft"},{"id":"q04","b":"ftft"},{"id":"q05","b":"tft"},{"id":"q06","b":"tft"},{"id":"q07","b":"tftft"},{"id":"q08","b":"ftft"},{"id":"q09","b":"tft"},{"id":"q10","b":"tfft"},{"id":"q11","b":"ft"},{"id":"q12","b":"t"},{"id":"q13","b":"t"}]},{"n":2,"pages":[{"id":"q14","b":"tft"},{"id":"q15","b":"t"},{"id":"q16","b":"t"},{"id":"q17","b":"t"},{"id":"q18","b":"tftft"},{"id":"q19","b":"tft"},{"id":"q20","b":"tft"},{"id":"q21","b":"ft"},{"id":"q22","b":"t"},{"id":"q23","b":"t"}]}],"ans":[{"id":"a01","b":"tfft"}],"cmnt":[{"id":"c01","b":"tftft"}]}]};
+/* ===== 略語の正式名称（支援士・ネスペ共通）
+   キー: 略語、値: [正式名称（英語）, 日本語での呼び方や補足]
+   画面では、問題・選択肢・解説に出てくる略語をこの表から探し、解説の下に一覧で表示する ===== */
+const ABBR = {
+  AAAA: ["AAAA record", "IPv6アドレスを返すDNSのレコード"],
+  ABR: ["Area Border Router", "エリア境界ルータ"],
+  ACK: ["Acknowledgement", "確認応答"],
+  ACME: ["Automatic Certificate Management Environment", "証明書の自動発行の仕組み"],
+  AEAD: ["Authenticated Encryption with Associated Data", "認証付き暗号"],
+  AES: ["Advanced Encryption Standard", "米国の標準共通鍵暗号"],
+  AF: ["Assured Forwarding", "帯域を保証する優先制御"],
+  AH: ["Authentication Header", "認証ヘッダ"],
+  AP: ["Access Point", "無線LANのアクセスポイント"],
+  API: ["Application Programming Interface", "プログラムから機能を呼び出す窓口"],
+  ARC: ["Authenticated Received Chain", "転送経路での認証結果の引継ぎ"],
+  ARP: ["Address Resolution Protocol", "IPアドレスからMACアドレスを調べる"],
+  AS: ["Autonomous System／Authentication Server", "自律システム／（Kerberosの）認証サービス"],
+  BDR: ["Backup Designated Router", "バックアップ指定ルータ"],
+  BE: ["Best Effort", "ベストエフォート"],
+  BEC: ["Business Email Compromise", "ビジネスメール詐欺"],
+  BFD: ["Bidirectional Forwarding Detection", "高速な障害検知"],
+  BGP: ["Border Gateway Protocol", "AS間の経路制御"],
+  BPDU: ["Bridge Protocol Data Unit", "STPの制御フレーム"],
+  CA: ["Certification Authority", "認証局"],
+  CASB: ["Cloud Access Security Broker", "クラウド利用の可視化と制御"],
+  CBC: ["Cipher Block Chaining", "暗号利用モードの一つ"],
+  CBT: ["Computer Based Testing", "コンピュータで受ける試験方式"],
+  CE: ["Customer Edge", "顧客側の接続ルータ"],
+  CNAME: ["Canonical Name record", "別名を定義するDNSのレコード"],
+  CORS: ["Cross-Origin Resource Sharing", "オリジン間リソース共有"],
+  CRL: ["Certificate Revocation List", "証明書失効リスト"],
+  CRYPTREC: ["Cryptography Research and Evaluation Committees", "日本の暗号技術評価プロジェクト"],
+  CS: ["Class Selector", "DSCPの互換クラス"],
+  CSF: ["Cybersecurity Framework", "NISTのサイバーセキュリティフレームワーク"],
+  CSIRT: ["Computer Security Incident Response Team", "インシデント対応チーム"],
+  CSMA: ["Carrier Sense Multiple Access", "搬送波感知多重アクセス"],
+  CSP: ["Content Security Policy", "読み込み可能なコンテンツを制限するヘッダ"],
+  CSPM: ["Cloud Security Posture Management", "クラウドセキュリティ態勢管理"],
+  CSR: ["Certificate Signing Request", "証明書署名要求"],
+  CSRF: ["Cross-Site Request Forgery", "クロスサイトリクエストフォージェリ"],
+  CT: ["Certificate Transparency", "証明書の透明性ログ"],
+  CTR: ["Counter mode", "カウンタモード"],
+  CTS: ["Clear To Send", "送信許可"],
+  CVE: ["Common Vulnerabilities and Exposures", "脆弱性の識別番号"],
+  CVSS: ["Common Vulnerability Scoring System", "共通脆弱性評価システム"],
+  CWE: ["Common Weakness Enumeration", "脆弱性の種類の分類"],
+  CWPP: ["Cloud Workload Protection Platform", "クラウドワークロード保護"],
+  DANE: ["DNS-based Authentication of Named Entities", "証明書情報をDNSで公開する仕組み"],
+  DAST: ["Dynamic Application Security Testing", "動的アプリケーションセキュリティテスト"],
+  DB: ["Database", "データベース"],
+  DDoS: ["Distributed Denial of Service", "分散型サービス妨害攻撃"],
+  DES: ["Data Encryption Standard", "旧米国標準の共通鍵暗号"],
+  DF: ["Don't Fragment", "断片化禁止フラグ"],
+  DHCP: ["Dynamic Host Configuration Protocol", "IPアドレスの自動割当て"],
+  DHE: ["Diffie-Hellman Ephemeral", "使い捨て鍵によるDH鍵共有"],
+  DKIM: ["DomainKeys Identified Mail", "電子署名による送信ドメイン認証"],
+  DMARC: ["Domain-based Message Authentication, Reporting and Conformance", "SPF・DKIMの結果に基づく処理方針"],
+  DMZ: ["DeMilitarized Zone", "非武装地帯（公開サーバを置く区画）"],
+  DNS: ["Domain Name System", "名前解決の仕組み"],
+  DNSSEC: ["DNS Security Extensions", "DNS応答の署名検証"],
+  DoH: ["DNS over HTTPS", "HTTPSで暗号化したDNS"],
+  DOM: ["Document Object Model", "ブラウザ上の文書の構造"],
+  DoS: ["Denial of Service", "サービス妨害攻撃"],
+  DoT: ["DNS over TLS", "TLSで暗号化したDNS"],
+  DR: ["Designated Router", "指定ルータ"],
+  DSCP: ["Differentiated Services Code Point", "優先制御のためのIPヘッダの値"],
+  DSSS: ["Direct Sequence Spread Spectrum", "直接拡散方式"],
+  DTD: ["Document Type Definition", "XMLの文書型定義"],
+  EAP: ["Extensible Authentication Protocol", "拡張可能な認証プロトコル"],
+  EAPOL: ["EAP over LAN", "LAN上でEAPを運ぶ形式"],
+  EC: ["Elliptic Curve", "楕円曲線"],
+  ECB: ["Electronic Codebook", "暗号利用モードの一つ"],
+  ECDHE: ["Elliptic Curve Diffie-Hellman Ephemeral", "楕円曲線を使った使い捨て鍵共有"],
+  ECMP: ["Equal Cost Multi-Path", "等コストマルチパス"],
+  EDR: ["Endpoint Detection and Response", "端末での検知と対応"],
+  EF: ["Expedited Forwarding", "低遅延の優先制御"],
+  EGP: ["Exterior Gateway Protocol", "AS間の経路制御プロトコルの総称"],
+  EPP: ["Endpoint Protection Platform", "従来型のウイルス対策"],
+  ESP: ["Encapsulating Security Payload", "IPsecの暗号化"],
+  FIDO: ["Fast IDentity Online", "パスワードを使わない認証の標準"],
+  FIPS: ["Federal Information Processing Standards", "米国連邦情報処理標準"],
+  FQDN: ["Fully Qualified Domain Name", "完全修飾ドメイン名"],
+  FW: ["Firewall", "ファイアウォール"],
+  GCM: ["Galois/Counter Mode", "認証付き暗号利用モード"],
+  GRE: ["Generic Routing Encapsulation", "汎用のトンネル方式"],
+  GW: ["Gateway", "ゲートウェイ"],
+  HELO: ["SMTPの挨拶コマンド", "送信サーバが名乗るコマンド"],
+  HMAC: ["Hash-based Message Authentication Code", "ハッシュを使ったメッセージ認証コード"],
+  HoL: ["Head-of-Line blocking", "先頭のデータが詰まると後続も待たされる現象"],
+  HSM: ["Hardware Security Module", "鍵を守る専用装置"],
+  HSTS: ["HTTP Strict Transport Security", "HTTPSの利用を強制する仕組み"],
+  HTML: ["HyperText Markup Language", "Webページの記述言語"],
+  HTTP: ["HyperText Transfer Protocol", "Webの通信プロトコル"],
+  HTTPS: ["HTTP over TLS", "TLSで暗号化したHTTP"],
+  IaaS: ["Infrastructure as a Service", "インフラを提供するクラウド"],
+  IAM: ["Identity and Access Management", "ID・アクセス権限の管理"],
+  IC: ["Integrated Circuit", "集積回路（ICカード）"],
+  ICMP: ["Internet Control Message Protocol", "IPの制御・エラー通知"],
+  ID: ["Identifier", "識別子"],
+  IdP: ["Identity Provider", "認証を行う側"],
+  IDS: ["Intrusion Detection System", "侵入検知システム"],
+  IEEE: ["Institute of Electrical and Electronics Engineers", "米国電気電子学会（規格の策定団体）"],
+  IGMP: ["Internet Group Management Protocol", "マルチキャストの参加管理"],
+  IGP: ["Interior Gateway Protocol", "AS内の経路制御プロトコルの総称"],
+  IKE: ["Internet Key Exchange", "IPsecの鍵交換"],
+  IMDS: ["Instance Metadata Service", "インスタンスメタデータサービス"],
+  IoC: ["Indicator of Compromise", "侵害の痕跡"],
+  IP: ["Internet Protocol", "インターネットの基本プロトコル"],
+  IPA: ["Information-technology Promotion Agency", "情報処理推進機構"],
+  IPS: ["Intrusion Prevention System", "侵入防止システム"],
+  IPsec: ["IP Security", "IP層の暗号化通信"],
+  ISMS: ["Information Security Management System", "情報セキュリティマネジメントシステム"],
+  ISO: ["International Organization for Standardization", "国際標準化機構"],
+  IEC: ["International Electrotechnical Commission", "国際電気標準会議"],
+  ISP: ["Internet Service Provider", "インターネット接続事業者"],
+  IT: ["Information Technology", "情報技術"],
+  IV: ["Initialization Vector", "初期化ベクトル"],
+  JIS: ["Japanese Industrial Standards", "日本産業規格"],
+  JPCERT: ["Japan Computer Emergency Response Team Coordination Center", "JPCERT/CC（インシデント対応の調整機関）"],
+  JS: ["JavaScript", "Webページで動くプログラム言語"],
+  JSON: ["JavaScript Object Notation", "データの記述形式"],
+  JWT: ["JSON Web Token", "署名付きのトークン形式"],
+  KDC: ["Key Distribution Center", "鍵配布センター"],
+  LACP: ["Link Aggregation Control Protocol", "リンクアグリゲーションの制御"],
+  LAN: ["Local Area Network", "構内ネットワーク"],
+  LAPS: ["Local Administrator Password Solution", "端末ごとに管理者パスワードを変える仕組み"],
+  LSA: ["Link State Advertisement", "OSPFの経路情報"],
+  MAC: ["Media Access Control／Message Authentication Code", "機器の物理アドレス／メッセージ認証コード"],
+  MED: ["Multi-Exit Discriminator", "隣接ASに入口の優先を伝えるBGP属性"],
+  MIB: ["Management Information Base", "SNMPで扱う管理情報"],
+  MITB: ["Man-in-the-Browser", "ブラウザを乗っ取る攻撃"],
+  MLD: ["Multicast Listener Discovery", "IPv6のマルチキャスト参加管理"],
+  MPLS: ["Multi-Protocol Label Switching", "ラベルで転送する方式"],
+  MSS: ["Maximum Segment Size", "TCPの最大セグメント長"],
+  MTU: ["Maximum Transmission Unit", "一度に送れる最大の長さ"],
+  MX: ["Mail Exchanger record", "メールの受信サーバを示すDNSのレコード"],
+  NA: ["Neighbor Advertisement", "近隣広告"],
+  NAPT: ["Network Address and Port Translation", "アドレスとポートの変換"],
+  NAS: ["Network Attached Storage", "ネットワーク接続のストレージ"],
+  NAT: ["Network Address Translation", "アドレス変換"],
+  NDP: ["Neighbor Discovery Protocol", "IPv6の近隣探索"],
+  NFV: ["Network Functions Virtualization", "ネットワーク機能の仮想化"],
+  NIST: ["National Institute of Standards and Technology", "米国国立標準技術研究所"],
+  NS: ["Name Server record／Neighbor Solicitation", "権威DNSサーバを示すレコード／近隣要請"],
+  NTLM: ["NT LAN Manager", "Windowsの認証方式"],
+  NTP: ["Network Time Protocol", "時刻同期"],
+  OAuth: ["Open Authorization", "権限の委譲（認可）の仕組み"],
+  OCSP: ["Online Certificate Status Protocol", "証明書の失効状態の問合せ"],
+  OFDM: ["Orthogonal Frequency Division Multiplexing", "直交周波数分割多重"],
+  OIDC: ["OpenID Connect", "OAuthの上の認証の仕組み"],
+  OP25B: ["Outbound Port 25 Blocking", "外向き25番ポートの遮断"],
+  OS: ["Operating System", "基本ソフトウェア"],
+  OSPF: ["Open Shortest Path First", "リンクステート型の経路制御"],
+  OSS: ["Open Source Software", "オープンソースソフトウェア"],
+  OTP: ["One-Time Password", "使い捨てパスワード"],
+  PaaS: ["Platform as a Service", "実行基盤を提供するクラウド"],
+  PC: ["Personal Computer", "パソコン"],
+  PCP: ["Priority Code Point", "VLANタグの優先度"],
+  PD: ["Powered Device", "受電側機器"],
+  PDCA: ["Plan-Do-Check-Act", "計画・実行・点検・処置"],
+  PE: ["Provider Edge", "通信事業者側の接続ルータ"],
+  PEAP: ["Protected EAP", "TLSトンネル内でパスワード認証するEAP"],
+  PGP: ["Pretty Good Privacy", "メールの暗号化・署名"],
+  PHB: ["Per-Hop Behavior", "ルータごとの転送の扱い"],
+  PIM: ["Protocol Independent Multicast", "マルチキャストの経路制御"],
+  PKCE: ["Proof Key for Code Exchange", "認可コードの横取り対策"],
+  PKI: ["Public Key Infrastructure", "公開鍵基盤"],
+  PMTU: ["Path MTU", "経路上の最小MTU"],
+  PoC: ["Point of Contact", "窓口"],
+  PoE: ["Power over Ethernet", "LANケーブルでの給電"],
+  PPPoE: ["PPP over Ethernet", "イーサネット上のPPP接続"],
+  PQC: ["Post-Quantum Cryptography", "耐量子計算機暗号"],
+  PSE: ["Power Sourcing Equipment", "給電側機器"],
+  PSK: ["Pre-Shared Key", "事前共有鍵"],
+  PTR: ["Pointer record", "IPアドレスから名前を引くDNSのレコード"],
+  QoS: ["Quality of Service", "通信品質の制御"],
+  QUIC: ["QUIC（固有名）", "UDP上の高速なトランスポート"],
+  RA: ["Router Advertisement／Registration Authority", "ルータ通知／登録局"],
+  RADIUS: ["Remote Authentication Dial In User Service", "認証サーバのプロトコル"],
+  RAID: ["Redundant Arrays of Inexpensive Disks", "ディスクの冗長化"],
+  RAM: ["Random Access Memory", "メモリ"],
+  RC4: ["Rivest Cipher 4", "脆弱なストリーム暗号"],
+  RD: ["Route Distinguisher", "経路を区別する識別子"],
+  RDNSS: ["Recursive DNS Server", "RAで配るDNSサーバ情報"],
+  RIP: ["Routing Information Protocol", "距離ベクタ型の経路制御"],
+  RSA: ["Rivest-Shamir-Adleman", "素因数分解の困難性による公開鍵暗号"],
+  RSTP: ["Rapid Spanning Tree Protocol", "高速スパニングツリー"],
+  RT: ["Route Target", "経路を取り込むVRFを決める値"],
+  RTP: ["Real-time Transport Protocol", "音声・映像の転送"],
+  RTS: ["Request To Send", "送信要求"],
+  RTT: ["Round Trip Time", "往復遅延時間"],
+  SA: ["Security Association", "IPsecの通信路の取決め"],
+  SaaS: ["Software as a Service", "アプリを提供するクラウド"],
+  SAE: ["Simultaneous Authentication of Equals", "WPA3の鍵確立"],
+  SAML: ["Security Assertion Markup Language", "認証結果を伝えるXML形式"],
+  SAST: ["Static Application Security Testing", "静的アプリケーションセキュリティテスト"],
+  SBOM: ["Software Bill of Materials", "ソフトウェア部品表"],
+  SCA: ["Software Composition Analysis", "ソフトウェア構成分析"],
+  SDN: ["Software-Defined Networking", "ソフトウェアで制御するネットワーク"],
+  SDP: ["Session Description Protocol", "通話の条件の記述"],
+  SHA: ["Secure Hash Algorithm", "ハッシュ関数"],
+  SID: ["Session ID", "セッションID"],
+  SIEM: ["Security Information and Event Management", "ログの集約と相関分析"],
+  SIP: ["Session Initiation Protocol", "IP電話の呼制御"],
+  SLAAC: ["Stateless Address Autoconfiguration", "IPv6アドレスの自動設定"],
+  SMB: ["Server Message Block", "Windowsのファイル共有"],
+  SMS: ["Short Message Service", "携帯電話のショートメッセージ"],
+  SMTP: ["Simple Mail Transfer Protocol", "メールの送信"],
+  SNMP: ["Simple Network Management Protocol", "ネットワーク機器の監視"],
+  SP: ["Service Provider", "サービスを提供する側"],
+  SPF: ["Sender Policy Framework", "送信元IPによる送信ドメイン認証"],
+  SQL: ["Structured Query Language", "データベースの問合せ言語"],
+  SSH: ["Secure Shell", "暗号化したリモート操作"],
+  SSID: ["Service Set Identifier", "無線LANのネットワーク名"],
+  SSL: ["Secure Sockets Layer", "TLSの前身"],
+  SSRF: ["Server Side Request Forgery", "サーバに不正なリクエストを送らせる攻撃"],
+  STP: ["Spanning Tree Protocol", "スパニングツリー（L2のループ防止）"],
+  STRIDE: ["Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege", "脅威の6分類"],
+  SWG: ["Secure Web Gateway", "Webアクセスの検査"],
+  SYN: ["Synchronize", "TCPの接続要求"],
+  TCP: ["Transmission Control Protocol", "信頼性のあるトランスポート"],
+  TGS: ["Ticket Granting Service", "チケット発行サービス"],
+  TGT: ["Ticket Granting Ticket", "チケットを得るためのチケット"],
+  TKIP: ["Temporal Key Integrity Protocol", "WPAの旧暗号方式"],
+  TLS: ["Transport Layer Security", "通信の暗号化"],
+  TOCTOU: ["Time Of Check to Time Of Use", "確認と使用の間の競合状態"],
+  TPID: ["Tag Protocol Identifier", "VLANタグの識別子"],
+  TPM: ["Trusted Platform Module", "鍵を守る端末内のチップ"],
+  TTL: ["Time To Live", "生存時間"],
+  TTP: ["Tactics, Techniques, and Procedures", "攻撃者の手口"],
+  TXT: ["Text record", "任意の文字列を置くDNSのレコード"],
+  UDP: ["User Datagram Protocol", "軽量なトランスポート"],
+  URI: ["Uniform Resource Identifier", "資源の識別子"],
+  URL: ["Uniform Resource Locator", "Web上の場所を示すアドレス"],
+  USB: ["Universal Serial Bus", "汎用の接続規格"],
+  VID: ["VLAN Identifier", "VLAN ID"],
+  VLAN: ["Virtual LAN", "仮想LAN"],
+  VNI: ["VXLAN Network Identifier", "VXLANのセグメント番号"],
+  VPN: ["Virtual Private Network", "仮想専用線"],
+  VRF: ["Virtual Routing and Forwarding", "仮想的な経路表"],
+  VRID: ["Virtual Router Identifier", "仮想ルータ番号"],
+  VRRP: ["Virtual Router Redundancy Protocol", "ルータの冗長化"],
+  VXLAN: ["Virtual eXtensible LAN", "L2をUDPで包むオーバレイ"],
+  WAF: ["Web Application Firewall", "Webアプリ用ファイアウォール"],
+  WAN: ["Wide Area Network", "広域網"],
+  WEP: ["Wired Equivalent Privacy", "脆弱な旧無線LAN暗号"],
+  WORM: ["Write Once Read Many", "書換え不可の記録"],
+  WPA: ["Wi-Fi Protected Access", "無線LANのセキュリティ規格"],
+  XML: ["Extensible Markup Language", "データの記述言語"],
+  XOR: ["Exclusive OR", "排他的論理和"],
+  XSS: ["Cross-Site Scripting", "クロスサイトスクリプティング"],
+  XXE: ["XML External Entity", "XML外部実体参照"]
+};
+/* ===== 解説の図解（支援士）
+   g: 箱と矢印の図 {n: 箱[{id,x,y,w,h,t,c}], e: 矢印[[元,先,ラベル,"bad|ok|dash|none|both"]], notes: [[x,y,文字,"start|middle"]]}
+   seq: 手順の図 {a: 登場する人や機器, m: [[元,先,ラベル,"bad|ok|dash"]]（元と先が同じなら、その場での処理）, note}
+   FIGMAP: 問題のID → 図の名前（4択・記述・事例の設問 "c-1-2" など） ===== */
+const FIG = {
+  hybrid: { cap: "ハイブリッド暗号", type: "g", h: 150,
+    n: [{ id: "m", x: 10, y: 14, w: 76, t: "データ" }, { id: "k", x: 10, y: 84, w: 76, t: "共通鍵" },
+        { id: "c", x: 214, y: 14, w: 96, t: "暗号文" }, { id: "ek", x: 214, y: 78, w: 96, h: 44, t: "暗号化した\n共通鍵" }],
+    e: [["m", "c", "共通鍵で暗号化（速い）"], ["k", "ek", "受信者の公開鍵で暗号化"]],
+    notes: [[160, 142, "受信者は自分の秘密鍵で共通鍵を取り出し、データを復号する"]] },
+  sign: { cap: "ディジタル署名", type: "seq", a: ["送信者", "受信者"],
+    m: [[0, 0, "ハッシュ値を自分の秘密鍵で署名"], [0, 1, "データ＋署名"], [1, 1, "送信者の公開鍵で検証", "ok"]],
+    note: "秘密鍵を持つのは本人だけ → 本人が作成し、改ざんされていないと分かる" },
+  chain: { cap: "証明書チェーンの検証", type: "g", h: 176,
+    n: [{ id: "r", x: 95, y: 8, w: 130, h: 40, t: "ルートCA証明書\n（OS・ブラウザに格納）", c: "ok" },
+        { id: "i", x: 95, y: 70, w: 130, t: "中間CA証明書" }, { id: "s", x: 95, y: 124, w: 130, t: "サーバ証明書" }],
+    e: [["r", "i", "署名"], ["i", "s", "署名"]],
+    notes: [[160, 172, "サーバ証明書から署名を上へたどり、信頼済みのルートに着けば成功"]] },
+  fs: { cap: "前方秘匿性（(EC)DHE）", type: "seq", a: ["クライアント", "サーバ"],
+    m: [[0, 1, "使い捨ての鍵の素"], [1, 0, "使い捨ての鍵の素＋署名"], [0, 0, "共通鍵を計算し、通信後に破棄", "ok"]],
+    note: "長期の秘密鍵は署名だけに使う → 後で漏れても過去の通信は復号できない" },
+  oauth: { cap: "OAuth 2.0 認可コードフロー（PKCE付き）", type: "seq", a: ["利用者", "クライアント", "認可サーバ", "API"],
+    m: [[1, 2, "認可要求（state, code_challenge）"], [0, 2, "ログインして同意"], [2, 1, "認可コード（リダイレクト）"],
+        [1, 2, "コード＋code_verifier"], [2, 1, "アクセストークン", "ok"], [1, 3, "トークンでAPIを呼ぶ"]],
+    note: "state：CSRF対策／PKCE：コードを横取りされても交換できない／リダイレクトURIは完全一致で照合" },
+  saml: { cap: "SAMLによるシングルサインオン", type: "seq", a: ["利用者", "SP", "IdP"],
+    m: [[0, 1, "サービスにアクセス"], [1, 0, "IdPへリダイレクト"], [0, 2, "ログイン"], [2, 0, "署名付きアサーション"],
+        [0, 1, "アサーションを提出"], [1, 1, "署名を検証してログイン", "ok"]] },
+  fido: { cap: "FIDO2（WebAuthn）の認証", type: "seq", a: ["認証器（端末）", "ブラウザ", "サーバ"],
+    m: [[2, 1, "チャレンジ"], [1, 0, "チャレンジ＋オリジン"], [0, 0, "生体認証で秘密鍵を使う"], [0, 2, "署名（オリジンを含む）"],
+        [2, 2, "登録済みの公開鍵で検証", "ok"]],
+    note: "偽サイトのオリジンで作った署名は、正規のサーバでは通らない" },
+  kerberos: { cap: "Kerberos認証", type: "seq", a: ["利用者", "AS", "TGS", "サービス"],
+    m: [[0, 1, "認証要求"], [1, 0, "TGT"], [0, 2, "TGT＋利用したいサービス"], [2, 0, "サービスチケット"], [0, 3, "サービスチケット", "ok"]],
+    note: "TGTはkrbtgtの鍵で暗号化 → その鍵が漏れるとTGTを偽造できる（Golden Ticket）" },
+  csrf: { cap: "CSRFの流れと対策", type: "seq", a: ["正規サイト", "利用者のブラウザ", "罠サイト"],
+    m: [[1, 0, "ログイン（Cookie発行）"], [1, 2, "罠サイトを閲覧"], [2, 1, "自動送信されるフォーム", "bad"],
+        [1, 0, "更新リクエスト＋Cookie", "bad"], [0, 0, "トークンがないので拒否", "ok"]],
+    note: "対策：推測できないトークンを照合／CookieのSameSite／重要な操作の前に再認証" },
+  xss: { cap: "反射型XSSの流れ", type: "seq", a: ["攻撃者", "ブラウザ", "脆弱なサイト", "攻撃者サーバ"],
+    m: [[0, 1, "罠のURLを送る"], [1, 2, "スクリプト入りのURL"], [2, 1, "そのまま出力したページ", "bad"],
+        [1, 1, "スクリプトが実行される", "bad"], [1, 3, "Cookieを送信", "bad"]],
+    note: "対策：出力時のエスケープ／保険としてHttpOnly属性・CSP" },
+  ssrf: { cap: "SSRF", type: "g", h: 140,
+    n: [{ id: "a", x: 6, y: 46, w: 70, t: "攻撃者", c: "bad" }, { id: "w", x: 118, y: 46, w: 84, t: "Webサーバ" },
+        { id: "m", x: 238, y: 10, w: 78, h: 40, t: "メタデータ\nサービス" }, { id: "i", x: 238, y: 82, w: 78, t: "内部システム" }],
+    e: [["a", "w", ""], ["w", "m", "", "bad"], ["w", "i", "", "bad"]],
+    notes: [[97, 100, "細工したURL"], [160, 134, "外からは届かない場所へ、サーバを踏み台にしてアクセスする"]] },
+  sqli: { cap: "SQLインジェクションとプレースホルダ", type: "g", h: 124,
+    n: [{ id: "a", x: 8, y: 8, w: 304, h: 46, t: "文字列連結：…WHERE id='' OR '1'='1'\n入力がSQL文の一部として解釈される", c: "bad" },
+        { id: "b", x: 8, y: 68, w: 304, h: 46, t: "プレースホルダ：…WHERE id=?（値は後で渡す）\n入力は常に「値」として扱われる", c: "ok" }], e: [] },
+  dmz: { cap: "DMZの構成", type: "g", h: 158,
+    n: [{ id: "net", x: 6, y: 56, w: 76, h: 40, t: "インター\nネット" }, { id: "fw", x: 124, y: 60, w: 56, t: "FW" },
+        { id: "dmz", x: 222, y: 10, w: 92, h: 40, t: "DMZ\n公開サーバ" }, { id: "lan", x: 222, y: 104, w: 92, t: "内部LAN" }],
+    e: [["net", "fw", "", "both"], ["fw", "dmz", ""], ["fw", "lan", "", "bad"]],
+    notes: [[140, 30, "必要な通信だけ通す"], [140, 128, "外から内部LANへは拒否"], [160, 154, "公開サーバが侵害されても、内部LANへ広がりにくくする"]] },
+  ipsec: { cap: "IPsec（IKEとESP）", type: "seq", a: ["拠点A", "拠点B"],
+    m: [[0, 1, "IKE（UDP 500）：相互認証と鍵交換"], [1, 0, "SAを確立"], [0, 1, "ESP：データを暗号化", "ok"]],
+    note: "NAPTを越えるときは、ESPをUDP 4500で包む（NATトラバーサル）" },
+  reflect: { cap: "DNSリフレクション攻撃", type: "g", h: 170,
+    n: [{ id: "a", x: 6, y: 32, w: 70, t: "攻撃者", c: "bad" }, { id: "r", x: 124, y: 28, w: 84, h: 40, t: "オープン\nリゾルバ" },
+        { id: "v", x: 240, y: 112, w: 74, t: "標的" }],
+    e: [["a", "r", "送信元を詐称"], ["r", "v", "大きな応答が殺到", "bad"]],
+    notes: [[100, 112, "小さな問合せ → 大きな応答", "middle"], [160, 164, "対策：再帰問合せは自組織のアドレスだけに許可する"]] },
+  mailauth: { cap: "送信ドメイン認証（SPF・DKIM・DMARC）", type: "g", h: 172,
+    n: [{ id: "s", x: 6, y: 34, w: 82, t: "送信サーバ" }, { id: "r", x: 232, y: 34, w: 82, t: "受信サーバ" },
+        { id: "d", x: 112, y: 102, w: 96, h: 40, t: "送信ドメイン\nのDNS" }],
+    e: [["s", "r", "メール（DKIM署名付き）"], ["r", "d", "SPF・公開鍵・方針を参照"]],
+    notes: [[160, 160, "SPF：送信元IP／DKIM：署名／DMARC：ヘッダFromとの一致と方針"]] },
+  poison: { cap: "DNSキャッシュポイズニング", type: "seq", a: ["キャッシュDNS", "攻撃者", "権威DNS"],
+    m: [[0, 2, "問合せ（ランダムなサブドメイン）"], [1, 0, "偽の応答を大量に送る", "bad"], [2, 0, "正しい応答（遅れると負ける）"]],
+    note: "IDとポート番号が一致した偽応答が先に届くと汚染 → ポートのランダム化とDNSSEC" },
+  backup: { cap: "ランサムウェアとバックアップ", type: "g", h: 160,
+    n: [{ id: "rw", x: 120, y: 8, w: 84, h: 40, t: "ランサム\nウェア", c: "bad" }, { id: "s", x: 6, y: 64, w: 84, t: "業務サーバ" },
+        { id: "n", x: 120, y: 104, w: 84, h: 40, t: "同じネット\nワークのNAS", c: "bad" }, { id: "o", x: 228, y: 98, w: 88, h: 52, t: "切り離した媒体\n変更不可の領域\n（世代管理）", c: "ok" }],
+    e: [["rw", "s", "暗号化", "bad"], ["rw", "n", "届くので暗号化", "bad"], ["s", "o", "", "dash"]] },
+  ir: { cap: "インシデント対応の流れ", type: "g", h: 104,
+    n: [{ id: "a", x: 4, y: 10, w: 56, h: 40, t: "検知\n分析" }, { id: "b", x: 68, y: 10, w: 56, h: 40, t: "封じ\n込め", c: "ok" },
+        { id: "c", x: 132, y: 10, w: 56, h: 40, t: "根絶" }, { id: "d", x: 196, y: 10, w: 56, h: 40, t: "復旧" }, { id: "e", x: 260, y: 10, w: 56, h: 40, t: "事後\n対応" }],
+    e: [["a", "b", ""], ["b", "c", ""], ["c", "d", ""], ["d", "e", ""]],
+    notes: [[4, 72, "封じ込め：電源は切らずにネットワークから隔離（証拠を残す）", "start"], [4, 92, "根絶：原因の除去／復旧：業務の再開／事後：再発防止", "start"]] },
+  attack: { cap: "標的型攻撃の進み方", type: "g", h: 104,
+    n: [{ id: "a", x: 4, y: 10, w: 56, t: "侵入" }, { id: "b", x: 68, y: 10, w: 56, h: 40, t: "C&C\n通信" }, { id: "c", x: 132, y: 10, w: 56, h: 40, t: "権限\n昇格" },
+        { id: "d", x: 196, y: 10, w: 56, t: "横展開", c: "bad" }, { id: "e", x: 260, y: 10, w: 56, h: 40, t: "持出し\n暗号化", c: "bad" }],
+    e: [["a", "b", ""], ["b", "c", ""], ["c", "d", ""], ["d", "e", ""]],
+    notes: [[4, 72, "C&C：一定間隔で同じ宛先へ通信（ビーコン）", "start"], [4, 92, "横展開：盗んだ認証情報で他の端末へ（管理者の分離が有効）", "start"]] },
+  zt: { cap: "境界型防御とゼロトラスト", type: "g", h: 96,
+    n: [{ id: "a", x: 6, y: 10, w: 148, h: 70, t: "境界型防御\n内側は信頼する\n侵入されると広がる", c: "bad" },
+        { id: "b", x: 166, y: 10, w: 148, h: 70, t: "ゼロトラスト\n要求のたびに\n利用者・端末を検証", c: "ok" }], e: [] },
+  risk: { cap: "リスク対応の4分類", type: "g", h: 100,
+    n: [{ id: "a", x: 6, y: 8, w: 148, h: 38, t: "回避：その業務をやめる" }, { id: "b", x: 166, y: 8, w: 148, h: 38, t: "低減：対策で小さくする" },
+        { id: "c", x: 6, y: 54, w: 148, h: 38, t: "移転：保険・委託", c: "ok" }, { id: "d", x: 166, y: 54, w: 148, h: 38, t: "保有：受け入れる" }], e: [] },
+  shared: { cap: "IaaSの責任共有モデル", type: "g", h: 170,
+    n: [{ id: "a", x: 60, y: 6, w: 160, h: 26, t: "データ・アカウント", c: "ok" }, { id: "b", x: 60, y: 36, w: 160, h: 26, t: "アプリケーション", c: "ok" },
+        { id: "c", x: 60, y: 66, w: 160, h: 26, t: "OS・ミドルウェア", c: "ok" }, { id: "d", x: 60, y: 96, w: 160, h: 26, t: "仮想化基盤" },
+        { id: "e", x: 60, y: 126, w: 160, h: 26, t: "物理機器・建物" }], e: [],
+    notes: [[228, 52, "利用者", "start"], [228, 128, "事業者", "start"], [160, 166, "IaaSはOSから上が利用者の責任"]] },
+  tlsinsp: { cap: "TLSインスペクション", type: "g", h: 126,
+    n: [{ id: "p", x: 6, y: 40, w: 70, t: "端末" }, { id: "x", x: 124, y: 40, w: 72, t: "プロキシ" }, { id: "w", x: 244, y: 40, w: 72, t: "Webサーバ" }],
+    e: [["p", "x", "代理の証明書", "both"], ["x", "w", "本物の証明書", "both"]],
+    notes: [[160, 112, "端末に、プロキシが使うCAの証明書を信頼済みとして入れる"]] },
+  dnstun: { cap: "DNSトンネリング", type: "g", h: 140,
+    n: [{ id: "m", x: 6, y: 40, w: 76, h: 40, t: "感染\n端末", c: "bad" }, { id: "d", x: 122, y: 40, w: 76, h: 40, t: "社内\nDNS" }, { id: "c", x: 238, y: 40, w: 78, h: 40, t: "攻撃者の\n権威DNS", c: "bad" }],
+    e: [["m", "d", "問合せ"], ["d", "c", "名前解決を中継", "bad"]],
+    notes: [[160, 108, "「データ.攻撃者のドメイン」の形で、名前にデータを埋め込む"], [160, 128, "対策：外部の名前解決を限定し、長い名前・大量の問合せを監視"]] }
+};
+const FIGMAP = {
+  "cr-9": "hybrid", "cr-5": "sign", "cr-6": "sign", "cr-14": "chain", "cr-4": "chain", "cr-7": "chain", "w-11": "chain",
+  "cr-2": "fs", "nt-6": "fs", "au-3": "oauth", "au-4": "oauth", "au-5": "oauth", "w-13": "oauth", "au-6": "saml",
+  "au-2": "fido", "w-4": "fido", "au-9": "kerberos", "at-8": "kerberos", "au-10": "attack",
+  "wb-3": "csrf", "w-9": "csrf", "c-3-3": "csrf", "wb-1": "xss", "wb-4": "xss", "wb-14": "xss", "w-1": "xss",
+  "wb-5": "ssrf", "dv-5": "ssrf", "w-10": "ssrf", "wb-2": "sqli", "w-2": "sqli",
+  "nt-7": "dmz", "nt-5": "dmz", "c-1-1": "dmz", "c-1-2": "dmz", "nt-3": "ipsec", "at-7": "reflect", "ml-8": "reflect",
+  "ml-1": "mailauth", "ml-2": "mailauth", "ml-3": "mailauth", "w-5": "mailauth", "c-4-0": "mailauth", "c-4-2": "mailauth",
+  "ml-7": "poison", "ml-5": "poison", "ir-1": "backup", "w-6": "backup", "ir-11": "ir", "ir-2": "ir", "w-7": "ir",
+  "at-9": "attack", "w-17": "attack", "ir-5": "attack", "c-2-0": "attack", "w-24": "attack",
+  "au-8": "zt", "nt-9": "zt", "mg-1": "risk", "dv-2": "shared", "nt-12": "tlsinsp", "w-8": "dnstun"
+};
 
 /* ===== 日付ユーティリティ（すべてローカル日付の YYYY-MM-DD 文字列で扱う） ===== */
 const DAY = 864e5;
@@ -1031,7 +1425,7 @@ async function runQuiz(n, domain, ids) {
     await coach('<span class="tag">' + esc(DOMAINS[q.d]) + "</span>" +
       (right ? '<p><span class="ok">✓ 正解</span>　' + ansKana + "　" + esc(q.c[0]) + "</p>"
              : '<p><span class="ng">✕ 不正解</span></p><ul><li>あなたの解答：' + mineKana + "　" + esc(q.c[pick]) + "</li><li><strong>正解：" + ansKana + "　" + esc(q.c[0]) + "</strong></li></ul>") +
-      "<p>" + esc(q.e) + "</p>", 250);
+      "<p>" + esc(q.e) + "</p>" + figHTML(q.id) + abbrHTML([q.q].concat(q.c, [q.e])), 250);
     if (i < qs.length - 1) {
       const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
       if (!go) { quit = true; break; }
@@ -1074,7 +1468,7 @@ async function runWrite(domain) {
   await coach('<span class="tag">記述　' + esc(DOMAINS[w.d]) + "</span><p>" + esc(w.s) + "</p><p><strong>" + esc(w.q.replace(/。$/, "")) + "（" + w.lim + "字以内）。</strong></p><p class=\"small\">科目Bでは「何が起きたか」と「なぜそうなるか」をセットで書くのがコツです。</p>");
   const r = await askText(w.id, "設問：" + w.q.replace(/。$/, "") + "（" + w.lim + "字以内）", w.lim);
   if (r.quit) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, quit: true }; }
-  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p><p>" + esc(w.note) + "</p>";
+  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p><p>" + esc(w.note) + "</p>" + figHTML(w.id) + abbrHTML([w.s, w.q, w.a, w.note]);
   if (r.skip) {
     S.write[w.id] = { r: 0, t: todayStr() }; save();
     await coach(ansHTML + "<p>解答例を一度書き写すと、言い回しが身につきます。この問題は" + GAP_TXT[0] + "</p>");
@@ -1100,7 +1494,7 @@ function pickCase() {
 async function runCase() {
   const c = pickCase();
   const n = c.qs.length;
-  await coach('<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>", 600);
+  await coach('<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>" + abbrHTML([c.s].concat(c.fig.lines || [], (c.fig.rows || []).flat())), 600);
   let score = 0, answered = 0, quit = false;
   for (let i = 0; i < n && !quit; i++) {
     const sq = c.qs[i];
@@ -1118,7 +1512,7 @@ async function runCase() {
       const right = pick === sq.ans;
       if (right) score++;
       const ak = KANA[order.findIndex(o => o.k === sq.ans)];
-      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + "<p>" + esc(sq.e) + "</p>", 250);
+      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + "<p>" + esc(sq.e) + "</p>" + figHTML(c.id + "-" + i) + abbrHTML([sq.q].concat(sq.c, [sq.e])), 250);
     } else {
       let r;
       for (;;) {
@@ -1127,7 +1521,7 @@ async function runCase() {
         await coach(figHTML(c.fig), 150); await coach(head, 150);
       }
       if (r.quit) { quit = true; break; }
-      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p><p>" + esc(sq.note) + "</p>";
+      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p><p>" + esc(sq.note) + "</p>" + figHTML(c.id + "-" + i) + abbrHTML([sq.q, sq.a, sq.note]);
       if (r.skip) await coach(ansHTML, 250);
       else {
         const gh = gradeHTML(r.text, sq);
@@ -1152,6 +1546,132 @@ async function runCase() {
   return { n: 1 };
 }
 
+
+/* ===== 解説の図解と略語 ===== */
+const HAS_FIG = typeof FIG !== "undefined" && typeof FIGMAP !== "undefined";
+let figSeq = 0;
+function svgLines(x, y, text, o = {}) {
+  const lines = String(text).split("\n"), lh = o.lh || 13;
+  const y0 = y - (lines.length - 1) * lh / 2;
+  return lines.map((t, i) => '<text x="' + x + '" y="' + (y0 + i * lh) + '" text-anchor="' + (o.anchor || "middle") + '" dominant-baseline="middle"' + (o.cls ? ' class="' + o.cls + '"' : "") + (o.fs ? ' style="font-size:' + o.fs + 'px"' : "") + ">" + esc(t) + "</text>").join("");
+}
+// 文字の幅の目安（全角は文字の大きさ、半角はその約半分）で、指定の幅に収まるように折り返す
+function wrapText(text, maxW, fs = 10) {
+  const out = [];
+  for (const para of String(text).split("\n")) {
+    let line = "", w = 0, lastBreak = -1;
+    for (const ch of para) {
+      const cw = /[\x00-\x7f]/.test(ch) ? fs * 0.56 : fs;
+      if (w + cw > maxW && line) {
+        const cut = lastBreak > 0 ? lastBreak : line.length;
+        out.push(line.slice(0, cut)); line = line.slice(cut); w = [...line].reduce((a, c) => a + (/[\x00-\x7f]/.test(c) ? fs * 0.56 : fs), 0); lastBreak = -1;
+      }
+      line += ch; w += cw;
+      if ("、。／→ ）".includes(ch)) lastBreak = line.length;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function edgePt(n, tx, ty) {
+  // 箱の中心から (tx,ty) へ向かう線が、箱の縁と交わる点
+  const cx = n.x + n.w / 2, cy = n.y + n.h / 2, dx = tx - cx, dy = ty - cy;
+  if (!dx && !dy) return [cx, cy];
+  const s = Math.min(Math.abs((n.w / 2 + 3) / (dx || 1e-9)), Math.abs((n.h / 2 + 3) / (dy || 1e-9)));
+  return [cx + dx * s, cy + dy * s];
+}
+function marker(id) {
+  return '<defs><marker id="' + id + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah"/></marker></defs>';
+}
+function figGraph(s) {
+  const W = s.w || 320, H = s.h, id = "ah" + (++figSeq);
+  const N = {};
+  s.n.forEach(n => { N[n.id] = Object.assign({ w: 80, h: 32 }, n); });
+  let out = marker(id);
+  for (const [a, b, label, opt = ""] of s.e) {
+    const A = N[a], B = N[b];
+    const [x1, y1] = edgePt(A, B.x + B.w / 2, B.y + B.h / 2), [x2, y2] = edgePt(B, A.x + A.w / 2, A.y + A.h / 2);
+    const cls = "ln" + (opt.includes("bad") ? " bad" : opt.includes("ok") ? " ok" : "") + (opt.includes("dash") ? " dash" : "");
+    const mk = opt.includes("none") ? "" : ' marker-end="url(#' + id + ')"' + (opt.includes("both") ? ' marker-start="url(#' + id + ')"' : "");
+    out += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" class="' + cls + '"' + mk + "/>";
+    if (label) {
+      const vertical = Math.abs(x2 - x1) < Math.abs(y2 - y1) * 0.35;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      const lw = [...label].reduce((s, c) => s + (/[\x00-\x7f]/.test(c) ? 5.6 : 10), 0);
+      // ラベルが箱に重ならない位置を、線の上・下・少し離れた位置の順に探す
+      const hits = (lx, ly, anchor) => { const x0 = anchor === "start" ? lx : lx - lw / 2;
+        return Object.values(N).some(n => x0 < n.x + n.w && n.x < x0 + lw && ly - 7 < n.y + n.h && n.y < ly + 7); };
+      const cands = vertical ? [[mx + 6, my, "start"], [mx - 6 - lw, my, "start"]] : [[mx, my - 9, "middle"], [mx, my + 11, "middle"], [mx, my - 20, "middle"], [mx, my + 22, "middle"], [mx, my - 30, "middle"], [mx, my + 32, "middle"], [mx, my - 40, "middle"], [mx, my + 42, "middle"]];
+      const [lx, ly, la] = cands.find(c => !hits(...c)) || cands[0];
+      out += svgLines(lx, ly, label, { cls: "lbl", anchor: la });
+    }
+  }
+  for (const n of Object.values(N)) {
+    out += '<rect x="' + n.x + '" y="' + n.y + '" width="' + n.w + '" height="' + n.h + '" rx="6" class="box' + (n.c ? " " + n.c : "") + '"/>' + svgLines(n.x + n.w / 2, n.y + n.h / 2, n.t);
+  }
+  let extra = 0;
+  for (const [x, y, t, anchor] of s.notes || []) {
+    const a = anchor || "middle";
+    const lines = wrapText(t, a === "middle" ? W - 8 : W - x - 4);
+    // 折り返した行は下へ伸ばし、図の下端の補足なら図の高さも伸ばす
+    lines.forEach((ln, i) => { out += svgLines(x, y + i * 12, ln, { cls: "note", anchor: a }); });
+    if (y > H - 30 && lines.length > 1) extra = Math.max(extra, (lines.length - 1) * 12 + 6);
+  }
+  return { W, H: H + extra, body: out };
+}
+function figSeqDiagram(s) {
+  const W = s.w || 320, k = s.a.length, colW = W / k, id = "ah" + (++figSeq), top = 34, row = 26;
+  const noteLines = s.note ? wrapText(s.note, W - 8) : [];
+  const H = top + s.m.length * row + 12 + (noteLines.length ? 14 + noteLines.length * 12 : 0);
+  const cx = i => colW * i + colW / 2;
+  let out = marker(id);
+  s.a.forEach((a, i) => {
+    out += '<line x1="' + cx(i) + '" y1="' + (top - 6) + '" x2="' + cx(i) + '" y2="' + (top + s.m.length * row) + '" class="life"/>';
+    // 名前が枠に収まらないときは文字を小さくする
+    const est = [...a].reduce((s, c) => s + (/[\x00-\x7f]/.test(c) ? 0.56 : 1), 0) * 11;
+    out += '<rect x="' + (cx(i) - colW / 2 + 3) + '" y="2" width="' + (colW - 6) + '" height="24" rx="6" class="box"/>' + svgLines(cx(i), 14, a, { fs: est > colW - 12 ? Math.max(8, Math.floor(11 * (colW - 12) / est)) : 0 });
+  });
+  s.m.forEach(([f, t, label, opt = ""], j) => {
+    const y = top + j * row + row - 4;
+    const cls = "ln" + (opt.includes("bad") ? " bad" : opt.includes("ok") ? " ok" : "") + (opt.includes("dash") ? " dash" : "");
+    if (f === t) {
+      out += '<circle cx="' + cx(f) + '" cy="' + (y - 4) + '" r="3" class="dot' + (opt.includes("bad") ? " bad" : opt.includes("ok") ? " ok" : "") + '"/>';
+      out += svgLines(cx(f) + (f < k / 2 ? 8 : -8), y - 4, label, { cls: "lbl", anchor: f < k / 2 ? "start" : "end" });
+    } else {
+      const x1 = cx(f) + (t > f ? 3 : -3), x2 = cx(t) + (t > f ? -3 : 3);
+      out += '<line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '" class="' + cls + '" marker-end="url(#' + id + ')"/>';
+      out += svgLines((x1 + x2) / 2, y - 9, label, { cls: "lbl" });
+    }
+  });
+  noteLines.forEach((ln, i) => { out += svgLines(W / 2, H - 8 - (noteLines.length - 1 - i) * 12, ln, { cls: "note" }); });
+  return { W, H, body: out };
+}
+function figHTML(qid) {
+  if (!HAS_FIG || !FIGMAP[qid] || !FIG[FIGMAP[qid]]) return "";
+  const s = FIG[FIGMAP[qid]];
+  const r = s.type === "seq" ? figSeqDiagram(s) : figGraph(s);
+  return '<figure class="fig"><figcaption class="small">図解：' + esc(s.cap) + '</figcaption><svg viewBox="0 0 ' + r.W + " " + r.H + '" role="img" aria-label="' + esc(s.cap) + '">' + r.body + "</svg></figure>";
+}
+// 文章に出てくる略語を ABBR から探し、正式名称の一覧にする
+function abbrHTML(texts) {
+  if (typeof ABBR === "undefined") return "";
+  const found = new Map();
+  const tryKey = k => { if (ABBR[k] && !found.has(k)) found.set(k, ABBR[k]); return !!ABBR[k]; };
+  for (const t of texts) {
+    for (const m of String(t || "").matchAll(/[A-Za-z][A-Za-z0-9]*(?:[\-\/][A-Za-z0-9]+)*/g)) {
+      const tok = m[0];
+      if (tryKey(tok)) continue;
+      for (const part of tok.split(/[\-\/]/)) {
+        if (tryKey(part)) continue;
+        const base = part.replace(/v?\d+$/, "");
+        if (base && base !== part) tryKey(base);
+      }
+    }
+  }
+  if (!found.size) return "";
+  return '<details class="abbr" open><summary>略語の正式名称（' + found.size + "）</summary><dl>" +
+    [...found].map(([k, [en, ja]]) => "<dt>" + esc(k) + "</dt><dd>" + esc(en) + (ja ? "<span>" + esc(ja) + "</span>" : "") + "</dd>").join("") + "</dl></details>";
+}
 
 /* ===== IPAの過去問（科目A-1・A-2は4択、午後は本番演習） ===== */
 const A2 = HAS_PAST ? PAST.a2 : [], A1 = HAS_PAST ? PAST.a1 : [], PM = HAS_PAST ? PAST.pm : [];

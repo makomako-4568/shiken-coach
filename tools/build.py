@@ -19,10 +19,10 @@ RESET = (':root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-ar
          'img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}')
 
 APPS = [
-    {"dir": "sc", "parts": ["h_head.html", "d1_quiz.js", "d2_write.js", "d_past.js", "e_engine.js"], "name": "支援士合格コーチ", "short": "支援士コーチ",
+    {"dir": "sc", "parts": ["h_head.html", "d1_quiz.js", "d2_write.js", "d_past.js", "../common/d_abbr.js", "d_fig.js", "e_engine.js"], "name": "支援士合格コーチ", "short": "支援士コーチ",
      "light": "#FFFFFF", "dark": "#15211E", "bg": "#F1F5F4", "color": (11, 110, 95), "icon": "shield",
      "desc": "情報処理安全確保支援士試験の学習計画づくり、4択・記述・事例演習、進捗管理"},
-    {"dir": "nespe", "parts": ["h_head.html", "d_exam.js", "d_data.js", "d_cases.js", "d_past.js", "e_engine.js"], "name": "ネスペ合格コーチ", "short": "ネスペコーチ",
+    {"dir": "nespe", "parts": ["h_head.html", "d_exam.js", "d_data.js", "d_cases.js", "d_past.js", "../common/d_abbr.js", "d_fig.js", "e_engine.js"], "name": "ネスペ合格コーチ", "short": "ネスペコーチ",
      "light": "#FFFFFF", "dark": "#16212A", "bg": "#F2F5F7", "color": (31, 111, 178), "icon": "port",
      "desc": "ネットワークスペシャリスト試験の学習計画づくり、4択・記述・事例演習、進捗管理"},
 ]

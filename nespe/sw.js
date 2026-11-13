@@ -1,5 +1,5 @@
 // オフラインでも開けるようにする。画面は通信できればいつも最新版を取り、できなければ保存済みの版を使う
-const CACHE = "nespe-191f21a628";
+const CACHE = "nespe-60335af8aa";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {

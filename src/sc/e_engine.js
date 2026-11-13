@@ -598,7 +598,7 @@ async function runQuiz(n, domain, ids) {
     await coach('<span class="tag">' + esc(DOMAINS[q.d]) + "</span>" +
       (right ? '<p><span class="ok">✓ 正解</span>　' + ansKana + "　" + esc(q.c[0]) + "</p>"
              : '<p><span class="ng">✕ 不正解</span></p><ul><li>あなたの解答：' + mineKana + "　" + esc(q.c[pick]) + "</li><li><strong>正解：" + ansKana + "　" + esc(q.c[0]) + "</strong></li></ul>") +
-      "<p>" + esc(q.e) + "</p>", 250);
+      "<p>" + esc(q.e) + "</p>" + figHTML(q.id) + abbrHTML([q.q].concat(q.c, [q.e])), 250);
     if (i < qs.length - 1) {
       const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
       if (!go) { quit = true; break; }
@@ -641,7 +641,7 @@ async function runWrite(domain) {
   await coach('<span class="tag">記述　' + esc(DOMAINS[w.d]) + "</span><p>" + esc(w.s) + "</p><p><strong>" + esc(w.q.replace(/。$/, "")) + "（" + w.lim + "字以内）。</strong></p><p class=\"small\">科目Bでは「何が起きたか」と「なぜそうなるか」をセットで書くのがコツです。</p>");
   const r = await askText(w.id, "設問：" + w.q.replace(/。$/, "") + "（" + w.lim + "字以内）", w.lim);
   if (r.quit) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, quit: true }; }
-  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p><p>" + esc(w.note) + "</p>";
+  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p><p>" + esc(w.note) + "</p>" + figHTML(w.id) + abbrHTML([w.s, w.q, w.a, w.note]);
   if (r.skip) {
     S.write[w.id] = { r: 0, t: todayStr() }; save();
     await coach(ansHTML + "<p>解答例を一度書き写すと、言い回しが身につきます。この問題は" + GAP_TXT[0] + "</p>");
@@ -667,7 +667,7 @@ function pickCase() {
 async function runCase() {
   const c = pickCase();
   const n = c.qs.length;
-  await coach('<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>", 600);
+  await coach('<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>" + abbrHTML([c.s].concat(c.fig.lines || [], (c.fig.rows || []).flat())), 600);
   let score = 0, answered = 0, quit = false;
   for (let i = 0; i < n && !quit; i++) {
     const sq = c.qs[i];
@@ -685,7 +685,7 @@ async function runCase() {
       const right = pick === sq.ans;
       if (right) score++;
       const ak = KANA[order.findIndex(o => o.k === sq.ans)];
-      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + "<p>" + esc(sq.e) + "</p>", 250);
+      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + "<p>" + esc(sq.e) + "</p>" + figHTML(c.id + "-" + i) + abbrHTML([sq.q].concat(sq.c, [sq.e])), 250);
     } else {
       let r;
       for (;;) {
@@ -694,7 +694,7 @@ async function runCase() {
         await coach(figHTML(c.fig), 150); await coach(head, 150);
       }
       if (r.quit) { quit = true; break; }
-      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p><p>" + esc(sq.note) + "</p>";
+      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p><p>" + esc(sq.note) + "</p>" + figHTML(c.id + "-" + i) + abbrHTML([sq.q, sq.a, sq.note]);
       if (r.skip) await coach(ansHTML, 250);
       else {
         const gh = gradeHTML(r.text, sq);
@@ -719,6 +719,132 @@ async function runCase() {
   return { n: 1 };
 }
 
+
+/* ===== 解説の図解と略語 ===== */
+const HAS_FIG = typeof FIG !== "undefined" && typeof FIGMAP !== "undefined";
+let figSeq = 0;
+function svgLines(x, y, text, o = {}) {
+  const lines = String(text).split("\n"), lh = o.lh || 13;
+  const y0 = y - (lines.length - 1) * lh / 2;
+  return lines.map((t, i) => '<text x="' + x + '" y="' + (y0 + i * lh) + '" text-anchor="' + (o.anchor || "middle") + '" dominant-baseline="middle"' + (o.cls ? ' class="' + o.cls + '"' : "") + (o.fs ? ' style="font-size:' + o.fs + 'px"' : "") + ">" + esc(t) + "</text>").join("");
+}
+// 文字の幅の目安（全角は文字の大きさ、半角はその約半分）で、指定の幅に収まるように折り返す
+function wrapText(text, maxW, fs = 10) {
+  const out = [];
+  for (const para of String(text).split("\n")) {
+    let line = "", w = 0, lastBreak = -1;
+    for (const ch of para) {
+      const cw = /[\x00-\x7f]/.test(ch) ? fs * 0.56 : fs;
+      if (w + cw > maxW && line) {
+        const cut = lastBreak > 0 ? lastBreak : line.length;
+        out.push(line.slice(0, cut)); line = line.slice(cut); w = [...line].reduce((a, c) => a + (/[\x00-\x7f]/.test(c) ? fs * 0.56 : fs), 0); lastBreak = -1;
+      }
+      line += ch; w += cw;
+      if ("、。／→ ）".includes(ch)) lastBreak = line.length;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function edgePt(n, tx, ty) {
+  // 箱の中心から (tx,ty) へ向かう線が、箱の縁と交わる点
+  const cx = n.x + n.w / 2, cy = n.y + n.h / 2, dx = tx - cx, dy = ty - cy;
+  if (!dx && !dy) return [cx, cy];
+  const s = Math.min(Math.abs((n.w / 2 + 3) / (dx || 1e-9)), Math.abs((n.h / 2 + 3) / (dy || 1e-9)));
+  return [cx + dx * s, cy + dy * s];
+}
+function marker(id) {
+  return '<defs><marker id="' + id + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah"/></marker></defs>';
+}
+function figGraph(s) {
+  const W = s.w || 320, H = s.h, id = "ah" + (++figSeq);
+  const N = {};
+  s.n.forEach(n => { N[n.id] = Object.assign({ w: 80, h: 32 }, n); });
+  let out = marker(id);
+  for (const [a, b, label, opt = ""] of s.e) {
+    const A = N[a], B = N[b];
+    const [x1, y1] = edgePt(A, B.x + B.w / 2, B.y + B.h / 2), [x2, y2] = edgePt(B, A.x + A.w / 2, A.y + A.h / 2);
+    const cls = "ln" + (opt.includes("bad") ? " bad" : opt.includes("ok") ? " ok" : "") + (opt.includes("dash") ? " dash" : "");
+    const mk = opt.includes("none") ? "" : ' marker-end="url(#' + id + ')"' + (opt.includes("both") ? ' marker-start="url(#' + id + ')"' : "");
+    out += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" class="' + cls + '"' + mk + "/>";
+    if (label) {
+      const vertical = Math.abs(x2 - x1) < Math.abs(y2 - y1) * 0.35;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      const lw = [...label].reduce((s, c) => s + (/[\x00-\x7f]/.test(c) ? 5.6 : 10), 0);
+      // ラベルが箱に重ならない位置を、線の上・下・少し離れた位置の順に探す
+      const hits = (lx, ly, anchor) => { const x0 = anchor === "start" ? lx : lx - lw / 2;
+        return Object.values(N).some(n => x0 < n.x + n.w && n.x < x0 + lw && ly - 7 < n.y + n.h && n.y < ly + 7); };
+      const cands = vertical ? [[mx + 6, my, "start"], [mx - 6 - lw, my, "start"]] : [[mx, my - 9, "middle"], [mx, my + 11, "middle"], [mx, my - 20, "middle"], [mx, my + 22, "middle"], [mx, my - 30, "middle"], [mx, my + 32, "middle"], [mx, my - 40, "middle"], [mx, my + 42, "middle"]];
+      const [lx, ly, la] = cands.find(c => !hits(...c)) || cands[0];
+      out += svgLines(lx, ly, label, { cls: "lbl", anchor: la });
+    }
+  }
+  for (const n of Object.values(N)) {
+    out += '<rect x="' + n.x + '" y="' + n.y + '" width="' + n.w + '" height="' + n.h + '" rx="6" class="box' + (n.c ? " " + n.c : "") + '"/>' + svgLines(n.x + n.w / 2, n.y + n.h / 2, n.t);
+  }
+  let extra = 0;
+  for (const [x, y, t, anchor] of s.notes || []) {
+    const a = anchor || "middle";
+    const lines = wrapText(t, a === "middle" ? W - 8 : W - x - 4);
+    // 折り返した行は下へ伸ばし、図の下端の補足なら図の高さも伸ばす
+    lines.forEach((ln, i) => { out += svgLines(x, y + i * 12, ln, { cls: "note", anchor: a }); });
+    if (y > H - 30 && lines.length > 1) extra = Math.max(extra, (lines.length - 1) * 12 + 6);
+  }
+  return { W, H: H + extra, body: out };
+}
+function figSeqDiagram(s) {
+  const W = s.w || 320, k = s.a.length, colW = W / k, id = "ah" + (++figSeq), top = 34, row = 26;
+  const noteLines = s.note ? wrapText(s.note, W - 8) : [];
+  const H = top + s.m.length * row + 12 + (noteLines.length ? 14 + noteLines.length * 12 : 0);
+  const cx = i => colW * i + colW / 2;
+  let out = marker(id);
+  s.a.forEach((a, i) => {
+    out += '<line x1="' + cx(i) + '" y1="' + (top - 6) + '" x2="' + cx(i) + '" y2="' + (top + s.m.length * row) + '" class="life"/>';
+    // 名前が枠に収まらないときは文字を小さくする
+    const est = [...a].reduce((s, c) => s + (/[\x00-\x7f]/.test(c) ? 0.56 : 1), 0) * 11;
+    out += '<rect x="' + (cx(i) - colW / 2 + 3) + '" y="2" width="' + (colW - 6) + '" height="24" rx="6" class="box"/>' + svgLines(cx(i), 14, a, { fs: est > colW - 12 ? Math.max(8, Math.floor(11 * (colW - 12) / est)) : 0 });
+  });
+  s.m.forEach(([f, t, label, opt = ""], j) => {
+    const y = top + j * row + row - 4;
+    const cls = "ln" + (opt.includes("bad") ? " bad" : opt.includes("ok") ? " ok" : "") + (opt.includes("dash") ? " dash" : "");
+    if (f === t) {
+      out += '<circle cx="' + cx(f) + '" cy="' + (y - 4) + '" r="3" class="dot' + (opt.includes("bad") ? " bad" : opt.includes("ok") ? " ok" : "") + '"/>';
+      out += svgLines(cx(f) + (f < k / 2 ? 8 : -8), y - 4, label, { cls: "lbl", anchor: f < k / 2 ? "start" : "end" });
+    } else {
+      const x1 = cx(f) + (t > f ? 3 : -3), x2 = cx(t) + (t > f ? -3 : 3);
+      out += '<line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '" class="' + cls + '" marker-end="url(#' + id + ')"/>';
+      out += svgLines((x1 + x2) / 2, y - 9, label, { cls: "lbl" });
+    }
+  });
+  noteLines.forEach((ln, i) => { out += svgLines(W / 2, H - 8 - (noteLines.length - 1 - i) * 12, ln, { cls: "note" }); });
+  return { W, H, body: out };
+}
+function figHTML(qid) {
+  if (!HAS_FIG || !FIGMAP[qid] || !FIG[FIGMAP[qid]]) return "";
+  const s = FIG[FIGMAP[qid]];
+  const r = s.type === "seq" ? figSeqDiagram(s) : figGraph(s);
+  return '<figure class="fig"><figcaption class="small">図解：' + esc(s.cap) + '</figcaption><svg viewBox="0 0 ' + r.W + " " + r.H + '" role="img" aria-label="' + esc(s.cap) + '">' + r.body + "</svg></figure>";
+}
+// 文章に出てくる略語を ABBR から探し、正式名称の一覧にする
+function abbrHTML(texts) {
+  if (typeof ABBR === "undefined") return "";
+  const found = new Map();
+  const tryKey = k => { if (ABBR[k] && !found.has(k)) found.set(k, ABBR[k]); return !!ABBR[k]; };
+  for (const t of texts) {
+    for (const m of String(t || "").matchAll(/[A-Za-z][A-Za-z0-9]*(?:[\-\/][A-Za-z0-9]+)*/g)) {
+      const tok = m[0];
+      if (tryKey(tok)) continue;
+      for (const part of tok.split(/[\-\/]/)) {
+        if (tryKey(part)) continue;
+        const base = part.replace(/v?\d+$/, "");
+        if (base && base !== part) tryKey(base);
+      }
+    }
+  }
+  if (!found.size) return "";
+  return '<details class="abbr" open><summary>略語の正式名称（' + found.size + "）</summary><dl>" +
+    [...found].map(([k, [en, ja]]) => "<dt>" + esc(k) + "</dt><dd>" + esc(en) + (ja ? "<span>" + esc(ja) + "</span>" : "") + "</dd>").join("") + "</dl></details>";
+}
 
 /* ===== IPAの過去問（科目A-1・A-2は4択、午後は本番演習） ===== */
 const A2 = HAS_PAST ? PAST.a2 : [], A1 = HAS_PAST ? PAST.a1 : [], PM = HAS_PAST ? PAST.pm : [];
