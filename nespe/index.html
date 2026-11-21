@@ -55,9 +55,8 @@ header .col { display: flex; align-items: center; gap: 12px; padding-block: 10px
 .port { width: 30px; height: 24px; border: 2px solid var(--ink); border-radius: 3px; position: relative; flex: none; }
 .port::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: -2px; height: 6px; background: var(--surface); border: 2px solid var(--ink); border-bottom: 0; }
 .port i { position: absolute; top: 3px; width: 5px; height: 4px; border-radius: 1px; }
-.port i:first-child { left: 3px; background: var(--led); animation: blink 1.6s infinite steps(2); }
+.port i:first-child { left: 3px; background: var(--led); }
 .port i:last-child { right: 3px; background: var(--amber); }
-@keyframes blink { 50% { opacity: .25; } }
 .status { margin-left: auto; font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; min-width: 0; }
 .status > span { border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; white-space: nowrap; }
 
@@ -131,6 +130,27 @@ main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; p
 .abbr dt { font-family: var(--f-mono); font-weight: 500; }
 .abbr dd { margin: 0; min-width: 0; }
 .abbr dd span { display: block; color: var(--muted); font-size: 12px; }
+/* 折りたたみ（くわしく・試験の詳細） */
+details.more { margin-top: 6px; }
+details.more > summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+details.more[open] > summary { margin-bottom: 6px; }
+.mt { margin-top: 6px; }
+/* この7日間のカレンダー */
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; text-align: center; font-family: var(--f-mono); }
+.week span { border: 1px solid var(--line); border-radius: 6px; padding: 2px 0; color: var(--muted); font-size: 14px; line-height: 1.3; }
+.week span small { display: block; font-size: 10px; }
+.week span.on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.week span.today { box-shadow: inset 0 -3px 0 var(--edge); }
+/* 過去問の本番形式：採点前の見直し */
+.ansgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 4px; margin-top: 6px; font-family: var(--f-mono); font-size: 14px; }
+.ansgrid span { border: 1px solid var(--line); border-radius: 4px; text-align: center; padding: 1px 0; }
+.ansgrid b { display: block; font-size: 10px; font-weight: 400; color: var(--muted); }
+.dock .col.grid6 { display: grid; grid-template-columns: repeat(5, 1fr); align-items: stretch; }
+.dock .col.grid6 > .lead, .dock .col.grid6 > .row, .dock .col.grid6 > .hint { grid-column: 1 / -1; }
+.dock .col.grid6 > .opt { text-align: center; padding: 6px 2px; min-height: 40px; font-size: 13px; font-family: var(--f-mono); }
+.pmdock .row > .sep { flex: 0 0 10px; }
+/* タッチ端末では、キーボード操作の案内を出さない */
+@media (hover: none) { .kbonly { display: none; } }
 /* 午後のページ画像。PCやタブレットはページ全体、スマホは本文を折り返したかたまりで表示する */
 .pg + .pg { margin-top: 10px; }
 .pg img { display: block; max-width: 100%; height: auto; cursor: zoom-in; }
@@ -777,9 +797,31 @@ const HOURS = [5, 10, 15, 20];
 const H_MIN = 1, H_MAX = 60;
 const validHours = h => Number.isInteger(h) && h >= H_MIN && h <= H_MAX;
 const QIDS = new Set(QUIZ.map(q => q.id)), WIDS = new Set(WRITE.map(w => w.id)), CIDS = new Set(CASES.map(c => c.id));
-const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, past: {}, pm: {}, pmrun: null, days: [], done: "", ob: null });
+const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, past: {}, pm: {}, pmrun: null, days: [], done: "", ob: null, sess: null, log: {} });
 const HAS_PAST = typeof PAST !== "undefined" && PAST && Array.isArray(PAST.a2) && PAST.a2.length > 0;
 const PID = (key, n) => key + "-" + n;
+// 途中の演習（4択・過去問・事例）。1問ごとに保存し、メニューの「続きから」で再開する
+const PSETS = HAS_PAST ? PAST.a2.concat(PAST.a1 || []) : [];
+function pastItem(pid) {
+  if (typeof pid !== "string") return null;
+  const j = pid.lastIndexOf("-"), set = PSETS.find(s => s.key === pid.slice(0, j)), n = Number(pid.slice(j + 1));
+  return set && Number.isInteger(n) && n >= 1 && n <= set.ans.length ? { set, n } : null;
+}
+function cleanSess(x) {
+  if (!x || typeof x !== "object") return null;
+  const int = (v, max) => Number.isInteger(v) && v >= 0 && v <= max;
+  if (x.k === "quiz" && Array.isArray(x.ids) && x.ids.length && x.ids.length <= 50 && x.ids.every(id => QIDS.has(id)) && int(x.i, x.ids.length - 1) && int(x.ok, x.i))
+    return { k: "quiz", ids: x.ids.slice(), i: x.i, ok: x.ok, today: x.today === true, box: x.box === true };
+  if (x.k === "past" && Array.isArray(x.items) && x.items.length && x.items.length <= 40 && x.items.every(pastItem) && int(x.i, x.items.length) && int(x.ok, x.items.length)) {
+    const ans = x.items.map((_, j) => Array.isArray(x.ans) && [0, 1, 2, 3].includes(x.ans[j]) ? x.ans[j] : null);
+    return { k: "past", items: x.items.slice(), i: x.i, ok: x.ok, exam: x.exam === true, ans, ms: Number.isFinite(x.ms) && x.ms >= 0 ? x.ms : 0, intro: typeof x.intro === "string" ? x.intro.slice(0, 300) : "" };
+  }
+  if (x.k === "case" && CIDS.has(x.id)) {
+    const c = CASES.find(c => c.id === x.id);
+    if (int(x.i, c.qs.length - 1) && x.i > 0 && Number.isFinite(x.score) && x.score >= 0 && x.score <= x.i) return { k: "case", id: x.id, i: x.i, score: x.score };
+  }
+  return null;
+}
 // 最初の設定の途中経過（再開用）を検査して取り込む
 function cleanA(a) {
   const o = { weak: Array.isArray(a.weak) ? a.weak.filter(k => DOMAINS[k]) : [], exp: ["none", "some", "pro"].includes(a.exp) ? a.exp : "some", amI: ["exempt", "none", "unknown"].includes(a.amI) ? a.amI : "none" };
@@ -818,9 +860,14 @@ function migrate(d) {
   for (const [k, v] of Object.entries(obj(d.past))) if (/^\d{4}r\d\d[ah]_(sc|nw|koudo_am1)-\d{1,2}$/.test(k) && v && typeof v.ok === "boolean" && isDate(v.t)) s.past[k] = { ok: v.ok, t: v.t };
   for (const [k, v] of Object.entries(obj(d.pm))) if (/^\d{4}r\d\d[ah]_(sc|nw)_pm2?$/.test(k) && v && [0, 1, 2, 3].includes(v.g) && Number.isFinite(v.min) && isDate(v.t)) s.pm[k] = { g: v.g, min: v.min, t: v.t };
   const r = d.pmrun;
-  if (r && typeof r === "object" && /^\d{4}r\d\d[ah]_(sc|nw)_pm2?$/.test(r.key) && Number.isFinite(r.start)) s.pmrun = { key: r.key, start: r.start, paused: Number.isFinite(r.paused) ? r.paused : 0, pauseAt: Number.isFinite(r.pauseAt) ? r.pauseAt : 0, memo: typeof r.memo === "string" ? r.memo.slice(0, 5000) : "" };
+  if (r && typeof r === "object" && /^\d{4}r\d\d[ah]_(sc|nw)_pm2?$/.test(r.key) && Number.isFinite(r.start)) s.pmrun = { key: r.key, start: r.start, paused: Number.isFinite(r.paused) ? r.paused : 0, pauseAt: Number.isFinite(r.pauseAt) ? r.pauseAt : 0, memo: typeof r.memo === "string" ? r.memo.slice(0, 5000) : "", seen: Number.isFinite(r.seen) ? r.seen : 0, hide: r.hide === true };
+  // 演習中にアプリが終了したときは、最後に画面を見ていた時刻で止める
+  if (s.pmrun && !s.pmrun.pauseAt && s.pmrun.seen) s.pmrun.pauseAt = Math.max(s.pmrun.start, s.pmrun.seen);
   if (Array.isArray(d.days)) s.days = d.days.filter(isDate).slice(-120);
   if (isDate(d.done)) s.done = d.done;
+  for (const [k, v] of Object.entries(obj(d.log))) if (isDate(k) && v && Number.isInteger(v.n) && v.n >= 0 && Number.isFinite(v.ms) && v.ms >= 0) s.log[k] = { n: v.n, ms: v.ms };
+  Object.keys(s.log).sort().slice(0, -60).forEach(k => delete s.log[k]);
+  s.sess = cleanSess(d.sess);
   if (Number.isFinite(d.at) && d.at > 0) s.at = d.at;
   if (!s.profile && d.ob && typeof d.ob === "object" && d.ob.A && typeof d.ob.A === "object" && Number.isInteger(d.ob.i) && d.ob.i >= 0 && d.ob.i < 20) {
     const A = cleanA(d.ob.A);
@@ -874,10 +921,34 @@ async function pushCloud() {
     if (cloudDirty) { cloudDirty = false; pushCloud(); }
   }
 }
-// 画面を閉じる・切り替えるときは待たずに保存する
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && cloud) { clearTimeout(cloudTimer); pushCloud(); } });
-function loadDraft(id) { try { const d = JSON.parse(localStorage.getItem(DKEY) || "null"); return d && d.id === id && typeof d.text === "string" ? d.text : ""; } catch (e) { return ""; } }
-function saveDraft(id, text) { try { if (text) localStorage.setItem(DKEY, JSON.stringify({ id, text })); else localStorage.removeItem(DKEY); } catch (e) {} }
+// 画面を閉じる・切り替えるときは待たずに保存する。午後の演習中なら、離れている間は時間を止める
+let pmActive = null;
+function pmHide() { const r = pmActive; if (r && !r.pauseAt) { r.pauseAt = Date.now(); saveLocal(); } }
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") { pmHide(); if (cloud) { clearTimeout(cloudTimer); pushCloud(); } return; }
+  const r = pmActive;
+  if (r && r.pauseAt) {
+    const gap = Date.now() - r.pauseAt;
+    r.paused += gap; r.pauseAt = 0; save();
+    if (gap >= 60000) coach("<p>画面を離れていた約" + Math.round(gap / 60000) + "分は、時間を止めておきました。</p>", 0);
+  }
+});
+window.addEventListener("pagehide", pmHide);
+// 記述の下書き（問題ごと）。「やめる」でも消さず、次に同じ問題を開くと続きから書ける
+function draftMap() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DKEY) || "null");
+    if (!d || typeof d !== "object" || Array.isArray(d)) return {};
+    if (typeof d.id === "string" && typeof d.text === "string") return d.text ? { [d.id]: d.text } : {};
+    const o = {};
+    for (const [k, v] of Object.entries(d)) if (typeof v === "string" && v) o[k] = v.slice(0, 6000);
+    return o;
+  } catch (e) { return {}; }
+}
+function loadDraft(id) { return draftMap()[id] || ""; }
+function saveDraft(id, text) { try { const m = draftMap(); if (text) m[id] = text; else delete m[id]; localStorage.setItem(DKEY, JSON.stringify(m)); } catch (e) {} }
+function clearDrafts() { try { localStorage.removeItem(DKEY); } catch (e) {} }
+const writeDrafts = () => WRITE.filter(w => loadDraft(w.id).trim());
 
 // 表記ゆれの吸収: NFKC（全角→半角）、チャンネル→チャネル、カタカナ直後の長音を削除、大文字化、空白除去
 const norm = s => String(s).normalize("NFKC").replace(/チャンネル/g, "チャネル").replace(/([ァ-ヴ])ー/g, "$1").toUpperCase().replace(/\s/g, "");
@@ -994,6 +1065,7 @@ function ask(options, opts = {}) {
     clearDock();
     if (opts.grid) $dock.classList.add("grid2");
     if (opts.row4) $dock.classList.add("grid4");
+    if (opts.cls) $dock.classList.add(opts.cls);
     let doneFlag = false;
     const finish = (label, value) => { if (doneFlag) return; doneFlag = true; document.removeEventListener("keydown", onKey); clearDock(); if (label !== null) me(label); res(value); $dock.focus({ preventScroll: true }); };
     if (opts.lead) setLead(opts.lead);
@@ -1065,23 +1137,23 @@ function askMulti(options, defaults, opts = {}) {
     settle();
   });
 }
-/* 記述の入力。戻り値: {text} | {skip:true} | {quit:true} | {extra:true} */
+/* 記述の入力。戻り値: {text} | {skip:true} | {quit:true} | {extra:true}。下書きは入力のたびに保存し、「やめる」でも消さない */
 function askText(id, lead, lim, extraLabel) {
   return new Promise(res => {
     clearDock();
     setLead(lead, "q");
     const wrap = document.createElement("div");
     wrap.className = "row";
+    const KB = '<span class="kbonly">Ctrl＋Enter（Macは⌘＋Enter）でも送信できます。</span>';
     wrap.innerHTML = '<textarea id="ans" placeholder="' + lim + '字以内で解答" aria-describedby="cnt ansHint"></textarea>' +
+      '<div class="row"><span class="count" id="cnt" aria-live="polite">0 / ' + lim + '字</span><span class="grow"></span>' +
+      (extraLabel ? '<button type="button" class="opt quiet" id="extra">' + esc(extraLabel) + "</button>" : "") + "</div>" +
       '<div class="row"><button type="button" class="opt quiet" id="quit">やめる</button><span class="grow"></span>' +
-      (extraLabel ? '<button type="button" class="opt quiet" id="extra">' + esc(extraLabel) + "</button>" : "") +
       '<button type="button" class="opt quiet" id="skip">答えを見る</button><button type="button" class="opt primary" id="send">送信</button></div>' +
-      '<div class="row"><span class="count" id="cnt" aria-live="polite">0 / ' + lim + '字</span></div>' +
-      '<p class="hint" id="ansHint">空白を除いて数えています（本番の数え方はIPAの案内で確認してください）。Ctrl＋Enter（Macは⌘＋Enter）でも送信できます。</p>';
+      '<p class="hint" id="ansHint">空白を除いて数えています。書いた内容は自動で保存されます。' + KB + "</p>";
     $dock.appendChild(wrap);
-    const t = document.getElementById("ans"), c = document.getElementById("cnt"), h = document.getElementById("ansHint"), q = document.getElementById("quit");
+    const t = document.getElementById("ans"), c = document.getElementById("cnt"), h = document.getElementById("ansHint");
     t.setAttribute("aria-labelledby", "dockLead");
-    let armed = false;
     const recount = () => {
       const n = clen(t.value);
       c.textContent = n + " / " + lim + "字" + (n > lim ? "（" + (n - lim) + "字オーバー）" : "");
@@ -1090,8 +1162,7 @@ function askText(id, lead, lim, extraLabel) {
     t.value = loadDraft(id); recount();
     t.oninput = () => {
       recount(); saveDraft(id, t.value);
-      if (t.value.trim()) { t.removeAttribute("aria-invalid"); h.className = "hint"; h.textContent = "Ctrl＋Enter（Macは⌘＋Enter）でも送信できます。"; }
-      if (armed) { armed = false; q.textContent = "やめる"; }
+      if (t.value.trim() && h.classList.contains("err")) { t.removeAttribute("aria-invalid"); h.className = "hint"; h.innerHTML = "書いた内容は自動で保存されます。" + KB; }
     };
     const send = () => {
       const v = t.value.trim();
@@ -1102,14 +1173,7 @@ function askText(id, lead, lim, extraLabel) {
     document.getElementById("send").onclick = send;
     document.getElementById("skip").onclick = () => { saveDraft(id, ""); clearDock(); me("答えを見る"); res({ skip: true }); };
     if (extraLabel) document.getElementById("extra").onclick = () => { clearDock(); me(extraLabel); res({ extra: true }); };
-    q.onclick = () => {
-      if (t.value.trim() && !armed) {
-        armed = true; q.textContent = "消してやめる";
-        h.className = "hint err"; h.textContent = "書いた内容は消えます。やめる場合は「消してやめる」を押してください。";
-        return;
-      }
-      saveDraft(id, ""); clearDock(); me("やめる"); res({ quit: true });
-    };
+    document.getElementById("quit").onclick = () => { clearDock(); me("やめる"); res({ quit: true }); };
     focusDock(t);
     settle();
   });
@@ -1198,6 +1262,7 @@ function sourceHTML() {
   return '<p class="small">IPA公式サイトの掲載内容を' + esc(EXAM.asof) + "時点で確認したものです。最新情報は次のページで確認してください。</p><ul class=\"small\">" +
     EXAM.links.map(([t, u]) => '<li><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + "</a></li>").join("") + "</ul>";
 }
+const moreHTML = (title, html) => '<details class="more"><summary>' + esc(title) + "（タップで開く）</summary>" + html + "</details>";
 function examHTML() { return fmtHTML() + curCard() + lateCard() + nextCard() + sourceHTML(); }
 /* ===== 計画 =====
    計画は作成日（profile.start）を起点に固定し、日がたつとフェーズが進む */
@@ -1284,11 +1349,10 @@ function renderStatus() {
   const el = document.getElementById("status");
   if (!S.profile) { el.innerHTML = "<span>初回設定</span>"; return; }
   const plan = buildPlan(S.profile);
-  const t = totals();
   const head = plan.done ? "試験終了" : plan.today ? "本日試験" : "あと" + plan.days + "日";
   let ph = "";
   if (plan.phases.length) { const i = currentPhase(plan); ph = "<span>P" + (i+1) + '<span class="ph-name"> ' + esc(plan.phases[i].t) + "</span></span>"; }
-  const acc = t.n >= 5 ? "正答率 " + Math.round(t.c / t.n * 100) + "%" : "4択 " + t.n + "問";
+  const acc = "今日 " + todayLog().n + "問";
   el.innerHTML = "<span>" + head + "</span>" + ph + '<span class="acc">' + acc + "</span>";
 }
 function markDay() { const d = todayStr(); if (!S.days.includes(d)) { S.days.push(d); S.days = S.days.slice(-120); } }
@@ -1299,6 +1363,30 @@ function streak() {
   return n;
 }
 function weekDays() { const t = todayStr(); return S.days.filter(d => diff(d, t) < 7 && diff(d, t) >= 0).length; }
+// 今日解いた数と勉強した時間（答えと答えの間隔から数える。5分以上あいた分は数えない）
+let lastAct = 0;
+const actStart = () => { lastAct = Date.now(); };
+function logAct(n, ms) {
+  const now = Date.now();
+  if (ms === undefined) { ms = lastAct ? Math.min(now - lastAct, 5 * 60000) : 60000; lastAct = now; }
+  const d = todayStr(), L = S.log[d] || (S.log[d] = { n: 0, ms: 0 });
+  L.n += n; L.ms += Math.max(0, ms); markDay();
+}
+const todayLog = () => S.log[todayStr()] || { n: 0, ms: 0 };
+const minTxt = ms => Math.max(1, Math.round(ms / 60000)) + "分";
+function weekSolved() { const t = todayStr(); let n = 0; for (let k = 0; k < 7; k++) { const L = S.log[addDays(t, -k)]; if (L) n += L.n; } return n; }
+function totalSolved() { return totals().n + Object.keys(S.past).length + Object.keys(S.write).length + Object.keys(S.cases).length; }
+// 今週のカレンダー（学習した日に✓）
+function weekHTML() {
+  const t = todayStr(), W = "日月火水木金土";
+  let h = "";
+  for (let k = 6; k >= 0; k--) {
+    const d = addDays(t, -k), on = S.days.includes(d);
+    h += '<span class="' + (on ? "on" : "") + (k ? "" : " today") + '"><small>' + (k ? W[parseLocal(d).getDay()] : "今日") + "</small>" + (on ? "✓" : "・") + "</span>";
+  }
+  return '<div class="week" role="img" aria-label="この7日間で学習した日 ' + weekDays() + '日">' + h + "</div>";
+}
+function rewardHTML() { return '<div class="card"><p class="small">この7日間（✓は学習した日）</p>' + weekHTML() + '<p class="small mt">これまでに解いた問題：<strong>' + totalSolved() + "問</strong></p></div>"; }
 
 /* ===== 4択 ===== */
 function pickQuiz(n, domain, ids) {
@@ -1314,39 +1402,62 @@ function pickQuiz(n, domain, ids) {
   pool.sort((a, b) => b.w - a.w);
   return pool.slice(0, n).map(x => x.q);
 }
-async function runQuiz(n, domain, ids) {
-  const qs = pickQuiz(n, domain, ids);
-  let ok = 0, done = 0, quit = false;
-  await coach("<p>" + (ids ? "前回間違えた問題を" : "科目A-2（旧午前II）形式の4択を") + qs.length + "問いきます。ほかの選択肢がなぜ違うかも考えてみてください。</p><p class=\"small\">キーボードなら1〜4キーでも答えられます。</p>");
-  for (let i = 0; i < qs.length; i++) {
+/* o.today: 今日の学習から / o.one: 1問だけ / o.box: 10分だけ / o.resume: 続きから */
+async function runQuiz(n, domain, ids, o = {}) {
+  let sess = o.resume;
+  actStart();
+  if (sess) await coach("<p>続きから再開します。あと" + (sess.ids.length - sess.i) + "問です。</p>", 250);
+  else {
+    const qs0 = pickQuiz(n, domain, ids);
+    sess = { k: "quiz", ids: qs0.map(q => q.id), i: 0, ok: 0, today: !!o.today, box: !!o.box };
+    if (!o.today) await coach("<p>" + (o.one ? "4択を1問だけいきます。" : o.box ? "10分だけ、4択を解きます。10分たったらお知らせします。" : ids ? "復習リストの問題を" + qs0.length + "問いきます。" : "科目A-2（旧午前II）形式の4択を" + qs0.length + "問いきます（約" + qs0.length + "分）。") + '</p><p class="small kbonly">キーボードなら1〜4キーでも答えられます。</p>', 350);
+  }
+  const qs = sess.ids.map(id => QUIZ.find(q => q.id === id));
+  const start = sess.i, t0 = Date.now();
+  S.sess = sess; save();
+  let quit = false, boxEnd = false, boxAsk = sess.box;
+  for (let i = start; i < qs.length; i++) {
     const q = qs[i];
     const order = shuffle(q.c.map((t, k) => ({ t, k })));
-    await coach('<span class="tag">Q' + (i+1) + "/" + qs.length + "　正解" + ok + '</span><p class="qtext">' + esc(q.q) + "</p>", i ? 250 : 450);
+    await coach('<span class="tag">Q' + (i+1) + (sess.box ? "" : "/" + qs.length) + '</span><p class="qtext">' + esc(q.q) + "</p>", i > start ? 250 : 450);
     const pick = await ask(order.map(o => ({ label: o.t, value: o.k })), { wide: true, lead: "答えを選んでください", extra: [{ label: "やめる", value: -1 }] });
     if (pick === -1) { quit = true; break; }
     const right = pick === 0;
-    if (right) ok++;
-    done++;
+    sess.i = i + 1; if (right) sess.ok++;
     const st = S.stats[q.d] || (S.stats[q.d] = { c: 0, n: 0 });
     st.n++; if (right) st.c++;
-    S.last[q.id] = right; markDay(); save();
+    S.last[q.id] = right; logAct(1);
+    if (sess.i >= qs.length) S.sess = null;
+    save();
     const ansKana = KANA[order.findIndex(o => o.k === 0)], mineKana = KANA[order.findIndex(o => o.k === pick)];
     await coach('<span class="tag">' + esc(DOMAINS[q.d]) + "</span>" +
       (right ? '<p><span class="ok">✓ 正解</span>　' + ansKana + "　" + esc(q.c[0]) + "</p>"
              : '<p><span class="ng">✕ 不正解</span></p><ul><li>あなたの解答：' + mineKana + "　" + esc(q.c[pick]) + "</li><li><strong>正解：" + ansKana + "　" + esc(q.c[0]) + "</strong></li></ul>") +
-      "<p>" + esc(q.e) + "</p>" + figHTML(q.id) + abbrHTML([q.q].concat(q.c, [q.e])), 250);
+      explainHTML(q.e, q.id, [q.q].concat(q.c, [q.e])), 250);
     if (i < qs.length - 1) {
-      const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
-      if (!go) { quit = true; break; }
+      if (boxAsk && Date.now() - t0 >= 10 * 60000) {
+        const more = await ask([{ label: "ここで終える", value: false, primary: true }], { lead: "10分たちました。おつかれさまです", extra: [{ label: "もう少し続ける", value: true }] });
+        if (!more) { boxEnd = true; break; }
+        boxAsk = false;
+      } else {
+        const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
+        if (!go) { quit = true; break; }
+      }
     }
   }
+  const done = sess.i, ok = sess.ok;
+  const keep = quit && done > 0 && done < qs.length;
+  if (!keep) S.sess = null;
+  save();
   if (!done) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, ok: 0, quit: true }; }
+  if (o.one) return { n: done, ok, quit: false };
   const rate = Math.round(ok / done * 100);
-  const msg = done < 10
-    ? "今回は" + done + "問中 <strong>" + ok + "問正解</strong>でした。" + (rate >= 80 ? "この調子で続けましょう。" : rate >= 60 ? "間違えた問題は、メニューの「間違えた問題」から復習できます。" : "解説の用語をテキストで確認してから、もう一度挑戦しましょう。")
-    : done + "問中 <strong>" + ok + "問正解</strong>（" + rate + "%）でした。" + (rate >= 80 ? "科目A-2の合格ラインを十分に越えています。" : rate >= 60 ? "合格ラインの60%は越えています。間違えた問題は今日中に見直しましょう。" : "まだ伸びしろが大きいところです。解説の用語を確認してから、もう一度挑戦しましょう。");
-  await coach("<p>" + msg + (quit ? "（途中でやめました。ここまでの記録は保存しています）" : "") + "</p>");
-  return { n: done, ok, quit };
+  let msg = ok === 0 ? done + "問チャレンジしました。解説を読んだ分だけ、確実に前に進んでいます。"
+    : done + "問解きました（そのうち" + ok + "問正解）。" + (done >= 10 ? (rate >= 80 ? "科目A-2の合格ラインを十分に越えています。" : rate >= 60 ? "合格ラインの60%を越えています。" : "") : "");
+  if (ok < done) msg += "間違えた問題は「復習リスト」に入れておきました。";
+  if (keep) msg += "続きは、メニューの一番上の「続きから」で再開できます。";
+  await coach("<p>" + msg + "</p>" + (o.today ? "" : rewardHTML()));
+  return { n: done, ok, quit: keep || quit };
 }
 
 /* ===== 記述 ===== */
@@ -1361,6 +1472,9 @@ function gradeHTML(ans, item) {
   return { sug, html: "<p>解答例の要素のうち <strong>" + g.h + " / " + g.g.length + "</strong> が含まれています" + (len > item.lim ? "。字数が" + (len - item.lim) + "字オーバーしています。本番では減点や採点対象外になりえます" : "") + "。</p><ul>" + rows + "</ul><p class=\"small\">語句の一致による目安です。言い回しが違っても、論点が合っていれば正解です。</p>" };
 }
 function pickWrite(domain) {
+  // 書きかけの下書きがある問題を先に出す
+  const dr = writeDrafts().filter(w => !domain || w.d === domain);
+  if (dr.length) return dr[0];
   const t = todayStr();
   const weak = new Set(S.profile ? S.profile.weak : []);
   const pool = WRITE.filter(w => !domain || w.d === domain).map(w => {
@@ -1372,21 +1486,23 @@ function pickWrite(domain) {
   }).sort((a, b) => b.s - a.s);
   return pool[0].w;
 }
-async function runWrite(domain) {
-  const w = pickWrite(domain);
-  await coach('<span class="tag">記述　' + esc(DOMAINS[w.d]) + "</span><p>" + esc(w.s) + "</p><p><strong>" + esc(w.q.replace(/。$/, "")) + "（" + w.lim + "字以内）。</strong></p><p class=\"small\">科目Bでは「何が起きたか」と「なぜそうなるか」をセットで書くのがコツです。</p>");
+async function runWrite(domain, id) {
+  const w = (id && WRITE.find(x => x.id === id)) || pickWrite(domain);
+  const draft = loadDraft(w.id).trim();
+  actStart();
+  await coach('<span class="tag">記述　' + esc(DOMAINS[w.d]) + "</span><p>" + esc(w.s) + "</p><p><strong>" + esc(w.q.replace(/。$/, "")) + "（" + w.lim + "字以内）。</strong></p>" + (draft ? '<p class="small">前回の下書きを入れてあります。続きから書けます。</p>' : '<p class="small">「何が起きたか」と「なぜそうなるか」をセットで書くのがコツです。</p>'));
   const r = await askText(w.id, "設問：" + w.q.replace(/。$/, "") + "（" + w.lim + "字以内）", w.lim);
-  if (r.quit) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, quit: true }; }
-  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p><p>" + esc(w.note) + "</p>" + figHTML(w.id) + abbrHTML([w.s, w.q, w.a, w.note]);
+  if (r.quit) { await coach("<p>" + (loadDraft(w.id).trim() ? "下書きを保存しました。メニューの「書きかけの記述を続ける」から続きを書けます。" : "中断しました。メニューに戻ります。") + "</p>", 200); return { n: 0, quit: true }; }
+  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p>" + explainHTML(w.note, w.id, [w.s, w.q, w.a, w.note]);
   if (r.skip) {
-    S.write[w.id] = { r: 0, t: todayStr() }; save();
+    S.write[w.id] = { r: 0, t: todayStr() }; logAct(0); save();
     await coach(ansHTML + "<p>解答例を一度書き写すと、言い回しが身につきます。この問題は" + GAP_TXT[0] + "</p>");
     return { n: 0 };
   }
   const gh = gradeHTML(r.text, w);
   await coach(gh.html + ansHTML);
   const g = await ask([{ label: "○ 書けた", value: 2 }, { label: "△ 惜しい", value: 1 }, { label: "× 書けなかった", value: 0 }], { lead: "解答例と比べて自己採点してください（語句の一致からの目安：" + gh.sug + "）" });
-  S.write[w.id] = { r: g, t: todayStr() }; markDay(); save();
+  S.write[w.id] = { r: g, t: todayStr() }; logAct(1); save();
   await coach("<p>" + ["大丈夫です。解答例を一度書き写すと、言い回しが身につきます。", "あと一歩です。足りなかった要素を意識して、また書いてみましょう。", "いい調子です。本番でもこの書き方で十分戦えます。"][g] + "この問題は" + GAP_TXT[g] + "</p>", 250);
   return { n: 1 };
 }
@@ -1400,12 +1516,16 @@ function pickCase() {
   const weak = new Set(S.profile ? S.profile.weak : []);
   return CASES.map(c => ({ c, s: (S.cases[c.id] ? (100 - S.cases[c.id].p) / 50 : 3) + (weak.has(c.d) ? 1 : 0) + Math.random() })).sort((a, b) => b.s - a.s)[0].c;
 }
-async function runCase() {
-  const c = pickCase();
+async function runCase(resume) {
+  const c = (resume && CASES.find(x => x.id === resume.id)) || pickCase();
   const n = c.qs.length;
-  await coach('<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>" + abbrHTML([c.s].concat(c.fig.lines || [], (c.fig.rows || []).flat())), 600);
-  let score = 0, answered = 0, quit = false;
-  for (let i = 0; i < n && !quit; i++) {
+  const sess = resume || { k: "case", id: c.id, i: 0, score: 0 };
+  actStart();
+  await coach((resume ? "<p>事例演習の続きです。設問" + (sess.i + 1) + "から再開します。</p>" : "") + '<span class="tag">事例　' + esc(DOMAINS[c.d]) + "</span><p><strong>" + esc(c.title) + "</strong></p><p>" + esc(c.s) + "</p>" + figHTML(c.fig) + '<p class="small">設問は' + n + "問です。図表は「図表を見る」でいつでも再表示できます。</p>" + abbrHTML([c.s].concat(c.fig.lines || [], (c.fig.rows || []).flat())), 600);
+  // 1問以上答えたあとに「やめる」を押したら、誤タップでないか確かめる
+  const quitOK = () => sess.i > 0 ? ask([{ label: "続ける", value: false, primary: true }], { lead: "ここまでの解答は保存してあります。やめても、あとで続きから再開できます", extra: [{ label: "やめる", value: true }] }) : Promise.resolve(true);
+  let quit = false;
+  for (let i = sess.i; i < n && !quit; i++) {
     const sq = c.qs[i];
     const head = '<span class="tag">設問' + (i+1) + "/" + n + "</span><p>" + esc(sq.q) + "</p>";
     await coach(head, 250);
@@ -1417,11 +1537,11 @@ async function runCase() {
         if (pick !== -2) break;
         await coach(figHTML(c.fig), 150); await coach(head, 150);
       }
-      if (pick === -1) { quit = true; break; }
+      if (pick === -1) { if (await quitOK()) { quit = true; break; } i--; continue; }
       const right = pick === sq.ans;
-      if (right) score++;
+      if (right) sess.score++;
       const ak = KANA[order.findIndex(o => o.k === sq.ans)];
-      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + "<p>" + esc(sq.e) + "</p>" + figHTML(c.id + "-" + i) + abbrHTML([sq.q].concat(sq.c, [sq.e])), 250);
+      await coach((right ? '<p><span class="ok">✓ 正解</span></p>' : '<p><span class="ng">✕ 不正解</span>　正解は <strong>' + ak + "　" + esc(sq.c[sq.ans]) + "</strong></p>") + explainHTML(sq.e, c.id + "-" + i, [sq.q].concat(sq.c, [sq.e])), 250);
     } else {
       let r;
       for (;;) {
@@ -1429,32 +1549,33 @@ async function runCase() {
         if (!r.extra) break;
         await coach(figHTML(c.fig), 150); await coach(head, 150);
       }
-      if (r.quit) { quit = true; break; }
-      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p><p>" + esc(sq.note) + "</p>" + figHTML(c.id + "-" + i) + abbrHTML([sq.q, sq.a, sq.note]);
+      if (r.quit) { if (await quitOK()) { quit = true; break; } i--; continue; }
+      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p>" + explainHTML(sq.note, c.id + "-" + i, [sq.q, sq.a, sq.note]);
       if (r.skip) await coach(ansHTML, 250);
       else {
         const gh = gradeHTML(r.text, sq);
         await coach(gh.html + ansHTML, 250);
         const g = await ask([{ label: "○ 書けた", value: 2 }, { label: "△ 惜しい", value: 1 }, { label: "× 書けなかった", value: 0 }], { lead: "自己採点してください（語句の一致からの目安：" + gh.sug + "）" });
-        score += [0, .5, 1][g];
+        sess.score += [0, .5, 1][g];
       }
     }
-    answered++;
+    sess.i = i + 1;
+    S.sess = sess.i < n ? sess : null; logAct(0); save();
     if (i < n - 1) {
       const go = await ask([{ label: "次の設問へ", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
       if (!go) quit = true;
     }
   }
-  if (quit && answered < n) {
-    await coach("<p>中断しました。" + (answered ? "途中までの結果は記録しません。" : "") + "メニューに戻ります。</p>", 200);
+  if (sess.i < n) {
+    if (sess.i > 0) { S.sess = sess; save(); }
+    await coach("<p>" + (sess.i > 0 ? "設問" + sess.i + "までの解答を保存しました。メニューの「続きから」で設問" + (sess.i + 1) + "から再開できます。" : "中断しました。メニューに戻ります。") + "</p>", 200);
     return { n: 0, quit: true };
   }
-  const p = Math.round(score / n * 100);
-  S.cases[c.id] = { p, t: todayStr() }; markDay(); save();
-  await coach("<p>この事例の得点の目安は <strong>" + p + "点</strong> です（設問ごとに等配点で計算）。本番の科目Bは60点が合格基準です。</p><p class=\"small\">本番の事例は数ページあり、設問も10前後あります。IPAの過去問でも同じ手順（図表から根拠を探す→指定の字句を使う→字数内でまとめる）で練習しましょう。</p>");
+  const p = Math.round(sess.score / n * 100);
+  S.cases[c.id] = { p, t: todayStr() }; S.sess = null; logAct(1, 0); save();
+  await coach("<p>この事例の得点の目安は <strong>" + p + "点</strong> です（設問ごとに等配点で計算）。本番の科目Bは60点が合格基準です。</p><p class=\"small\">本番の事例は数ページあり、設問も10前後あります。IPAの過去問でも同じ手順（図表から根拠を探す→指定の字句を使う→字数内でまとめる）で練習しましょう。</p>" + rewardHTML());
   return { n: 1 };
 }
-
 
 /* ===== 解説の図解と略語 ===== */
 const HAS_FIG = typeof FIG !== "undefined" && typeof FIGMAP !== "undefined";
@@ -1555,11 +1676,20 @@ function figSeqDiagram(s) {
   noteLines.forEach((ln, i) => { out += svgLines(W / 2, H - 8 - (noteLines.length - 1 - i) * 12, ln, { cls: "note" }); });
   return { W, H, body: out };
 }
-function figHTML(qid) {
+function diagHTML(qid) {
   if (!HAS_FIG || !FIGMAP[qid] || !FIG[FIGMAP[qid]]) return "";
   const s = FIG[FIGMAP[qid]];
   const r = s.type === "seq" ? figSeqDiagram(s) : figGraph(s);
   return '<figure class="fig"><figcaption class="small">図解：' + esc(s.cap) + '</figcaption><svg viewBox="0 0 ' + r.W + " " + r.H + '" role="img" aria-label="' + esc(s.cap) + '">' + r.body + "</svg></figure>";
+}
+// 解説は要点（最初の1文）だけを見せ、残りと図解は「くわしく」に畳む
+function explainHTML(text, qid, texts) {
+  const s = String(text), k = s.indexOf("。");
+  const cut = k >= 0 && k < s.length - 1;
+  const head = cut ? s.slice(0, k + 1) : s, rest = cut ? s.slice(k + 1) : "";
+  const dg = diagHTML(qid);
+  const more = rest || dg ? '<details class="more"><summary>くわしく' + (dg ? "（図解あり）" : "") + "</summary>" + (rest ? "<p>" + esc(rest) + "</p>" : "") + dg + "</details>" : "";
+  return "<p>" + esc(head) + "</p>" + more + abbrHTML(texts);
 }
 // 文章に出てくる略語を ABBR から探し、正式名称の一覧にする
 function abbrHTML(texts) {
@@ -1578,7 +1708,9 @@ function abbrHTML(texts) {
     }
   }
   if (!found.size) return "";
-  return '<details class="abbr" open><summary>略語の正式名称（' + found.size + "）</summary><dl>" +
+  const keys = [...found.keys()];
+  const sum = "略語：" + (keys.length > 6 ? keys.slice(0, 6).join("・") + " ほか" : keys.join("・")) + "（タップで正式名称）";
+  return '<details class="abbr"><summary>' + esc(sum) + "</summary><dl>" +
     [...found].map(([k, [en, ja]]) => "<dt>" + esc(k) + "</dt><dd>" + esc(en) + (ja ? "<span>" + esc(ja) + "</span>" : "") + "</dd>").join("") + "</dl></details>";
 }
 
@@ -1587,9 +1719,8 @@ const A2 = HAS_PAST ? PAST.a2 : [], A1 = HAS_PAST ? PAST.a1 : [], PM = HAS_PAST 
 const ALL_A = () => A2.concat(A1);
 function pastSummary() {
   const v = Object.values(S.past);
-  const total = ALL_A().reduce((a, s) => a + s.ans.length, 0);
   const pm = Object.keys(S.pm).length;
-  return v.length + " / " + total + "問" + (v.length ? "・正答率 " + Math.round(v.filter(x => x.ok).length / v.length * 100) + "%" : "") + (pm ? "・午後 " + pm + "回" : "");
+  return "解いた問題 " + v.length + "問" + (v.length ? "・正答率 " + Math.round(v.filter(x => x.ok).length / v.length * 100) + "%" : "") + (pm ? "・午後 " + pm + "回" : "");
 }
 function pastImg(set, n) {
   const f = set.dir + "/" + set.key + "/q" + String(n).padStart(2, "0");
@@ -1622,41 +1753,89 @@ document.addEventListener("load", e => {
 function pastLink(set, kind) {
   return set.pdf && set.pdf[kind] ? '<a href="' + esc(set.pdf[kind]) + '" target="_blank" rel="noopener">' + (kind === "ans" ? "解答例" : "問題冊子") + "（IPA・PDF）</a>" : "";
 }
-/* items: [{set, n}]。o.exam=true は本番形式（途中で正誤を出さず、最後にまとめて表示） */
+/* items: [{set, n}]。o.exam=true は本番形式（途中で正誤を出さず、見直してから採点する）。o.resume: 続きから */
 async function runPast(items, o = {}) {
-  let ok = 0, done = 0, quit = false;
-  const t0 = Date.now(), res = [];
-  await coach("<p>" + esc(o.intro) + "</p><p class=\"small\">問題は、IPAが公表している問題冊子の画像です。解説は公表されていないため、正解だけを表示します。キーボードなら1〜4キーでも答えられます。</p>", 300);
-  for (let i = 0; i < items.length; i++) {
-    const { set, n } = items[i];
-    await coach('<span class="tag">' + (i + 1) + "/" + items.length + (o.exam ? "" : "　正解" + ok) + "　" + esc(set.subj) + "</span>" + pastImg(set, n), i ? 200 : 350);
-    const pick = await ask(KANA.map((k, j) => ({ label: k, value: j })), { row4: true, lead: set.label + " " + set.subj + " 問" + n + "：答えを選んでください", extra: [{ label: "やめる", value: -1 }] });
+  let sess = o.resume;
+  if (sess) items = sess.items.map(pastItem);
+  else sess = { k: "past", items: items.map(x => PID(x.set.key, x.n)), i: 0, ok: 0, exam: !!o.exam, ans: items.map(() => null), ms: 0, intro: o.intro || "" };
+  const L = items.length, set0 = items[0].set;
+  actStart();
+  if (o.resume) await coach("<p>IPAの過去問の続きです。" + (sess.exam ? "ここまでの解答は保存してあります。" : "") + "</p>", 250);
+  else await coach("<p>" + esc(sess.intro) + '</p><p class="small">問題は、IPAが公表している問題冊子の画像です。解説は公表されていないため、正解だけを表示します。<span class="kbonly">キーボードなら1〜4キーでも答えられます。</span></p>', 300);
+  S.sess = sess; save();
+  let seg = Date.now();
+  const elapsed = () => sess.ms + (Date.now() - seg);
+  const flush = () => { sess.ms = elapsed(); seg = Date.now(); };
+  const show = (i, wait) => coach('<span class="tag">' + (i + 1) + "/" + L + "　" + esc(items[i].set.subj) + "</span>" + pastImg(items[i].set, items[i].n), wait);
+  const askAns = (i, extra) => {
+    const { set, n } = items[i], a = sess.ans[i];
+    return ask(KANA.map((k, j) => ({ label: k, value: j })), { row4: true, lead: set.label + " 問" + n + (sess.exam ? "　経過" + Math.floor(elapsed() / 60000) + "分 / " + set.min + "分" + (a === null ? "" : "（選んだ答え：" + KANA[a] + "）") : "") + "：答えを選んでください", extra });
+  };
+  let quit = false;
+  let i = sess.exam ? (sess.ans.indexOf(null) < 0 ? L : sess.ans.indexOf(null)) : sess.i;
+  const first = i;
+  while (i < L) {
+    await show(i, i > first ? 200 : 350);
+    const pick = await askAns(i, (sess.exam && i > 0 ? [{ label: "← 前の問題", value: -3 }] : []).concat([{ label: "やめる", value: -1 }]));
     if (pick === -1) { quit = true; break; }
+    if (pick === -3) { i--; continue; }
+    if (sess.exam) { sess.ans[i] = pick; i++; sess.i = Math.max(sess.i, i); flush(); logAct(0); save(); continue; }
+    const { set, n } = items[i];
     const correct = set.ans[n - 1], mine = KANA[pick], right = mine === correct;
-    if (right) ok++;
-    done++;
-    res.push({ set, n, mine, correct, right });
-    S.past[PID(set.key, n)] = { ok: right, t: todayStr() }; markDay(); save();
-    if (!o.exam) {
-      await coach((right ? '<p><span class="ok">✓ 正解</span>　' + correct + "</p>" : '<p><span class="ng">✕ 不正解</span>　あなたの解答は ' + mine + "、<strong>正解は " + correct + "</strong></p>") +
-        '<p class="small">' + pastLink(set, "ans") + "</p>", 200);
-      if (i < items.length - 1) {
-        const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
-        if (!go) { quit = true; break; }
-      }
+    if (right) sess.ok++;
+    i++; sess.i = i;
+    S.past[PID(set.key, n)] = { ok: right, t: todayStr() }; logAct(1);
+    if (i >= L) S.sess = null;
+    save();
+    await coach((right ? '<p><span class="ok">✓ 正解</span>　' + correct + "</p>" : '<p><span class="ng">✕ 不正解</span>　あなたの解答は ' + mine + "、<strong>正解は " + correct + "</strong></p>") +
+      '<p class="small">' + pastLink(set, "ans") + "</p>", 200);
+    if (i < L) {
+      const go = await ask([{ label: "次の問題", value: true, primary: true }], { extra: [{ label: "ここでやめる", value: false }] });
+      if (!go) { quit = true; break; }
     }
   }
-  if (!done) { await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, ok: 0, quit: true }; }
-  const rate = Math.round(ok / done * 100);
-  const min = Math.round((Date.now() - t0) / 60000);
-  const set0 = items[0].set;
-  let html = "<p>" + done + "問中 <strong>" + ok + "問正解</strong>（" + rate + "%）でした。" +
-    (o.exam && done === items.length ? "解答時間は約" + min + "分（本番は" + set0.min + "分）。" + (rate >= 60 ? set0.subj + "の基準点（60点）を越えています。" : set0.subj + "の基準点（60点）まであと少しです。") : "") + "</p>";
-  const wrong = res.filter(r => !r.right);
-  if (o.exam && wrong.length) html += '<div class="card"><p class="small">間違えた問題</p><ul>' + wrong.map(r => "<li>問" + r.n + "：あなた " + r.mine + " → 正解 " + r.correct + "</li>").join("") + "</ul></div>";
-  if (o.exam) html += '<p class="small">' + pastLink(set0, "ans") + "　間違えた問題は、メニューの「IPAの過去問」→「間違えた過去問」から解き直せます。</p>";
-  await coach(html + (quit ? "<p class=\"small\">（途中でやめました。ここまでの記録は保存しています）</p>" : ""));
-  return { n: done, ok, quit };
+  if (sess.exam && !quit) {
+    // 採点の前に見直す
+    for (;;) {
+      await coach("<p>全" + L + "問に答えました（経過" + Math.floor(elapsed() / 60000) + "分）。採点の前に、答えを見直せます。</p><div class=\"card\"><p class=\"small\">あなたの解答</p><div class=\"ansgrid\">" + sess.ans.map((a, j) => "<span><b>" + (j + 1) + "</b>" + (a === null ? "－" : KANA[a]) + "</span>").join("") + "</div></div>", 250);
+      const v = await ask([{ label: "採点する", value: "grade", primary: true }], { extra: [{ label: "見直す問題を選ぶ", value: "pick" }, { label: "やめる", value: "quit" }] });
+      if (v === "grade") break;
+      if (v === "quit") { quit = true; break; }
+      const j = await ask(items.map((_, j) => ({ label: (j + 1) + " " + (sess.ans[j] === null ? "－" : KANA[sess.ans[j]]), value: j })), { lead: "見直す問題の番号を選んでください", cls: "grid6", extra: [{ label: "← 戻る", value: -1 }] });
+      if (j < 0) continue;
+      await show(j, 200);
+      const p = await askAns(j, [{ label: "変えずに戻る", value: -1 }]);
+      if (p >= 0) sess.ans[j] = p;
+      flush(); save();
+    }
+  }
+  flush();
+  if (quit) {
+    const any = sess.exam ? sess.ans.some(a => a !== null) : sess.i > 0;
+    if (!any) { S.sess = null; save(); await coach("<p>中断しました。メニューに戻ります。</p>", 200); return { n: 0, ok: 0, quit: true }; }
+    S.sess = sess; save();
+    if (sess.exam) { await coach("<p>途中で止めました。ここまでの解答と経過時間は保存してあります。メニューの一番上の「続きから」で再開できます。</p>", 200); return { n: 0, ok: 0, quit: true }; }
+  }
+  let html, ok;
+  if (sess.exam) {
+    ok = 0;
+    const wrong = [];
+    items.forEach(({ set, n }, j) => {
+      const correct = set.ans[n - 1], mine = sess.ans[j] === null ? "－" : KANA[sess.ans[j]], right = mine === correct;
+      if (right) ok++; else wrong.push({ n, mine, correct });
+      S.past[PID(set.key, n)] = { ok: right, t: todayStr() };
+    });
+    S.sess = null; logAct(L, 0); save();
+    const rate = Math.round(ok / L * 100);
+    html = "<p>" + L + "問中 <strong>" + ok + "問正解</strong>（" + rate + "%）でした。解答時間は約" + Math.round(sess.ms / 60000) + "分（本番は" + set0.min + "分）。" + (rate >= 60 ? set0.subj + "の基準点（60点）を越えています。" : set0.subj + "の基準点（60点）まであと少しです。") + "</p>";
+    if (wrong.length) html += '<div class="card"><p class="small">見直したい問題</p><ul>' + wrong.map(r => "<li>問" + r.n + "：あなた " + r.mine + " → 正解 " + r.correct + "</li>").join("") + "</ul></div>";
+    html += '<p class="small">' + pastLink(set0, "ans") + "　間違えた問題は、「IPAの過去問」→「過去問の復習リスト」から解き直せます。</p>";
+  } else {
+    ok = sess.ok;
+    html = "<p>" + (ok === 0 ? sess.i + "問チャレンジしました。" : sess.i + "問解きました（そのうち" + ok + "問正解）。") + (quit ? "続きは、メニューの一番上の「続きから」で再開できます。" : "") + "</p>";
+  }
+  await coach(html + rewardHTML());
+  return { n: sess.exam ? L : sess.i, ok, quit };
 }
 function pastPool(sets, filter) {
   const out = [];
@@ -1676,15 +1855,15 @@ async function pastMenu() {
     { label: "科目A-2：回を選んで25問（40分）", value: "a2", primary: true, full: true },
     A1.length ? { label: "科目A-1：回を選んで30問（50分）", value: "a1" } : null,
     { label: "科目A-2からランダムに10問", value: "rand" },
-    { label: "まだ解いていない問題から10問（残り" + fresh.length + "問）", value: "new" },
-    wrong.length ? { label: "間違えた過去問（" + wrong.length + "問）", value: "wrong" } : null,
+    { label: "まだ解いていない問題から10問", value: "new" },
+    wrong.length ? { label: "過去問の復習リスト（" + wrong.length + "問）", value: "wrong" } : null,
     PM.length ? { label: "午後の本番演習（" + esc(PM[0].subjAll) + "）", value: "pm", full: true } : null,
     { label: "午後の過去問PDF（リンク）", value: "pdf" }
   ].filter(Boolean), { lead: "IPAの過去問（直近5年）", grid: true, extra: [{ label: "← メニューへ", value: null }] });
   if (v === "a2" || v === "a1") {
     const set = await pickSet(v === "a2" ? A2 : A1, "解く回を選んでください");
     if (!set) return;
-    await runPast(Array.from({ length: set.ans.length }, (_, i) => ({ set, n: i + 1 })), { exam: true, intro: set.src + "の" + set.ans.length + "問を、本番と同じく" + set.min + "分を目安に解きます。正誤は最後にまとめて表示します。" });
+    await runPast(Array.from({ length: set.ans.length }, (_, i) => ({ set, n: i + 1 })), { exam: true, intro: set.src + "の" + set.ans.length + "問を、本番と同じく" + set.min + "分を目安に解きます。正誤は最後にまとめて表示します。前の問題に戻ったり、採点の前に見直したりできます。" });
   } else if (v === "rand") await runPast(shuffle(pastPool(A2, () => true)).slice(0, 10), { intro: "直近5年の科目A-2から、ランダムに10問出します。" });
   else if (v === "new") {
     if (!fresh.length) { await coach("<p>すべての過去問を一度は解きました。おつかれさまでした。間違えた問題の解き直しがおすすめです。</p>", 200); return; }
@@ -1712,8 +1891,8 @@ function pmPagesHTML(set, pages, what) {
   return pages.map((p, i) => pmPageHTML(set, p, set.src + " " + what + "（" + (i + 1) + "/" + pages.length + "ページ）")).join("");
 }
 const pmElapsed = r => Math.max(0, (r.pauseAt || Date.now()) - r.start - (r.paused || 0));
-const mmss = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
-/* 演習中の操作パネル。経過時間を毎秒更新する。戻り値: {prob:n} | "memo" | "end" | "pause" */
+const pmMin = r => Math.floor(pmElapsed(r) / 60000);
+/* 演習中の操作パネル。経過時間は分単位で表示し、隠すこともできる。戻り値: {prob:n} | "memo" | "end" | "pause" */
 function pmDock(set, run) {
   return new Promise(res => {
     clearDock(); $dock.classList.add("pmdock");
@@ -1721,11 +1900,13 @@ function pmDock(set, run) {
     const lead = document.getElementById("dockLead");
     const tick = () => {
       const ms = pmElapsed(run), lim = set.min * 60000;
-      lead.textContent = set.label + " " + set.subj + "　経過 " + mmss(ms) + " / " + set.min + "分" + (ms > lim ? "（時間切れ）" : "　残り " + mmss(lim - ms));
+      run.seen = Date.now();
+      lead.textContent = set.label + " " + set.subj + (run.hide ? "" : "　経過 " + Math.floor(ms / 60000) + "分 / " + set.min + "分" + (ms > lim ? "（時間切れ）" : "（残り" + Math.ceil((lim - ms) / 60000) + "分）"));
     };
-    tick(); const timer = setInterval(tick, 1000);
+    tick(); saveLocal();
+    const timer = setInterval(() => { tick(); saveLocal(); }, 15000);
     const done = (label, v) => { clearInterval(timer); clearDock(); me(label); res(v); };
-    // 問題を読む場所を広く取るため、操作は2行にまとめる
+    // 問題を読む場所を広く取るため、操作は2行にまとめる。「終了」は控えめにして離して置く
     const btn = (label, cls, said, v, parent) => { const b = document.createElement("button"); b.type = "button"; b.className = "opt " + cls; b.textContent = label; b.onclick = () => done(said, v); parent.appendChild(b); return b; };
     const r1 = document.createElement("div"); r1.className = "row probs";
     set.probs.forEach(p => btn("問" + p.n, "", "問" + p.n + "を開く", { prob: p.n }, r1));
@@ -1733,47 +1914,61 @@ function pmDock(set, run) {
     const r2 = document.createElement("div"); r2.className = "row";
     btn("メモ" + (run.memo ? "✓" : ""), "", "解答メモ", "memo", r2);
     btn("中断", "quiet", "中断（あとで続ける）", "pause", r2);
-    const e = btn("終了・解答例", "primary", "終了して解答例を見る", "end", r2);
+    const h = document.createElement("button"); h.type = "button"; h.className = "opt quiet";
+    const hl = () => { h.textContent = run.hide ? "時間を表示" : "時間を隠す"; h.setAttribute("aria-pressed", run.hide ? "true" : "false"); };
+    hl(); h.onclick = () => { run.hide = !run.hide; hl(); tick(); saveLocal(); };
+    r2.appendChild(h);
+    const sp = document.createElement("span"); sp.className = "sep"; r2.appendChild(sp);
+    btn("終了", "quiet", "終了する", "end", r2);
     $dock.appendChild(r2);
-    focusDock(e); settle();
+    focusDock(r1.firstChild); settle();
   });
 }
 async function runPm(set) {
   let run = S.pmrun && S.pmrun.key === set.key ? S.pmrun : null;
   if (run) {
-    if (run.pauseAt) { run.paused = (run.paused || 0) + (Date.now() - run.pauseAt); run.pauseAt = 0; }
-    await coach("<p>" + esc(set.src) + "の続きです。経過時間は " + mmss(pmElapsed(run)) + " です。</p>", 250);
+    const away = run.pauseAt ? Date.now() - run.pauseAt : 0;
+    if (run.pauseAt) { run.paused = (run.paused || 0) + away; run.pauseAt = 0; }
+    await coach("<p>" + esc(set.src) + "の続きです。" + (away >= 60000 ? "離れていた間は時間を止めていたので、" : "") + "経過時間は " + pmMin(run) + "分 です。</p>", 250);
   } else {
-    run = { key: set.key, start: Date.now(), paused: 0, pauseAt: 0, memo: "" };
+    run = { key: set.key, start: Date.now(), paused: 0, pauseAt: 0, memo: "", seen: Date.now(), hide: false };
     await coach("<p>" + esc(set.src) + "を、本番と同じく<strong>" + set.min + "分</strong>で解きます。" + esc(set.pick) + "です。</p>" +
-      '<p class="small">問題はIPAが公表している問題冊子の画像です。スマホでは本文を折り返し、図や表は分けて表示します。画像をタップすると拡大します。解答は「メモ」に入力できます（CBTと同じくキーボードで入力する練習になります）。「中断」すると時間を止めて、あとで続きから再開できます。</p>', 350);
+      '<p class="small">問題はIPAが公表している問題冊子の画像です。画像をタップすると拡大します。解答は「メモ」に入力できます。アプリを閉じたり別の画面に切り替えたりすると、その間は時間が自動で止まります。</p>', 350);
   }
-  S.pmrun = run; save();
-  for (;;) {
-    const a = await pmDock(set, run);
-    if (a && a.prob) {
-      const p = set.probs.find(x => x.n === a.prob);
-      await coach('<span class="tag">' + esc(set.subj) + " 問" + p.n + "</span>" + pmPagesHTML(set, p.pages, "問" + p.n) + '<p class="small">出典：' + esc(set.src) + " 問" + p.n + "（IPA）。スマホでは本文を折り返して表示しています。</p>", 300);
-    } else if (a === "memo") {
-      const r = await askText("pm-" + set.key, "解答メモ（" + set.subj + "）", 5000);
-      if (r.text) { run.memo = r.text; save(); await coach("<p>解答メモを保存しました。</p>", 150); }
-    } else if (a === "pause") {
-      run.pauseAt = Date.now(); save();
-      await coach("<p>中断しました。経過 " + mmss(pmElapsed(run)) + " で止めています。メニューの「IPAの過去問」→「午後の本番演習」から続きを再開できます。</p>", 200);
-      return;
-    } else if (a === "end") {
-      const ms = pmElapsed(run);
-      await coach("<p>おつかれさまでした。解答時間は <strong>" + mmss(ms) + "</strong>（本番は" + set.min + "分）でした。</p>" +
-        (run.memo ? '<div class="card"><p class="small">あなたの解答メモ</p><p class="qtext">' + esc(run.memo) + "</p></div>" : ""), 250);
-      await coach('<span class="tag">解答例</span>' + pmPagesHTML(set, set.ans, "解答例") + '<p class="small">出典：' + esc(set.src) + " 解答例（IPA）</p>", 400);
-      if (set.cmnt.length) await coach('<span class="tag">採点講評</span>' + pmPagesHTML(set, set.cmnt, "採点講評") + '<p class="small">出典：' + esc(set.src) + " 採点講評（IPA）</p>", 300);
-      const g = await ask([{ label: "60点以上", value: 3 }, { label: "50〜59点", value: 2 }, { label: "40〜49点", value: 1 }, { label: "40点未満", value: 0 }], { lead: "解答例と比べて、自己採点の目安を選んでください（合格基準は60点）", grid: true });
-      S.pm[set.key] = { g, min: Math.round(ms / 60000), t: todayStr() };
-      S.pmrun = null; markDay(); save();
-      await coach("<p>" + ["まずは解答例の言い回しを書き写して、根拠になった本文の箇所を確かめましょう。", "あと一歩です。採点講評で、多くの人が落とした論点を確認しましょう。", "合格ラインまでもう少しです。字数と、設問が求める字句の使い方を見直しましょう。", "合格ラインを越えています。この調子で、別の回にも挑戦しましょう。"][g] + "</p>", 200);
-      return;
+  S.pmrun = run; pmActive = run; save();
+  try {
+    for (;;) {
+      const a = await pmDock(set, run);
+      if (a && a.prob) {
+        const p = set.probs.find(x => x.n === a.prob);
+        await coach('<span class="tag">' + esc(set.subj) + " 問" + p.n + "</span>" + pmPagesHTML(set, p.pages, "問" + p.n) + '<p class="small">出典：' + esc(set.src) + " 問" + p.n + "（IPA）。スマホでは本文を折り返して表示しています。</p>", 300);
+      } else if (a === "memo") {
+        const r = await askText("pm-" + set.key, "解答メモ（" + set.subj + "）", 5000);
+        if (r.text) { run.memo = r.text; save(); await coach("<p>解答メモを保存しました。</p>", 150); }
+      } else if (a === "pause") {
+        run.pauseAt = Date.now(); save();
+        await coach("<p>中断しました。経過 " + pmMin(run) + "分 で止めています。メニューの一番上の「午後演習の続き」から再開できます。</p>", 200);
+        return;
+      } else if (a === "end") {
+        const left = set.min - pmMin(run);
+        if (left > 0) {
+          const y = await ask([{ label: "続ける", value: false, primary: true }], { lead: "まだ" + left + "分あります。終了して解答例を見ますか", extra: [{ label: "終了して解答例を見る", value: true }] });
+          if (!y) continue;
+        }
+        const ms = pmElapsed(run);
+        pmActive = null;
+        await coach("<p>おつかれさまでした。解答時間は <strong>約" + Math.round(ms / 60000) + "分</strong>（本番は" + set.min + "分）でした。</p>" +
+          (run.memo ? '<div class="card"><p class="small">あなたの解答メモ</p><p class="qtext">' + esc(run.memo) + "</p></div>" : ""), 250);
+        await coach('<span class="tag">解答例</span>' + pmPagesHTML(set, set.ans, "解答例") + '<p class="small">出典：' + esc(set.src) + " 解答例（IPA）</p>", 400);
+        if (set.cmnt.length) await coach('<span class="tag">採点講評</span>' + pmPagesHTML(set, set.cmnt, "採点講評") + '<p class="small">出典：' + esc(set.src) + " 採点講評（IPA）</p>", 300);
+        const g = await ask([{ label: "60点以上", value: 3 }, { label: "50〜59点", value: 2 }, { label: "40〜49点", value: 1 }, { label: "40点未満", value: 0 }], { lead: "解答例と比べて、自己採点の目安を選んでください（合格基準は60点）", grid: true });
+        S.pm[set.key] = { g, min: Math.round(ms / 60000), t: todayStr() };
+        S.pmrun = null; logAct(1, ms); save();
+        await coach("<p>" + ["まずは解答例の言い回しを書き写して、根拠になった本文の箇所を確かめましょう。", "あと一歩です。採点講評で、多くの人が落とした論点を確認しましょう。", "合格ラインまでもう少しです。字数と、設問が求める字句の使い方を見直しましょう。", "合格ラインを越えています。この調子で、別の回にも挑戦しましょう。"][g] + "</p>" + rewardHTML(), 200);
+        return;
+      }
     }
-  }
+  } finally { pmActive = null; }
 }
 async function pmMenu() {
   const opts = PM.map(s => {
@@ -1821,9 +2016,9 @@ async function showProgress() {
   const dayTxt = plan.done ? "試験日を過ぎました" : plan.today ? "本日" : plan.days + "日";
   const weakNow = Object.entries(S.stats).filter(([, s]) => s.n >= 3 && s.c / s.n < .6).map(([k]) => DOMAINS[k]);
   await coach('<div class="card"><dl class="kv"><dt>試験まで</dt><dd>' + esc(dayTxt) + "（" + esc(slash(S.profile.exam)) + "）</dd><dt>現在のフェーズ</dt><dd>" + esc(phaseTxt) +
-    "</dd><dt>4択</dt><dd>" + t.n + "問・正答率 " + (t.n ? Math.round(t.c / t.n * 100) + "%" : "—") + "（全" + QUIZ.length + "問）</dd><dt>記述</dt><dd>" + wv.length + " / " + WRITE.length + "題（○ " + wv.filter(v => v.r === 2).length + "）</dd><dt>事例</dt><dd>" + cv.length + " / " + CASES.length + "事例" + (cv.length ? "（平均 " + Math.round(cv.reduce((a, b) => a + b.p, 0) / cv.length) + "点）" : "") +
-    "</dd>" + (HAS_PAST ? "<dt>IPAの過去問</dt><dd>" + pastSummary() + "</dd>" : "") + "<dt>間違えた問題</dt><dd>" + wrongIds().length + "問</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日（連続 " + streak() + "日）</dd><dt>記録の保存先</dt><dd>" + (cloud ? "Claudeの保存領域（別の端末でも続きから再開できます）" : "この端末（ブラウザ）の中") + "</dd></dl></div><div class=\"card\">" + bars + "</div>" +
-    (weakNow.length ? "<p>正答率が60%を下回っている分野：<strong>" + esc(weakNow.join("、")) + "</strong>。ここを集中的に回しましょう。</p>" : t.n ? "<p>60%を下回っている分野はありません。未着手の分野を埋めていきましょう。</p>" : "<p>まだ記録がありません。「今日の学習」から始めましょう。</p>"), 450);
+    "</dd><dt>4択</dt><dd>" + t.n + "問・正答率 " + (t.n ? Math.round(t.c / t.n * 100) + "%" : "—") + "</dd><dt>記述</dt><dd>" + wv.length + " / " + WRITE.length + "題（○ " + wv.filter(v => v.r === 2).length + "）</dd><dt>事例</dt><dd>" + cv.length + " / " + CASES.length + "事例" + (cv.length ? "（平均 " + Math.round(cv.reduce((a, b) => a + b.p, 0) / cv.length) + "点）" : "") +
+    "</dd>" + (HAS_PAST ? "<dt>IPAの過去問</dt><dd>" + pastSummary() + "</dd>" : "") + "<dt>復習リスト</dt><dd>" + wrongIds().length + "問</dd><dt>今週解いた問題</dt><dd>" + weekSolved() + "問（" + weekDays() + " / 7日・連続 " + streak() + "日）</dd><dt>累計</dt><dd>" + totalSolved() + "問</dd><dt>記録の保存先</dt><dd>" + (cloud ? "Claudeの保存領域（別の端末でも続きから再開できます）" : "この端末（ブラウザ）の中") + "</dd></dl>" + weekHTML() + "</div><div class=\"card\">" + bars + "</div>" +
+    (weakNow.length ? "<p>伸びしろが大きい分野：<strong>" + esc(weakNow.join("、")) + "</strong>。ここから優先して出題します。</p>" : t.n ? "<p>60%を下回っている分野はありません。未着手の分野を埋めていきましょう。</p>" : "<p>まだ記録がありません。「今日の学習」から始めましょう。</p>"), 450);
 }
 
 /* ===== 会話の流れ ===== */
@@ -1837,6 +2032,10 @@ function targetOptions() {
 async function onboarding(redo) {
   const old = redo ? S.profile : null;
   if (!redo) await coach("<p>はじめまして。ネットワークスペシャリスト試験（ネスペ）の合格まで伴走するコーチです。</p><p>6つほどの質問に答えてもらえれば、あなた専用の学習計画を作ります。1分ほどで終わります。答えを間違えたら「← 前の質問」で戻れます。</p>");
+  if (!redo && !S.ob) {
+    const v0 = await ask([{ label: "質問に答える（約1分）", value: "go", primary: true }, { label: "まず1問だけやってみる", value: "one" }], { lead: "どちらから始めますか" });
+    if (v0 === "one") { await runQuiz(1, null, null, { one: true }); await coach("<p>こんな感じで進めていきます。では、計画づくりの質問に答えてください。</p>", 250); }
+  }
   const A = old ? Object.assign({}, old, { weak: old.weak.slice() }) : { weak: [], exp: "some", amI: "none" };
   const t = () => todayStr();
   const steps = [
@@ -1847,8 +2046,8 @@ async function onboarding(redo) {
         const v = await ask(opts, { lead: "目指す試験", back });
         if (v === BACK || v === "cancel") return v;
         A.target = v;
-        if (v === "r8b") await coach("<p>科目Bの期間中ですね。ここからは記述対策に絞った短期集中プランにします。2026年度からCBT方式になり、科目名も変わりました（午前I→科目A-1、午前II→A-2、午後I→B-1、午後II→B-2）。</p>" + fmtHTML() + curCard(), 400);
-        else await coach("<p>2027年度からは新しい試験制度に移行する予定で、ネットワーク分野がどの区分で出題されるかはまだ発表されていません。ネットワークの技術内容は変わらず役に立つので、このまま準備を進めましょう。</p>" + nextCard() + lateCard() + sourceHTML(), 400);
+        if (v === "r8b") await coach("<p>科目Bの期間中ですね。ここからは記述対策に絞った短期集中プランにします。2026年度からCBT方式になり、科目名も変わりました（午前I→科目A-1、午前II→A-2、午後I→B-1、午後II→B-2）。</p>" + moreHTML("試験の形式と日程", fmtHTML() + curCard()), 400);
+        else await coach("<p>2027年度からは新しい試験制度に移行する予定で、ネットワーク分野がどの区分で出題されるかはまだ発表されていません。ネットワークの技術内容は変わらず役に立つので、このまま準備を進めましょう。</p>" + moreHTML("試験の形式と日程", nextCard() + lateCard() + sourceHTML()), 400);
         return v;
       } },
     { skip: () => A.target === "r8b", run: async back => {
@@ -1917,15 +2116,21 @@ async function showPlan(first) {
   const p = S.profile;
   const plan = buildPlan(p);
   if (plan.done || plan.today) { await coach(plan.today ? "<p>今日が試験日です。ここまでの積み重ねを信じて、落ち着いていきましょう。</p>" : "<p>設定した試験日を過ぎています。「その他」→「計画を作り直す」で次の目標を設定してください。</p>", 300); return; }
-  if (first && p.target !== "r8b") {
+  if (first) {
+    // 最初は「いまの期間」と「今日やること」だけ。全体は「その他」から見られる
+    const ci = currentPhase(plan), ph = plan.phases[ci];
+    await coach("<p>計画ができました。試験まで <strong>" + plan.days + "日</strong> です。</p><div class=\"card\"><p>いまの期間：<strong>P" + (ci + 1) + " " + esc(ph.t) + "</strong>（" + esc(mds(ph.to)) + "まで）</p><p class=\"mt\">今日やること：<strong>「今日の学習」を1回（約10分）</strong></p></div><p class=\"small\">全体の計画と時間割は、いつでも「その他」→「学習計画を見る」で見られます。</p>", 500);
+    return;
+  }
+  let note = "";
+  if (p.target !== "r8b") {
     const need = { none: 300, some: 200, pro: 120 }[p.exp];
     const who = { none: "ネットワークの実務経験がほぼない人", some: "運用などの実務経験が少しある人", pro: "設計・構築をしている人" }[p.exp];
-    if (plan.total < need) await coach('<div class="card warn"><p><strong>先に一つだけ。</strong>' + who + "の一般的な目安は、合格まで" + need + "時間前後です。今の設定だと約" + plan.total + "時間なので、週の時間を増やすか、過去問を解く量で補うと安心です。</p></div>", 300);
+    if (plan.total < need) note = '<p class="small">参考：' + who + "は、合格まで" + need + "時間前後が一つの目安と言われます。今の設定では約" + plan.total + "時間です。足りない分は、過去問を解く量で少しずつ補えば大丈夫です。</p>";
   }
-  const msg = first ? "<p>計画ができました。試験まで <strong>" + plan.days + "日</strong>、勉強時間は合計で約 <strong>" + plan.total + "時間</strong> の見込みです。</p>" : "<p>現在の学習計画です。</p>";
-  await coach(msg + datesHTML(p) + planHTML(plan) + "<p>目安の時間割は <strong>" + (plan.weekday ? "平日" + hm(plan.weekday) + " ＋ " : "") + "土日" + hm(plan.weekend) + "ずつ</strong>（週" + p.hours + "時間）です。</p>", 600);
+  await coach("<p>現在の学習計画です。試験まで <strong>" + plan.days + "日</strong>、勉強時間は合計で約 <strong>" + plan.total + "時間</strong> の見込みです。</p>" + datesHTML(p) + planHTML(plan) + "<p>目安の時間割は <strong>" + (plan.weekday ? "平日" + hm(plan.weekday) + " ＋ " : "") + "土日" + hm(plan.weekend) + "ずつ</strong>（週" + p.hours + "時間）です。</p>" + note, 600);
 }
-async function todaySession() {
+async function todaySession(resume) {
   const plan = buildPlan(S.profile);
   const ph = plan.phases.length ? plan.phases[currentPhase(plan)] : null;
   const key = ph ? ph.key : "base";
@@ -1937,8 +2142,8 @@ async function todaySession() {
     const label = ph ? "今日はP" + (currentPhase(plan)+1) + "「" + ph.t + "」の期間です。" : "";
     intro = label + (early ? "4択5問で知識を確認してから、記述を1題やりましょう。" : "科目B対策の時期なので記述が中心です。まず4択3問でウォームアップしましょう。" );
   }
-  await coach("<p>" + esc(intro) + "</p>");
-  const q = await runQuiz(nq);
+  if (!resume) await coach("<p>" + esc(intro) + "（約10分）</p>");
+  const q = await runQuiz(nq, null, null, { today: true, resume });
   if (q.n) { S.done = todayStr(); markDay(); save(); }
   if (q.quit) return;
   let wrote = 0, cased = 0;
@@ -1955,7 +2160,7 @@ async function todaySession() {
   }
   S.done = todayStr(); markDay(); save();
   const next = DOMAINS[weakest()];
-  await coach('<div class="card"><dl class="kv"><dt>今日の成果</dt><dd>4択 ' + q.n + "問（正解" + q.ok + "）・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "</dd><dt>今週の学習</dt><dd>" + weekDays() + " / 7日</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div><p>" + (HAS_PAST ? "おつかれさまでした。IPAの過去問は、メニューの「IPAの過去問」から回ごとに解けます。" : "おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。") + "</p>", 350);
+  await coach('<div class="card"><dl class="kv"><dt>今日やったこと</dt><dd>4択 ' + q.n + "問・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "（約" + minTxt(todayLog().ms) + "）</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div>" + rewardHTML() + "<p>" + (HAS_PAST ? "おつかれさまでした。IPAの過去問は、メニューの「IPAの過去問」から回ごとに解けます。" : "おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。") + "</p>", 350);
 }
 async function pickDomain(kind) {
   const keys = Object.keys(DOMAINS).filter(k => kind !== "write" || WRITE.some(w => w.d === k));
@@ -1966,7 +2171,7 @@ async function resetFlow() {
   await coach("<p>学習記録と計画をすべて消去します。元に戻せませんが、よろしいですか。</p>", 250);
   const y = await ask([{ label: "やめておく", value: false, primary: true }], { extra: [{ label: "記録をすべて消去する", value: true }] });
   if (!y) return;
-  S = blank(); save(); saveDraft("", ""); $log.innerHTML = "";
+  S = blank(); save(); clearDrafts(); $log.innerHTML = "";
   await onboarding(false);
 }
 async function otherMenu() {
@@ -1981,27 +2186,73 @@ async function otherMenu() {
   else if (v === "redo") { await coach("<p>学習記録は残したまま、計画を作り直します。</p>", 250); await onboarding(true); }
   else if (v === "reset") await resetFlow();
 }
+function sessLabel() {
+  const s = S.sess;
+  if (!s) return "";
+  if (s.k === "quiz") return (s.today ? "今日の学習" : "4択") + "（あと" + (s.ids.length - s.i) + "問）";
+  if (s.k === "past") {
+    const left = s.exam ? s.ans.filter(a => a === null).length : s.items.length - s.i, it = pastItem(s.items[0]);
+    return "IPAの過去問" + (it ? " " + it.set.label : "") + (left ? "（あと" + left + "問）" : "（採点の前）");
+  }
+  const c = CASES.find(x => x.id === s.id);
+  return "事例演習「" + c.title + "」（設問" + (s.i + 1) + "から）";
+}
+async function resumeSess() {
+  const s = S.sess;
+  if (s.k === "quiz") { if (s.today) await todaySession(s); else await runQuiz(0, null, null, { resume: s }); }
+  else if (s.k === "past") await runPast(null, { resume: s });
+  else await runCase(s);
+}
+async function moreMenu() {
+  const wrong = wrongIds();
+  const v = await ask([
+    { label: "4択を5問（おまかせ・約5分）", value: "quiz", primary: true, full: true },
+    { label: "4択の分野を選ぶ", value: "quizd" },
+    { label: "10分だけ4択", value: "box" },
+    { label: "記述トレーニング（約5分）", value: "write" },
+    { label: "事例演習（約15分）", value: "case" },
+    wrong.length ? { label: "復習リスト（" + wrong.length + "問）", value: "wrong" } : null,
+    HAS_PAST ? { label: "IPAの過去問（直近5年）", value: "past" } : null,
+    S.done === todayStr() ? { label: "今日の学習をもう一度", value: "today" } : null
+  ].filter(Boolean), { lead: "ほかの学習", grid: true, extra: [{ label: "← 戻る", value: null }] });
+  if (v === "quiz") await runQuiz(5);
+  else if (v === "quizd") { const d = await pickDomain("quiz"); if (d !== null) await runQuiz(5, d || null); }
+  else if (v === "box") await runQuiz(20, null, null, { box: true });
+  else if (v === "write") await runWrite();
+  else if (v === "case") await runCase();
+  else if (v === "wrong") await runQuiz(Math.min(10, wrong.length), null, wrong);
+  else if (v === "past") await pastMenu();
+  else if (v === "today") await todaySession();
+}
+async function oneQuestion() {
+  const r = await runQuiz(1, null, null, { one: true });
+  if (!r.n) return;
+  const first = S.done !== todayStr();
+  S.done = todayStr(); save();
+  await coach("<p>" + (first ? "今日の分はOKです。1問でも、続けたことに意味があります。" : "おつかれさまです。") + "</p>" + rewardHTML(), 250);
+}
 async function menuOnce() {
   renderStatus();
   if (storageNotice && !cloud) { storageNotice = false; await coach("<p>この環境では学習記録を保存できません。ページを閉じると記録が消えます。</p>", 200); }
   const doneToday = S.done === todayStr();
-  const wrong = wrongIds();
-  const rec = weakest();
+  const rec = weakest(), drafts = writeDrafts();
+  const pmSet = S.pmrun ? PM.find(s => s.key === S.pmrun.key) : null;
+  // 次にやることを大きなボタン1つで示す（続き → 今日の学習 → おすすめ の順）
   const opts = [];
-  if (doneToday) opts.push({ label: "おすすめ：" + DOMAINS[rec] + "の4択", value: "rec", primary: true, full: true }, { label: "今日の学習をもう一度", value: "today" });
-  else opts.push({ label: "今日の学習", value: "today", primary: true, full: true });
-  opts.push({ label: "4択演習（科目A-2）", value: "quiz" }, { label: "記述トレーニング", value: "write" }, { label: "事例演習（科目B形式）", value: "case" });
-  if (wrong.length) opts.push({ label: "間違えた問題（" + wrong.length + "問）", value: "wrong" });
-  if (HAS_PAST) opts.push({ label: "IPAの過去問（直近5年）", value: "past" });
-  opts.push({ label: "進捗を見る", value: "progress" });
-  const v = await ask(opts, { lead: doneToday ? "今日の学習は完了しています ✓　次は何をしますか" : "次は何をしますか", grid: true, extra: [{ label: "その他", value: "other" }] });
-  if (v === "today") await todaySession();
+  if (S.sess) opts.push({ label: "続きから：" + sessLabel(), value: "resume", primary: true, full: true });
+  if (pmSet) opts.push({ label: "午後演習の続き（" + pmSet.label + "・経過" + pmMin(S.pmrun) + "分）", value: "pm", primary: !opts.length, full: true });
+  if (!doneToday) opts.push({ label: "今日の学習（約10分）", value: "today", primary: !opts.length, full: true });
+  else if (!opts.length) opts.push({ label: "おすすめ：" + DOMAINS[rec] + "の4択（約5分）", value: "rec", primary: true, full: true });
+  if (drafts.length) opts.push({ label: "書きかけの記述を続ける", value: "draft", full: true });
+  opts.push({ label: "1問だけ（約1分）", value: "one" }, { label: "ほかの学習…", value: "more" });
+  const v = await ask(opts, { lead: doneToday ? "今日の分は完了しています ✓" : "次は何をしますか", grid: true, extra: [{ label: "進捗を見る", value: "progress" }, { label: "その他", value: "other" }] });
+  if (v === "resume") await resumeSess();
+  else if (v === "pm") await runPm(pmSet);
+  else if (v === "today") await todaySession();
   else if (v === "rec") await runQuiz(5, rec);
-  else if (v === "quiz") { const d = await pickDomain("quiz"); if (d !== null) await runQuiz(5, d || null); }
-  else if (v === "write") { const d = await pickDomain("write"); if (d !== null) await runWrite(d || null); }
-  else if (v === "case") await runCase();
-  else if (v === "wrong") await runQuiz(Math.min(10, wrong.length), null, wrong);
-  else if (v === "past") await pastMenu();
+  else if (v === "draft") await runWrite(null, drafts[0].id);
+  else if (v === "one") await oneQuestion();
+  else if (v === "more") await moreMenu();
   else if (v === "progress") await showProgress();
   else if (v === "other") await otherMenu();
 }
@@ -2032,7 +2283,7 @@ async function main() {
     if (plan.done) await coach("<p>おかえりなさい。設定した試験日（" + esc(slash(p.exam)) + "）を過ぎました。おつかれさまでした。</p><p>次の試験を目指すなら「その他」→「計画を作り直す」で目標を設定してください。演習はこのまま続けられます。</p>");
     else if (plan.today) await coach("<p>おかえりなさい。今日が試験日です。新しいことには手を出さず、弱点ノートを軽く見直して臨みましょう。</p>");
     else await coach("<p>おかえりなさい。試験まであと <strong>" + plan.days + "日</strong>、いまはP" + (currentPhase(plan)+1) + "「" + esc(plan.phases[currentPhase(plan)].t) + "」の期間です。" +
-      (s ? "連続" + s + "日学習中です。" : S.days.length ? "また今日から始めましょう。" : "") + "</p>" + extra);
+      (s ? "連続" + s + "日学習中です。" : S.days.length ? "また今日から始めましょう。" : "") + (S.sess || S.pmrun ? "前回の続きから再開できます。" : "") + "</p>" + (S.days.length ? weekHTML() : "") + extra);
   }
   await menu();
 }
