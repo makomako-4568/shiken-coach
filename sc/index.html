@@ -1365,12 +1365,12 @@ function tasksFor(key, p) {
   const a1 = p.target !== "r8b" && p.amI !== "exempt";
   const w = written(p);
   return {
-    base:  [(HAS_PAST ? "「IPAの過去問」で" : "") + "科目A-2の過去問を3〜4回分くり返し、正答率8割を安定させる", "間違えた用語は「何を守るか・どう防ぐか」を自分の言葉で1行にまとめる", a1 ? "科目A-1（旧午前I）は応用情報の午前過去問を毎日10問。正答率7割を目標にする" : null],
+    base:  [(HAS_PAST ? "「IPAの過去問」で" : "") + "科目A-2の過去問を3〜4回分くり返し、正答率8割を安定させる", "間違えた用語は「何を守るか・どう防ぐか」を自分の言葉で1行にまとめる", a1 ? (HAS_PAST ? "「IPAの過去問」の" : "") + "科目A-1（旧午前I）を毎日5〜10問。正答率7割を目標にする（応用情報の午前問題も同じ範囲）" : null],
     deep:  [weak.length ? "苦手分野を優先：" + weak.join("、") : "全分野をひととおり", "攻撃の流れ（侵入→横展開→持ち出し）と、各段階で効く対策を図に描いて説明する",
             w ? "科目B（旧午後）の過去問を週2問。記述トレーニングも週2回" : "科目Bの過去問の事例を週2問読み、設問の根拠を本文と図表から探す"],
     b:     w ? ["令和5年度以降の科目B（午後）の過去問を全問、1問70分で解く。続けて旧午後Iを1問45分で", "問題選択は最初の5分で決める。得意・不得意で選ぶ基準を作っておく", "CBTに合わせ、過去問のPDFを画面だけで読み、解答はキーボードで入力する", "解答例との差を「キーワード不足」「論点ずれ」「字数」に分類する", "記述トレーニングを毎日2題、事例演習を週2問"]
              : ["科目Bの過去問の事例を読み、設問ごとに根拠となる本文・図表の箇所を特定する", "IPAが公開している新制度のサンプル問題で形式に慣れる", "記述トレーニングで、答えを選んだ理由を説明できるようにする", "事例演習を週2問"],
-    acheck:[(HAS_PAST ? "「IPAの過去問」で" : "") + "科目A-2の過去問を2回分解き直し、正答率8割を確認する", a1 ? "科目A-1は応用情報の午前過去問で、正答率7割を確認する" : null, "この期間は4択を1日10問。間違えた問題の見直しを優先する", "科目Aの受験日時・会場・本人確認書類を確認する"],
+    acheck:[(HAS_PAST ? "「IPAの過去問」で" : "") + "科目A-2の過去問を2回分解き直し、正答率8割を確認する", a1 ? (HAS_PAST ? "「IPAの過去問」で" : "") + "科目A-1を回ごと（30問・50分）に解き、正答率7割を確認する" : null, "この期間は4択を1日10問。間違えた問題の見直しを優先する", "科目Aの受験日時・会場・本人確認書類を確認する"],
     b2:    ["科目Aのあとは科目Bに集中。令和5年度以降の過去問を、時間を計って解き直す", "事例演習と記述トレーニングで、弱点ノートの論点を確認する"],
     last:  [w ? "予約した時間帯と同じ時間に、科目B（150分・2問）を画面とキーボードで通しで解く" : "本番と同じ時間配分で、過去問の事例を通しで解く", "弱点ノートと間違えた問題だけを見直す", "前日は新しい問題に手を出さず、睡眠を優先する"],
     sprint:["弱点ノートと頻出論点（Web・認証・メール・インシデント対応）を見直す", "記述トレーニングで解答の書き方を確認する", "前日は早めに休み、受験票と本人確認書類を用意する"]
@@ -1414,6 +1414,13 @@ function buildPlan(p) {
   const weekend = (hpw * 60 - weekday * 5) / 2;
   return { days: left, total: Math.round(left / 7 * hpw), weekday, weekend, phases };
 }
+// 次に受ける試験。後期を受ける人で科目Aの予定日がまだ先なら、科目A（A-1・A-2は同じ日に受ける）を基準にする
+function nextExam(p) {
+  const t = todayStr();
+  if (p.target === "late" && isDate(p.aDate) && t <= p.aDate) return { a: true, date: p.aDate, days: diff(t, p.aDate) };
+  return { a: false, date: p.exam, days: diff(t, p.exam) };
+}
+const a1Focus = p => p.target === "late" && p.amI !== "exempt" && isDate(p.aDate) && todayStr() <= p.aDate && A1.length > 0;
 function currentPhase(plan) {
   const t = todayStr();
   const i = plan.phases.findIndex(ph => t <= ph.to);
@@ -1444,7 +1451,8 @@ function renderStatus() {
   const el = document.getElementById("status");
   if (!S.profile) { el.innerHTML = "<span>初回設定</span>"; return; }
   const plan = buildPlan(S.profile);
-  const head = plan.done ? "試験終了" : plan.today ? "本日試験" : "あと" + plan.days + "日";
+  const nx = nextExam(S.profile);
+  const head = plan.done ? "試験終了" : nx.a ? (nx.days ? "科目A あと" + nx.days + "日" : "本日 科目A") : plan.today ? "本日試験" : "あと" + plan.days + "日";
   let ph = "";
   if (plan.phases.length) { const i = currentPhase(plan); ph = "<span>P" + (i+1) + '<span class="ph-name"> ' + esc(plan.phases[i].t) + "</span></span>"; }
   const acc = "今日 " + todayLog().n + "問";
@@ -2129,7 +2137,7 @@ async function showProgress() {
   const phaseTxt = plan.phases.length ? "P" + (currentPhase(plan)+1) + "　" + plan.phases[currentPhase(plan)].t : "—";
   const dayTxt = plan.done ? "試験日を過ぎました" : plan.today ? "本日" : plan.days + "日";
   const weakNow = Object.entries(S.stats).filter(([, s]) => s.n >= 3 && s.c / s.n < .6).map(([k]) => DOMAINS[k]);
-  await coach('<div class="card"><dl class="kv"><dt>試験まで</dt><dd>' + esc(dayTxt) + "（" + esc(slash(S.profile.exam)) + "）</dd><dt>現在のフェーズ</dt><dd>" + esc(phaseTxt) +
+  await coach('<div class="card"><dl class="kv">' + (nextExam(S.profile).a ? "<dt>科目Aまで</dt><dd>" + nextExam(S.profile).days + "日（" + esc(slash(S.profile.aDate)) + "・A-1とA-2）</dd><dt>科目Bまで</dt>" : "<dt>試験まで</dt>") + "<dd>" + esc(dayTxt) + "（" + esc(slash(S.profile.exam)) + "）</dd><dt>現在のフェーズ</dt><dd>" + esc(phaseTxt) +
     "</dd><dt>4択</dt><dd>" + t.n + "問・正答率 " + (t.n ? Math.round(t.c / t.n * 100) + "%" : "—") + "</dd><dt>記述</dt><dd>" + wv.length + " / " + WRITE.length + "題（○ " + wv.filter(v => v.r === 2).length + "）</dd><dt>事例</dt><dd>" + cv.length + " / " + CASES.length + "事例" + (cv.length ? "（平均 " + Math.round(cv.reduce((a, b) => a + b.p, 0) / cv.length) + "点）" : "") +
     "</dd>" + (HAS_PAST ? "<dt>IPAの過去問</dt><dd>" + pastSummary() + "</dd>" : "") + "<dt>復習リスト</dt><dd>" + wrongIds().length + "問</dd><dt>今週解いた問題</dt><dd>" + weekSolved() + "問（" + weekDays() + " / 7日・連続 " + streak() + "日）</dd><dt>累計</dt><dd>" + totalSolved() + "問</dd><dt>記録の保存先</dt><dd>" + (cloud ? "Claudeの保存領域（別の端末でも続きから再開できます）" : "この端末（ブラウザ）の中") + "</dd></dl>" + weekHTML() + "</div><div class=\"card\">" + bars + "</div>" +
     (weakNow.length ? "<p>伸びしろが大きい分野：<strong>" + esc(weakNow.join("、")) + "</strong>。ここから優先して出題します。</p>" : t.n ? "<p>60%を下回っている分野はありません。未着手の分野を埋めていきましょう。</p>" : "<p>まだ記録がありません。「今日の学習」から始めましょう。</p>"), 450);
@@ -2249,7 +2257,7 @@ async function showPlan(first) {
   if (first) {
     // 最初は「いまの期間」と「今日やること」だけ。全体は「その他」から見られる
     const ci = currentPhase(plan), ph = plan.phases[ci];
-    await coach("<p>計画ができました。試験まで <strong>" + plan.days + "日</strong> です。</p><div class=\"card\"><p>いまの期間：<strong>P" + (ci + 1) + " " + esc(ph.t) + "</strong>（" + esc(mds(ph.to)) + "まで）</p><p class=\"mt\">今日やること：<strong>「今日の学習」を1回（約10分）</strong></p></div><p class=\"small\">全体の計画と時間割は、いつでも「その他」→「学習計画を見る」で見られます。</p>", 500);
+    await coach("<p>計画ができました。" + (nextExam(p).a ? "科目A（A-1・A-2）まで <strong>" + nextExam(p).days + "日</strong>（" + esc(mds(p.aDate)) + "）、科目Bまで" + plan.days + "日" : "試験まで <strong>" + plan.days + "日</strong>") + " です。</p><div class=\"card\"><p>いまの期間：<strong>P" + (ci + 1) + " " + esc(ph.t) + "</strong>（" + esc(mds(ph.to)) + "まで）</p><p class=\"mt\">今日やること：<strong>「今日の学習」を1回（約10分）</strong></p></div><p class=\"small\">全体の計画と時間割は、いつでも「その他」→「学習計画を見る」で見られます。</p>", 500);
     return;
   }
   let note = "";
@@ -2258,7 +2266,7 @@ async function showPlan(first) {
     const who = { none: "セキュリティの実務経験がほぼない人", some: "応用情報に合格していて実務経験が少しある人", pro: "セキュリティの専門業務をしている人" }[p.exp];
     if (plan.total < need) note = '<p class="small">参考：' + who + "は、合格まで" + need + "時間前後が一つの目安と言われます。今の設定では約" + plan.total + "時間です。足りない分は、過去問を解く量で少しずつ補えば大丈夫です。</p>";
   }
-  await coach("<p>現在の学習計画です。試験まで <strong>" + plan.days + "日</strong>、勉強時間は合計で約 <strong>" + plan.total + "時間</strong> の見込みです。</p>" + datesHTML(p) + planHTML(plan) + "<p>目安の時間割は <strong>" + (plan.weekday ? "平日" + hm(plan.weekday) + " ＋ " : "") + "土日" + hm(plan.weekend) + "ずつ</strong>（週" + p.hours + "時間）です。</p>" + note, 600);
+  await coach("<p>現在の学習計画です。" + (nextExam(p).a ? "科目Aまで <strong>" + nextExam(p).days + "日</strong>、科目Bまで" + plan.days + "日" : "試験まで <strong>" + plan.days + "日</strong>") + "、勉強時間は合計で約 <strong>" + plan.total + "時間</strong> の見込みです。</p>" + datesHTML(p) + planHTML(plan) + "<p>目安の時間割は <strong>" + (plan.weekday ? "平日" + hm(plan.weekday) + " ＋ " : "") + "土日" + hm(plan.weekend) + "ずつ</strong>（週" + p.hours + "時間）です。</p>" + note, 600);
 }
 async function todaySession(resume) {
   const plan = buildPlan(S.profile);
@@ -2277,7 +2285,19 @@ async function todaySession(resume) {
   if (q.n) { S.done = todayStr(); markDay(); save(); }
   if (q.quit) return;
   let wrote = 0, cased = 0;
-  const go = await ask([{ label: "記述に進む", value: true, primary: true }], { extra: [{ label: "今日はここまで", value: false }] });
+  // 科目Aまでは、科目A-1の過去問を選べるようにする
+  let a1n = 0, skipW = false;
+  if (a1Focus(S.profile)) {
+    const nx = await ask([{ label: "科目A-1の過去問を5問（約8分）", value: "a1", primary: true }, { label: "記述に進む", value: "w" }], { extra: [{ label: "今日はここまで", value: "" }] });
+    if (nx === "a1") {
+      const pool = pastPool(A1, id => !S.past[id] || !S.past[id].ok);
+      const r1 = await runPast(shuffle(pool.length >= 5 ? pool : pastPool(A1, () => true)).slice(0, 5), { intro: "科目A（" + mds(S.profile.aDate) + "）に向けて、科目A-1の過去問を5問解きます。" });
+      if (r1.quit) return;
+      a1n = r1.n;
+    }
+    skipW = nx !== "w";
+  }
+  const go = skipW ? false : await ask([{ label: "記述に進む", value: true, primary: true }], { extra: [{ label: "今日はここまで", value: false }] });
   if (go) {
     const w = await runWrite();
     if (w.quit) return;
@@ -2290,7 +2310,7 @@ async function todaySession(resume) {
   }
   S.done = todayStr(); markDay(); save();
   const next = DOMAINS[weakest()];
-  await coach('<div class="card"><dl class="kv"><dt>今日やったこと</dt><dd>4択 ' + q.n + "問・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "（約" + minTxt(todayLog().ms) + "）</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div>" + rewardHTML() + "<p>" + (HAS_PAST ? "おつかれさまでした。IPAの過去問は、メニューの「IPAの過去問」から回ごとに解けます。" : "おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。") + "</p>", 350);
+  await coach('<div class="card"><dl class="kv"><dt>今日やったこと</dt><dd>4択 ' + q.n + "問" + (a1n ? "・科目A-1 " + a1n + "問" : "") + "・記述 " + wrote + "題" + (cased ? "・事例 " + cased + "問" : "") + "（約" + minTxt(todayLog().ms) + "）</dd><dt>明日のおすすめ</dt><dd>" + esc(next) + "の4択と記述</dd></dl></div>" + rewardHTML() + "<p>" + (HAS_PAST ? "おつかれさまでした。IPAの過去問は、メニューの「IPAの過去問」から回ごとに解けます。" : "おつかれさまでした。過去問演習は、IPA公式サイトで公開されている問題で並行して進めてください。") + "</p>", 350);
 }
 async function pickDomain(kind) {
   const keys = Object.keys(DOMAINS).filter(k => kind !== "write" || WRITE.some(w => w.d === k));
@@ -2414,7 +2434,7 @@ async function main() {
       extra = "<p><strong>後期の申込受付" + (t < EXAM.late.applyStart ? "が" + mds(EXAM.late.applyStart) + "から始まります" : "中です（" + mds(EXAM.late.applyEnd) + "まで）") + "。</strong>科目Aと科目Bの受験日時も予約しましょう。</p>";
     if (plan.done) await coach("<p>おかえりなさい。設定した試験日（" + esc(slash(p.exam)) + "）を過ぎました。おつかれさまでした。</p><p>次の試験を目指すなら「その他」→「計画を作り直す」で目標を設定してください。演習はこのまま続けられます。</p>");
     else if (plan.today) await coach("<p>おかえりなさい。今日が試験日です。新しいことには手を出さず、弱点ノートを軽く見直して臨みましょう。</p>");
-    else await coach("<p>おかえりなさい。試験まであと <strong>" + plan.days + "日</strong>、いまはP" + (currentPhase(plan)+1) + "「" + esc(plan.phases[currentPhase(plan)].t) + "」の期間です。" +
+    else await coach("<p>おかえりなさい。" + (nextExam(p).a ? "科目A（A-1・A-2）まであと <strong>" + nextExam(p).days + "日</strong>（" + esc(mds(p.aDate)) + "）" : "試験まであと <strong>" + plan.days + "日</strong>") + "、いまはP" + (currentPhase(plan)+1) + "「" + esc(plan.phases[currentPhase(plan)].t) + "」の期間です。" +
       (s ? "連続" + s + "日学習中です。" : S.days.length ? "また今日から始めましょう。" : "") + (S.sess || S.pmrun ? "前回の続きから再開できます。" : "") + "</p>" + (S.days.length ? weekHTML() : "") + extra);
   }
   await menu();
