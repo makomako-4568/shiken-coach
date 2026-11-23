@@ -203,6 +203,8 @@ button { font: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 textarea, input[type="date"], input[type="number"] { font: inherit; font-size: 16px; width: 100%; border: 1px solid var(--edge); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 10px 12px; }
 textarea { min-height: 76px; resize: vertical; }
+/* 入力欄のフォーカス枠は内側に描く（返答欄はスクロール領域なので、外側に出すと左右が切れる） */
+textarea:focus-visible, input:focus-visible { outline: 3px solid var(--amber); outline-offset: -3px; }
 textarea[aria-invalid="true"], input[aria-invalid="true"] { border-color: var(--bad); }
 .typing { display: inline-flex; gap: 4px; padding: 6px 2px; }
 .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: dot 1s infinite; }
