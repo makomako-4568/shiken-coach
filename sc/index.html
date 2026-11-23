@@ -119,6 +119,8 @@ main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; p
 .fig .ln.ok { stroke: var(--ok); }
 .fig .ln.bad { stroke: var(--bad); }
 .fig .ln.dash { stroke-dasharray: 4 3; }
+.fig .grp { fill: color-mix(in srgb, var(--accent) 7%, transparent); stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 5 3; }
+.fig .grp-l { fill: var(--accent); font-size: 10px; font-weight: 700; }
 .fig .life { stroke: var(--edge); stroke-dasharray: 3 3; }
 .fig .ah, .fig .dot { fill: var(--ink); }
 .fig .dot.ok { fill: var(--ok); } .fig .dot.bad { fill: var(--bad); }
@@ -762,9 +764,9 @@ const FIG = {
     m: [[2, 1, "チャレンジ"], [1, 0, "チャレンジ＋オリジン"], [0, 0, "生体認証で秘密鍵を使う"], [0, 2, "署名（オリジンを含む）"],
         [2, 2, "登録済みの公開鍵で検証", "ok"]],
     note: "偽サイトのオリジンで作った署名は、正規のサーバでは通らない" },
-  kerberos: { cap: "Kerberos認証", type: "seq", a: ["利用者", "AS", "TGS", "サービス"],
+  kerberos: { cap: "Kerberos認証（KDCとAS・TGSの関係）", type: "seq", a: ["利用者", "AS", "TGS", "サービス"], grp: [1, 2, "KDC（鍵配布センター）"],
     m: [[0, 1, "認証要求"], [1, 0, "TGT"], [0, 2, "TGT＋利用したいサービス"], [2, 0, "サービスチケット"], [0, 3, "サービスチケット", "ok"]],
-    note: "AS＝認証サービス／TGS＝チケット発行サービス（KDCの機能）\nTGT＝TGSに出すチケット（TGSはサーバ、TGTはチケット）\nTGTはkrbtgtの鍵で暗号化 → 鍵が漏れると\nTGTを偽造できる（Golden Ticket）" },
+    note: "KDCの中に、AS（認証）とTGS（チケット発行）の2つの機能がある\nTGT＝TGSに出すチケット（TGSはサーバ、TGTはチケット）\nTGTはkrbtgtの鍵で暗号化 → 鍵が漏れると\nTGTを偽造できる（Golden Ticket）" },
   csrf: { cap: "CSRFの流れと対策", type: "seq", a: ["正規サイト", "利用者のブラウザ", "罠サイト"],
     m: [[1, 0, "ログイン（Cookie発行）"], [1, 2, "罠サイトを閲覧"], [2, 1, "自動送信されるフォーム", "bad"],
         [1, 0, "更新リクエスト＋Cookie", "bad"], [0, 0, "トークンがないので拒否", "ok"]],
@@ -1794,6 +1796,13 @@ function figSeqDiagram(s) {
     }
   });
   noteLines.forEach((ln, i) => { out += svgLines(W / 2, H - 8 - (noteLines.length - 1 - i) * 12, ln, { cls: "note" }); });
+  // 複数の列を枠でまとめる（例：KDCの中のASとTGS）。枠の見出しの分だけ下にずらす
+  if (s.grp) {
+    const [f, t, label] = s.grp, gy = 20, x0 = colW * f + 1, x1 = colW * (t + 1) - 1;
+    const h = top + s.m.length * row + 8 + gy;
+    out = '<rect x="' + x0 + '" y="1" width="' + (x1 - x0) + '" height="' + h + '" rx="8" class="grp"/>' + svgLines((x0 + x1) / 2, 11, label, { cls: "grp-l" }) + '<g transform="translate(0,' + gy + ')">' + out + "</g>";
+    return { W, H: H + gy, body: out };
+  }
   return { W, H, body: out };
 }
 function diagHTML(qid) {

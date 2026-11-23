@@ -898,6 +898,13 @@ function figSeqDiagram(s) {
     }
   });
   noteLines.forEach((ln, i) => { out += svgLines(W / 2, H - 8 - (noteLines.length - 1 - i) * 12, ln, { cls: "note" }); });
+  // 複数の列を枠でまとめる（例：KDCの中のASとTGS）。枠の見出しの分だけ下にずらす
+  if (s.grp) {
+    const [f, t, label] = s.grp, gy = 20, x0 = colW * f + 1, x1 = colW * (t + 1) - 1;
+    const h = top + s.m.length * row + 8 + gy;
+    out = '<rect x="' + x0 + '" y="1" width="' + (x1 - x0) + '" height="' + h + '" rx="8" class="grp"/>' + svgLines((x0 + x1) / 2, 11, label, { cls: "grp-l" }) + '<g transform="translate(0,' + gy + ')">' + out + "</g>";
+    return { W, H: H + gy, body: out };
+  }
   return { W, H, body: out };
 }
 function diagHTML(qid) {
