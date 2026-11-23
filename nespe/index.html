@@ -80,6 +80,7 @@ main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; p
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
 .card.warn { border-color: var(--amber); }
+.card.what { margin-bottom: 8px; }
 .phase { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; padding-block: 10px; }
 .phase + .phase { border-top: 1px dashed var(--line); }
 .phase:first-child { padding-top: 2px; }
@@ -1495,7 +1496,7 @@ async function runWrite(domain, id) {
   await coach('<span class="tag">記述　' + esc(DOMAINS[w.d]) + "</span><p>" + esc(w.s) + "</p><p><strong>" + esc(w.q.replace(/。$/, "")) + "（" + w.lim + "字以内）。</strong></p>" + (draft ? '<p class="small">前回の下書きを入れてあります。続きから書けます。</p>' : '<p class="small">「何が起きたか」と「なぜそうなるか」をセットで書くのがコツです。</p>'));
   const r = await askText(w.id, "設問：" + w.q.replace(/。$/, "") + "（" + w.lim + "字以内）", w.lim);
   if (r.quit) { await coach("<p>" + (loadDraft(w.id).trim() ? "下書きを保存しました。メニューの「書きかけの記述を続ける」から続きを書けます。" : "中断しました。メニューに戻ります。") + "</p>", 200); return { n: 0, quit: true }; }
-  const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p>" + explainHTML(w.note, w.id, [w.s, w.q, w.a, w.note]);
+  const ansHTML = whatHTML(w.x) + '<p class="answer"><span class="tag">解答例</span><br>' + esc(w.a) + "</p>" + explainHTML(w.note, w.id, [w.s, w.q, w.x, w.a, w.note]);
   if (r.skip) {
     S.write[w.id] = { r: 0, t: todayStr() }; logAct(0); save();
     await coach(ansHTML + "<p>解答例を一度書き写すと、言い回しが身につきます。この問題は" + GAP_TXT[0] + "</p>");
@@ -1552,7 +1553,7 @@ async function runCase(resume) {
         await coach(figHTML(c.fig), 150); await coach(head, 150);
       }
       if (r.quit) { if (await quitOK()) { quit = true; break; } i--; continue; }
-      const ansHTML = '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p>" + explainHTML(sq.note, c.id + "-" + i, [sq.q, sq.a, sq.note]);
+      const ansHTML = whatHTML(sq.x) + '<p class="answer"><span class="tag">解答例</span><br>' + esc(sq.a) + "</p>" + explainHTML(sq.note, c.id + "-" + i, [sq.q, sq.x, sq.a, sq.note]);
       if (r.skip) await coach(ansHTML, 250);
       else {
         const gh = gradeHTML(r.text, sq);
@@ -1684,6 +1685,8 @@ function diagHTML(qid) {
   const r = s.type === "seq" ? figSeqDiagram(s) : figGraph(s);
   return '<figure class="fig"><figcaption class="small">図解：' + esc(s.cap) + '</figcaption><svg viewBox="0 0 ' + r.W + " " + r.H + '" role="img" aria-label="' + esc(s.cap) + '">' + r.body + "</svg></figure>";
 }
+// 対策を問う設問では、解答例の前に「何が起きているか」（攻撃や事象の説明）を示す
+const whatHTML = x => x ? '<div class="card what"><p class="small">何が起きているか</p><p>' + esc(x) + "</p></div>" : "";
 // 解説は要点（最初の1文）だけを見せ、残りと図解は「くわしく」に畳む
 function explainHTML(text, qid, texts) {
   const s = String(text), k = s.indexOf("。");
