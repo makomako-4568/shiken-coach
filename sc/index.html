@@ -868,7 +868,7 @@ const HOURS = [5, 10, 15, 20];
 const H_MIN = 1, H_MAX = 60;
 const validHours = h => Number.isInteger(h) && h >= H_MIN && h <= H_MAX;
 const QIDS = new Set(QUIZ.map(q => q.id)), WIDS = new Set(WRITE.map(w => w.id)), CIDS = new Set(CASES.map(c => c.id));
-const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, past: {}, pm: {}, pmrun: null, days: [], done: "", ob: null, sess: null, log: {} });
+const blank = () => ({ v: SCHEMA, at: 0, profile: null, stats: {}, last: {}, write: {}, cases: {}, past: {}, pm: {}, pmrun: null, days: [], done: "", ob: null, sess: null, log: {}, qt: {} });
 const HAS_PAST = typeof PAST !== "undefined" && PAST && Array.isArray(PAST.a2) && PAST.a2.length > 0;
 const PID = (key, n) => key + "-" + n;
 // 途中の演習（4択・過去問・事例）。1問ごとに保存し、メニューの「続きから」で再開する
@@ -922,6 +922,7 @@ function migrate(d) {
   const obj = o => o && typeof o === "object" && !Array.isArray(o) ? o : {};
   for (const [k, v] of Object.entries(obj(d.stats))) if (DOMAINS[k] && v && Number.isInteger(v.n) && Number.isInteger(v.c) && v.c >= 0 && v.c <= v.n) s.stats[k] = { c: v.c, n: v.n };
   for (const [k, v] of Object.entries(obj(d.last))) if (QIDS.has(k) && typeof v === "boolean") s.last[k] = v;
+  for (const [k, v] of Object.entries(obj(d.qt))) if (QIDS.has(k) && v && [0, 1, 2, 3, 4].includes(v.r) && isDate(v.t)) s.qt[k] = { r: v.r, t: v.t };
   for (const [k, v] of Object.entries(obj(d.write))) {
     if (!WIDS.has(k)) continue;
     if ([0, 1, 2].includes(v)) s.write[k] = { r: v, t };
@@ -1480,18 +1481,32 @@ function weekHTML() {
 function rewardHTML() { return '<div class="card"><p class="small">この7日間（✓は学習した日）</p>' + weekHTML() + '<p class="small mt">これまでに解いた問題：<strong>' + totalSolved() + "問</strong></p></div>"; }
 
 /* ===== 4択 ===== */
-function pickQuiz(n, domain, ids) {
+/* 4択の出題順。間隔をあけてくり返す（間違えた問題は翌日、正解するたびに3日→7日→14日→30日後）。
+   直近に解いた問題は後回しにし、まだ解いていない問題と、復習の時期が来た問題を先に出す */
+const QGAP = [1, 3, 7, 14, 30];
+function quizPriority(q, t) {
+  const r = S.qt[q.id];
+  if (!r) return q.id in S.last ? (S.last[q.id] ? 2 : 4) : 3;   // 日付の記録がない問題
+  if (r.t === t) return -6;                                       // 今日解いた
+  const due = addDays(r.t, QGAP[r.r]);
+  return due <= t ? 3.5 + Math.min(diff(due, t), 30) * .03 - r.r * .2 : -3 + diff(t, due) * -.1;
+}
+function pickQuiz(n, domain, ids, mix) {
+  const t = todayStr();
   const weak = new Set(S.profile ? S.profile.weak : []);
-  const pool = QUIZ.filter(q => (!domain || q.d === domain) && (!ids || ids.includes(q.id))).map(q => {
+  const rank = list => list.map(q => {
     const st = S.stats[q.d], rate = st && st.n ? st.c / st.n : .5;
-    let w = 1 + (weak.has(q.d) ? 2 : 0) + (rate < .6 ? 1 : 0);
-    if (S.last[q.id] === true) w *= .25;
-    if (S.last[q.id] === false) w *= 2;
-    if (!(q.id in S.last)) w *= 1.5;
-    return { q, w: w * Math.random() };
-  });
-  pool.sort((a, b) => b.w - a.w);
-  return pool.slice(0, n).map(x => x.q);
+    return { q, s: quizPriority(q, t) + (weak.has(q.d) ? .8 : 0) + (rate < .6 ? .4 : 0) + Math.random() * 1.2 };
+  }).sort((a, b) => b.s - a.s).map(x => x.q);
+  const base = QUIZ.filter(q => !ids || ids.includes(q.id));
+  // おすすめ：苦手分野から半分強、残りはほかの分野から
+  if (mix && domain) {
+    const k = Math.ceil(n / 2);
+    const a = rank(base.filter(q => q.d === domain)).slice(0, k);
+    const b = rank(base.filter(q => q.d !== domain)).slice(0, n - a.length);
+    return shuffle(a.concat(b));
+  }
+  return rank(base.filter(q => !domain || q.d === domain)).slice(0, n);
 }
 /* o.today: 今日の学習から / o.one: 1問だけ / o.box: 10分だけ / o.resume: 続きから */
 async function runQuiz(n, domain, ids, o = {}) {
@@ -1499,7 +1514,7 @@ async function runQuiz(n, domain, ids, o = {}) {
   actStart();
   if (sess) await coach("<p>続きから再開します。あと" + (sess.ids.length - sess.i) + "問です。</p>", 250);
   else {
-    const qs0 = pickQuiz(n, domain, ids);
+    const qs0 = pickQuiz(n, domain, ids, o.mix);
     sess = { k: "quiz", ids: qs0.map(q => q.id), i: 0, ok: 0, today: !!o.today, box: !!o.box };
     if (!o.today) await coach("<p>" + (o.one ? "4択を1問だけいきます。" : o.box ? "10分だけ、4択を解きます。10分たったらお知らせします。" : ids ? "復習リストの問題を" + qs0.length + "問いきます。" : "科目A-2（旧午前II）形式の4択を" + qs0.length + "問いきます（約" + qs0.length + "分）。") + '</p><p class="small kbonly">キーボードなら1〜4キーでも答えられます。</p>', 350);
   }
@@ -1517,7 +1532,10 @@ async function runQuiz(n, domain, ids, o = {}) {
     sess.i = i + 1; if (right) sess.ok++;
     const st = S.stats[q.d] || (S.stats[q.d] = { c: 0, n: 0 });
     st.n++; if (right) st.c++;
-    S.last[q.id] = right; logAct(1);
+    S.last[q.id] = right;
+    const pr = S.qt[q.id];
+    S.qt[q.id] = { r: right ? (pr && pr.t !== todayStr() ? Math.min(pr.r + 1, 4) : pr ? pr.r : 1) : 0, t: todayStr() };
+    logAct(1);
     if (sess.i >= qs.length) S.sess = null;
     save();
     const ansKana = KANA[order.findIndex(o => o.k === 0)], mineKana = KANA[order.findIndex(o => o.k === pick)];
@@ -2349,14 +2367,14 @@ async function menuOnce() {
   if (S.sess) opts.push({ label: "続きから：" + sessLabel(), value: "resume", primary: true, full: true });
   if (pmSet) opts.push({ label: "午後演習の続き（" + pmSet.label + "・経過" + pmMin(S.pmrun) + "分）", value: "pm", primary: !opts.length, full: true });
   if (!doneToday) opts.push({ label: "今日の学習（約10分）", value: "today", primary: !opts.length, full: true });
-  else if (!opts.length) opts.push({ label: "おすすめ：" + DOMAINS[rec] + "の4択（約5分）", value: "rec", primary: true, full: true });
+  else if (!opts.length) opts.push({ label: "おすすめの4択（" + DOMAINS[rec] + "中心・約5分）", value: "rec", primary: true, full: true });
   if (drafts.length) opts.push({ label: "書きかけの記述を続ける", value: "draft", full: true });
   opts.push({ label: "1問だけ（約1分）", value: "one" }, { label: "ほかの学習…", value: "more" });
   const v = await ask(opts, { lead: doneToday ? "今日の分は完了しています ✓" : "次は何をしますか", grid: true, extra: [{ label: "進捗を見る", value: "progress" }, { label: "その他", value: "other" }] });
   if (v === "resume") await resumeSess();
   else if (v === "pm") await runPm(pmSet);
   else if (v === "today") await todaySession();
-  else if (v === "rec") await runQuiz(5, rec);
+  else if (v === "rec") await runQuiz(5, rec, null, { mix: true });
   else if (v === "draft") await runWrite(null, drafts[0].id);
   else if (v === "one") await oneQuestion();
   else if (v === "more") await moreMenu();
